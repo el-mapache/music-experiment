@@ -33,30 +33,31 @@ const sequencer = context => (bpm) => {
   let noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
 
   return {
-    /**
-     * 
-     * @param { AudioNodeObject | Array[AudioNodeObjects] } notes 
-     * @param { Number } bpm
-     * 
-     * Given one or several AudioNode objects, play them all at the current time,
-     * for the length of time indicated by the object
-     * TODO: Should this be a note object that inherits from an audionode object,
-     * and provides its length?
-     */
     play(noteGroups, bpm = null) {
       // tempo change requested, update length of each note type
       if (bpm) {
         noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
       }
       
-      serial(noteGroups, sequencer.run, () => {
+      serial(noteGroups, this.run.bind(this), () => {
         console.log('finished playing');
       });
     },
 
+    /**
+     *
+     * @param { AudioNodeObject | Array[AudioNodeObjects] } notes
+     * @param { Number } bpm
+     *
+     * Given one or several AudioNode objects, play them all at the current time,
+     * for the length of time indicated by the object
+     * TODO: Should this be a note object that inherits from an audionode object,
+     * and provides its length?
+     */
     run(notes, nextNoteFn) {
       const notesToPlay = Array.isArray(notes) ? notes : [notes];
       const now = context.currentTime;
+      let shortestNoteTime;
 
       notesToPlay.forEach(({ node, noteType }) => {
         const noteLength = noteValues[noteType];
@@ -88,17 +89,3 @@ const sequencer = context => (bpm) => {
 
 export { sequencer };
 export default AudioContextProvider(sequencer);
-
-
-/**
- * song = [
- *  [note1, note2],
- *  [note1]
- *  [note1],
- *  [note1....noteN]
- *  etc
- * ]
- * 
-
-serial(song, sequencer.run, donehandler)
- */
