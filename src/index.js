@@ -7,44 +7,10 @@ const fetchRepos = async () => {
   return data;
 };
 
-/**
- * 
- * @param {String} user 
- * @param {String} repo
- * 
- * The commit stats API call needs time to compute a repo's
- * commit history. If the first call doesn't populate the data object
- * return a new promise with a recursive call the getStats inside a timeout --
- * the delay should provide enough time for the API to compute a result 
- * 
- * TODO move this into the github service
- */
-const getRepoStats = (user, repo) => {
-  function getStats() {
-    return githubClient.repoCommitStats({
-      owner: user,
-      repo
-    })
-    .then((stats) => {
-      if (stats.data.length) {
-        return Promise.resolve(stats);
-      }
-      
-      return new Promise((resolve, reject) => {
-        setTimeout(() => resolve(getStats()), 4000); 
-      });
-    });
-  }
-
-  return new Promise((resolve, reject) => {
-    getStats().then((stats) => resolve(stats));
-  });
-};
-
 const onRepoSelect = (event) => {
   const { value: repo } = event.target;
 
-  getRepoStats(user, repo)
+  githubClient.getRepoStats(user, repo)
   .then((stats) => {
     /**
      * stats are returned as an array of objects.
