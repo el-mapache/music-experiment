@@ -34,7 +34,6 @@ const repoCommitStats = ({ owner, repo }) => {
  * return a new promise with a recursive call the getStats inside a timeout --
  * the delay should provide enough time for the API to compute a result
  *
- * TODO move this into the github service
  */
 const getRepoStats = (user, repo) => {
   function getStats() {
