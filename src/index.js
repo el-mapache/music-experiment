@@ -1,4 +1,5 @@
 import githubClient from 'services/github-client';
+import oscillator from 'services/oscillator';
 
 const user = 'el-mapache';
 
@@ -40,3 +41,9 @@ fetchRepos().then((repos) => {
   
   select.appendChild(fragment);
 });
+
+const o = oscillator();
+
+o.connectTo(o.context.destination);
+o.start(o.context.currentTime);
+o.stop(o.context.currentTime + .001);

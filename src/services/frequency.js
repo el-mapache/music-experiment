@@ -15,7 +15,7 @@ const NOTES = {
   B: 'B',
 };
 // All half steps assume a distance from A4, that is, the A
-// above middle C. Half steps are given as a positive number.
+// above middle C. Half steps are given as a negative number.
 // This map shouldn't be used directly! Its purpose is to help
 // compute the relative number of half steps towards or away
 // from A4
@@ -54,7 +54,8 @@ const findOctaveDistance = (octave) => {
  * @param {String} note
  * @param {String} modifier
  *
- * Given a note and a modifier, returns either -1, 0 or 1
+ * Given a note and a modifier, returns the correct name of the note
+ * Accounts for the single semitone between B and C, and E and F
  */
 const normalizeSemitones = (note, modifier) => {
   let normalized = NOTES[note];
