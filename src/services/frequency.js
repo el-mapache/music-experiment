@@ -1,5 +1,6 @@
 // A above middle C resides in the 4th octave
 const BASE_OCTAVE = 4;
+// value (in Hz) of A above middle C
 const A_ABOVE_MIDDLE_C = 440;
 // represents 1/12th of an octave, the distance between all notes
 // in an equal temperment system
@@ -15,17 +16,17 @@ const NOTES = {
 };
 // All half steps assume a distance from A4, that is, the A
 // above middle C. Half steps are given as a positive number.
-// This map shouldn't be used directly. Its purpose is to help
+// This map shouldn't be used directly! Its purpose is to help
 // compute the relative number of half steps towards or away
 // from A4
 const noteHalfSteps = {
-  'C': 3,
-  'D': 5,
-  'E': 7,
-  'F': 8,
-  'G': 10,
-  'A': 12,
-  'B': 14,
+  'C': -9,
+  'D': -7,
+  'E': -5,
+  'F': -4,
+  'G': -2,
+  'A': 0,
+  'B': 2,
 };
 const noteModifiers = {
   'b': -1,
@@ -37,10 +38,10 @@ const validNoteRegex = /([CDEFGAB]){1}(b|#)?([0-9]){1}/;
 const findOctaveDistance = (octave) => {
   // If the current octave is equal to the base octave, we don't
   // have to do anything!
-  let distance = 1;
+  let distance = 0;
 
   if (octave < BASE_OCTAVE) {
-    distance = BASE_OCTAVE - octave;
+    distance = -(BASE_OCTAVE - octave);
   } else if (octave > BASE_OCTAVE) {
     distance = octave - BASE_OCTAVE;
   }
@@ -48,8 +49,15 @@ const findOctaveDistance = (octave) => {
   return distance;
 };
 
+/**
+ *
+ * @param {String} note
+ * @param {String} modifier
+ *
+ * Given a note and a modifier, returns either -1, 0 or 1
+ */
 const normalizeSemitones = (note, modifier) => {
-  let normalized;
+  let normalized = NOTES[note];
 
   // special rules to handle E-F and B-C
   if (note === NOTES.B && modifier === '#') {
@@ -80,11 +88,15 @@ const getSteps = (noteString) => {
   const octaveDistance = findOctaveDistance(octave);
   note = normalizeSemitones(note, modifier);
 
-  return noteHalfSteps[note] + noteModifiers[modifier] * octaveDistance;
+  return noteHalfSteps[note] + noteModifiers[modifier] + (octaveDistance * 12);
 };
 
 const frequency = (stepsFromA) => {
-  return A_ABOVE_MIDDLE_C * Math.pow(EVEN_TEMPERED_RATIO, stepsFromA);
+  const rawFrequency = A_ABOVE_MIDDLE_C * Math.pow(EVEN_TEMPERED_RATIO, stepsFromA);
+
+  // truncate float to 2 digits after the decimal and round them.
+  // e.g. G7 -> 3135.9634878539955 -> 3135.96
+  return parseFloat(rawFrequency.toFixed(2));
 };
 
 export default frequency;
