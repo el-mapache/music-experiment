@@ -23,17 +23,6 @@ export default() => ({
         test: /.js?$/,
         exclude: /node_modules/,
         include: path.join(__dirname, 'src'),
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: [
-                ['es2015', { modules: false }],
-              ],
-            }
-          }
-        ]
       }
     ]
   },

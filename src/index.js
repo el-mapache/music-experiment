@@ -1,5 +1,9 @@
 import githubClient from 'services/github-client';
 import oscillator from 'services/oscillator';
+import sequencer from 'services/sequencer';
+import frequency from 'services/frequency';
+import NOTE_VALUES from 'services/note-values';
+import { parseCIDR } from 'ipaddr.js';
 
 const user = 'el-mapache';
 
@@ -42,8 +46,39 @@ fetchRepos().then((repos) => {
   select.appendChild(fragment);
 });
 
-const o = oscillator();
+const chord = ['C5', 'E6'].map(note => frequency(note));
+const radSequencer = sequencer(120);
+const equallyRadOscillator = oscillator();
+const choralOscillators = chord.map(frequency => oscillator({ frequency }));
+// TODO: creation process of these nodes is super cumbersome!!!
+const osc2 = oscillator({ frequency: frequency('G5') });
 
-o.connectTo(o.context.destination);
-o.start(o.context.currentTime);
-o.stop(o.context.currentTime + .001);
+choralOscillators.forEach(o => o.connectTo(o.context.destination));
+equallyRadOscillator.connectTo(equallyRadOscillator.context.destination);
+osc2.connectTo(osc2.context.destination);
+
+radSequencer.play(
+  [
+    {
+      node: equallyRadOscillator,
+      noteType: NOTE_VALUES.EIGHTH,
+    },
+    choralOscillators.reduce((memo, o) => { 
+      memo.push({
+        node: o,
+        noteType: NOTE_VALUES.SIXTEENTH,
+      });
+
+      return memo;
+    }, []),
+    {
+      node: osc2,
+      noteType: NOTE_VALUES.EIGHTH,
+    },
+    {
+      // TODO: obviously this plays but throws an error since you cant reuse oscillator nodes
+      node: osc2,
+      noteType: NOTE_VALUES.EIGHTH,
+    },
+  ]
+);

@@ -4,10 +4,11 @@ import Envelope from './envelope';
 const defaultState = {
   frequency: 440,
   type: 'triangle',
-  peak: 0.8
+  peak: 0.8,
 };
 
-const oscillator = context => (options = defaultState, envelope = new Envelope()) => {
+const oscillator = context => (oscState, envelope = new Envelope()) => {
+  const options = { ...defaultState, ...oscState };
   const osc = context.createOscillator();
   const gain = context.createGain();
   const attack = envelope.a / 1000;
@@ -21,6 +22,14 @@ const oscillator = context => (options = defaultState, envelope = new Envelope()
   osc.connect(gain);
 
   return {
+    get duration() {
+      return decay + sustain;
+    },
+
+    get envelope() {
+      return envelope;
+    },
+
     get context() {
       return context;
     },

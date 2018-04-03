@@ -1,4 +1,5 @@
-import AudioContextProvider from 'audio-context-provider';
+import AudioContextProvider from './audio-context-provider';
+import NOTE_VALUES from './note-values';
 
 const secondsPerMinute = 60;
 
@@ -7,12 +8,17 @@ const computeNoteLength = (bps, noteValue) => (1 / bps) * noteValue;
 
 // Assumes a 4/4 time signature! Will want to make that variable as well
 const computeNoteLengthMap = bps => ({
-  'whole': computeNoteLength(bps, 4),
-  'half': computeNoteLength(bps, 2),
-  'quarter': computeNoteLength(bps, 1),
-  'eighth': computeNoteLength(bps, .5),
-  'sixteenth': computeNoteLength(bps, .25),
+  [NOTE_VALUES.WHOLE]: computeNoteLength(bps, 4),
+  [NOTE_VALUES.HALF]: computeNoteLength(bps, 2),
+  [NOTE_VALUES.QUARTER]: computeNoteLength(bps, 1),
+  [NOTE_VALUES.EIGHTH]: computeNoteLength(bps, .5),
+  [NOTE_VALUES.SIXTEENTH]: computeNoteLength(bps, .25),
 });
+
+// This represents the running total of time since the sequencer started
+// Necessary to correctly time when notes are played in series, i.e.,
+// to ensure a note is played the correct amount of time after another
+let offset = 0;
 
 const serial = (data, handler, onDone) => {
   function next() {
@@ -28,20 +34,19 @@ const serial = (data, handler, onDone) => {
   next();
 };
 
+const defaultOnDone = () => console.log('finished playing');
 
-const sequencer = context => (bpm) => {
+const sequencer = context => (bpm, onDone = defaultOnDone) => {
   let noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
 
   return {
     play(noteGroups, bpm = null) {
-      // tempo change requested, update length of each note type
+      // tempo has changed, update length of each note type
       if (bpm) {
         noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
       }
       
-      serial(noteGroups, this.run.bind(this), () => {
-        console.log('finished playing');
-      });
+      serial(noteGroups, this.run.bind(this), onDone);
     },
 
     /**
@@ -57,22 +62,25 @@ const sequencer = context => (bpm) => {
     run(notes, nextNoteFn) {
       const notesToPlay = Array.isArray(notes) ? notes : [notes];
       const now = context.currentTime;
-      let shortestNoteTime;
+      let timeTilNextNote = 0;
 
       notesToPlay.forEach(({ node, noteType }) => {
         const noteLength = noteValues[noteType];
+        // Get the sustain of a note, and add it to the current time
+        const noteDuration = node.duration + now;
 
         // We want to figure out what the shortest note in this chord is,
         // so we know when to schedule the next note
 
-        // TODO: really there has to be the concept of sustain time in
-        // addition to note length, since a note can sustain for longer
+        // This determines which note in the chord is the longest, for use in
+        // deriving when the next note in the overall song should be scheduled.
+        // Neccessary as a note can sustain for longer
         // than the duration of time till the next note.
         // For example: In notated sheet music, a half-note `A` in the
         // bass with 3 16th notes in the treble are played as 4 16th notes,
         // but the A continues to sound as the next 3 notes are played.
-        if (noteLength < shortestNoteTime) {
-          shortestNoteTime = noteLength;
+        if (noteDuration > timeTilNextNote) {
+          timeTilNextNote = noteDuration;
         }
 
         // start should ramp gain up to current time, then play
@@ -81,8 +89,10 @@ const sequencer = context => (bpm) => {
         node.stop(now + noteValues[noteType]);
       });
 
-      const timeToNextNote = shortestNoteTime * 1000;
-      setTimeout(playNextNote, timeToNextNote);
+      timeTilNextNote = timeTilNextNote - offset;
+      offset = timeTilNextNote;
+
+      setTimeout(nextNoteFn, timeTilNextNote * 1000);
     }
   };
 };

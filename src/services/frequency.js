@@ -92,7 +92,8 @@ const getSteps = (noteString) => {
   return noteHalfSteps[note] + noteModifiers[modifier] + (octaveDistance * 12);
 };
 
-const frequency = (stepsFromA) => {
+const frequency = (noteString) => {
+  const stepsFromA = getSteps(noteString);
   const rawFrequency = A_ABOVE_MIDDLE_C * Math.pow(EVEN_TEMPERED_RATIO, stepsFromA);
 
   // truncate float to 2 digits after the decimal and round them.
