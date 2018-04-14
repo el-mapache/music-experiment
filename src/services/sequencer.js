@@ -36,7 +36,7 @@ const serial = (data, handler, onDone) => {
 
 const defaultOnDone = () => console.log('finished playing');
 
-const sequencer = context => (bpm, onDone = defaultOnDone) => {
+const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   let noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
 
   return {
@@ -64,10 +64,14 @@ const sequencer = context => (bpm, onDone = defaultOnDone) => {
       const now = context.currentTime;
       let timeTilNextNote = 0;
 
+      console.log('current system time', now)
+
       notesToPlay.forEach(({ node, noteType }) => {
         const noteLength = noteValues[noteType];
         // Get the sustain of a note, and add it to the current time
-        const noteDuration = node.duration + now;
+        const noteDuration = node.duration//; + now;
+        console.log('noteLength', noteLength);
+        console.log('noteDuration', noteDuration);
 
         // We want to figure out what the shortest note in this chord is,
         // so we know when to schedule the next note
@@ -79,20 +83,30 @@ const sequencer = context => (bpm, onDone = defaultOnDone) => {
         // For example: In notated sheet music, a half-note `A` in the
         // bass with 3 16th notes in the treble are played as 4 16th notes,
         // but the A continues to sound as the next 3 notes are played.
-        if (noteDuration > timeTilNextNote) {
-          timeTilNextNote = noteDuration;
-        }
+        
+
+        // if (noteDuration > noteLength) {
+        //   timeTilNextNote = noteDuration;
+        // } else {
+        //   console.log('like this should always be 0.25')
+        //   timeTilNextNote = noteLength
+        // }
+
+        timeTilNextNote = noteDuration+noteLength + now;
 
         // start should ramp gain up to current time, then play
         node.start(now);
         // stop should ramp gain down to stop time, then stop
-        node.stop(now + noteValues[noteType]);
+        node.stop(noteDuration + noteLength + now);
       });
-
-      timeTilNextNote = timeTilNextNote - offset;
-      offset = timeTilNextNote;
-
-      setTimeout(nextNoteFn, timeTilNextNote * 1000);
+      
+      console.log('note offset from system time', offset);
+      console.log('initial time to next note', timeTilNextNote)
+      const nextNoteTime = timeTilNextNote - offset;
+      offset += nextNoteTime;
+      console.log('offsest with note duration', offset, 'time til next note', nextNoteTime, '\n\n');
+      
+      setTimeout(nextNoteFn, nextNoteTime * 1000);
     }
   };
 };
