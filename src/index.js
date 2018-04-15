@@ -46,7 +46,7 @@ fetchRepos().then((repos) => {
   select.appendChild(fragment);
 });
 
-const radSequencer = sequencer({ bpm: 220 });
+const radSequencer = sequencer({ bpm: 120 });
 
 const chordC5Power = ['C5', 'E6'].map(noteFactory);
 const a4 = noteFactory('A4');
@@ -54,27 +54,22 @@ const g5 = noteFactory('G5');
 
 radSequencer.play(
   [
-    // {
-    //   node: a4,
-    //   noteType: NOTE_VALUES.QUARTER,
-    // },
-    // chordC5Power.reduce((memo, o) => { 
-    //   memo.push({
-    //     node: o,
-    //     noteType: NOTE_VALUES.QUARTER,
-    //   });
+    {
+      node: a4,
+      noteType: NOTE_VALUES.QUARTER,
+    },
+    chordC5Power.reduce((memo, o) => { 
+      memo.push({
+        node: o,
+        noteType: NOTE_VALUES.QUARTER,
+      });
 
-    //   return memo;
-    // }, []),
-    // {
-    //   node: g5,
-    //   noteType: NOTE_VALUES.HALF,
-    // },
-    // {
-    //   // TODO: obviously this plays but throws an error since you cant reuse oscillator nodes
-    //   node: g5,
-    //   noteType: NOTE_VALUES.EIGHTH,
-    // },
+      return memo;
+    }, []),
+    {
+      node: g5,
+      noteType: NOTE_VALUES.QUARTER,
+    },
     {
       node: noteFactory('A5'),
       noteType: NOTE_VALUES.EIGHTH,

@@ -23,7 +23,7 @@ const oscillator = context => (oscState, envelope = new Envelope()) => {
 
   return {
     get duration() {
-      return 0//decay + sustain;
+      return decay + sustain;
     },
 
     get envelope() {
