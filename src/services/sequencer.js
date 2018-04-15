@@ -36,9 +36,9 @@ const serial = (data, handler, onDone) => {
 
 const defaultOnDone = () => console.log('finished playing');
 
-const sequencer = context => (bpm, onDone = defaultOnDone) => {
+const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   let noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
-
+  
   return {
     play(noteGroups, bpm = null) {
       // tempo has changed, update length of each note type
@@ -64,33 +64,35 @@ const sequencer = context => (bpm, onDone = defaultOnDone) => {
       const now = context.currentTime;
       let timeTilNextNote = 0;
 
+      console.log('current system time', now)
+
       notesToPlay.forEach(({ node, noteType }) => {
         const noteLength = noteValues[noteType];
         // Get the sustain of a note, and add it to the current time
         const noteDuration = node.duration + now;
 
         // We want to figure out what the shortest note in this chord is,
-        // so we know when to schedule the next note
+        // so we know when to schedule the next note.
 
-        // This determines which note in the chord is the longest, for use in
-        // deriving when the next note in the overall song should be scheduled.
         // Neccessary as a note can sustain for longer
         // than the duration of time till the next note.
         // For example: In notated sheet music, a half-note `A` in the
         // bass with 3 16th notes in the treble are played as 4 16th notes,
         // but the A continues to sound as the next 3 notes are played.
-        if (noteDuration > timeTilNextNote) {
-          timeTilNextNote = noteDuration;
+        // TODO: this double if thing feel reaaaal clunky
+        if (!timeTilNextNote) {
+          timeTilNextNote = noteLength;
+        }
+
+        if (noteLength < timeTilNextNote) {
+          timeTilNextNote = noteLength
         }
 
         // start should ramp gain up to current time, then play
         node.start(now);
         // stop should ramp gain down to stop time, then stop
-        node.stop(now + noteValues[noteType]);
+        node.stop(noteDuration + noteLength);
       });
-
-      timeTilNextNote = timeTilNextNote - offset;
-      offset = timeTilNextNote;
 
       setTimeout(nextNoteFn, timeTilNextNote * 1000);
     }

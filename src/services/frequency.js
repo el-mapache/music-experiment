@@ -19,6 +19,9 @@ const NOTES = {
 // This map shouldn't be used directly! Its purpose is to help
 // compute the relative number of half steps towards or away
 // from A4
+// TODO: do some math to confirm below reasoning
+// We move negatively away from A because it ensures we
+// account for half steps when jumping around octaves
 const noteHalfSteps = {
   'C': -9,
   'D': -7,
@@ -33,6 +36,7 @@ const noteModifiers = {
   '#': 1,
   undefined: 0,
 };
+// Notes have to be capitalized to allow for a proper flat (b)
 const validNoteRegex = /([CDEFGAB]){1}(b|#)?([0-9]){1}/;
 
 const findOctaveDistance = (octave) => {

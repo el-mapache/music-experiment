@@ -2,8 +2,8 @@ import githubClient from 'services/github-client';
 import oscillator from 'services/oscillator';
 import sequencer from 'services/sequencer';
 import frequency from 'services/frequency';
+import noteFactory from 'services/note-factory';
 import NOTE_VALUES from 'services/note-values';
-import { parseCIDR } from 'ipaddr.js';
 
 const user = 'el-mapache';
 
@@ -46,38 +46,44 @@ fetchRepos().then((repos) => {
   select.appendChild(fragment);
 });
 
-const chord = ['C5', 'E6'].map(note => frequency(note));
-const radSequencer = sequencer(120);
-const equallyRadOscillator = oscillator();
-const choralOscillators = chord.map(frequency => oscillator({ frequency }));
-// TODO: creation process of these nodes is super cumbersome!!!
-const osc2 = oscillator({ frequency: frequency('G5') });
+const radSequencer = sequencer({ bpm: 120 });
 
-choralOscillators.forEach(o => o.connectTo(o.context.destination));
-equallyRadOscillator.connectTo(equallyRadOscillator.context.destination);
-osc2.connectTo(osc2.context.destination);
+const chordC5Power = ['C5', 'E6'].map(noteFactory);
+const a4 = noteFactory('A4');
+const g5 = noteFactory('G5');
 
 radSequencer.play(
   [
     {
-      node: equallyRadOscillator,
-      noteType: NOTE_VALUES.EIGHTH,
+      node: a4,
+      noteType: NOTE_VALUES.QUARTER,
     },
-    choralOscillators.reduce((memo, o) => { 
+    chordC5Power.reduce((memo, o) => { 
       memo.push({
         node: o,
-        noteType: NOTE_VALUES.SIXTEENTH,
+        noteType: NOTE_VALUES.QUARTER,
       });
 
       return memo;
     }, []),
     {
-      node: osc2,
+      node: g5,
+      noteType: NOTE_VALUES.QUARTER,
+    },
+    {
+      node: noteFactory('A5'),
       noteType: NOTE_VALUES.EIGHTH,
     },
     {
-      // TODO: obviously this plays but throws an error since you cant reuse oscillator nodes
-      node: osc2,
+      node: noteFactory('G5'),
+      noteType: NOTE_VALUES.EIGHTH,
+    },
+    {
+      node: noteFactory('A5'),
+      noteType: NOTE_VALUES.EIGHTH,
+    },
+    {
+      node: noteFactory('C#6'),
       noteType: NOTE_VALUES.EIGHTH,
     },
   ]
