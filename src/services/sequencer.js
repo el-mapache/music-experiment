@@ -15,11 +15,6 @@ const computeNoteLengthMap = bps => ({
   [NOTE_VALUES.SIXTEENTH]: computeNoteLength(bps, .25),
 });
 
-// This represents the running total of time since the sequencer started
-// Necessary to correctly time when notes are played in series, i.e.,
-// to ensure a note is played the correct amount of time after another
-let offset = 0;
-
 const serial = (data, handler, onDone) => {
   function next() {
     const nextData = data.shift();
@@ -63,8 +58,6 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
       const notesToPlay = Array.isArray(notes) ? notes : [notes];
       const now = context.currentTime;
       let timeTilNextNote = 0;
-
-      console.log('current system time', now)
 
       notesToPlay.forEach(({ node, noteType }) => {
         const noteLength = noteValues[noteType];

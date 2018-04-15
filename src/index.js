@@ -83,7 +83,7 @@ radSequencer.play(
       noteType: NOTE_VALUES.EIGHTH,
     },
     {
-      node: noteFactory('C#6'),
+      node: noteFactory('B4'),
       noteType: NOTE_VALUES.EIGHTH,
     },
   ]
