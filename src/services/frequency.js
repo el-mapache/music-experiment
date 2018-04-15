@@ -97,6 +97,10 @@ const getSteps = (noteString) => {
 };
 
 const frequency = (noteString) => {
+  if (!noteString) {
+    return 0;
+  }
+
   const stepsFromA = getSteps(noteString);
   const rawFrequency = A_ABOVE_MIDDLE_C * Math.pow(EVEN_TEMPERED_RATIO, stepsFromA);
 

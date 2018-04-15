@@ -2,8 +2,11 @@ import AudioContextProvider from './audio-context-provider';
 import frequency from './frequency';
 import oscillator from './oscillator';
 
-const noteFactory = context => noteString => {
-  const osc = oscillator({ frequency: frequency(noteString) });
+const noteFactory = context => ({ noteName, envelope, peak, type }) => {
+  const osc = oscillator({
+    frequency: frequency(noteName),
+    peak,
+  });
   osc.connectTo(osc.context.destination);
 
   return osc;
