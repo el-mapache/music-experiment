@@ -1,47 +1,74 @@
 import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
+import recorder from './services/recorder';
+import AudioContextProvider from './services/audio-context-provider';
 
-const user = 'el-mapache';
+const user = '18F';
+let myRecorder;
 
-// const fetchRepos = async () => {
-//   const { data } = await githubClient.reposForUser(user);
-//   return data;
-// };
+const fetchRepos = async () => {
+  const { data } = await githubClient.reposForUser(user);
+  return data;
+};
+let lastData;
 
-// const onRepoSelect = (event) => {
-//   const { value: repo } = event.target;
+const playScore = (data) => {
+  const score = buildScore(data);
 
-//   githubClient.getRepoStats(user, repo)
-//   .then((stats) => {
-//     /**
-//      * stats are returned as an array of objects.
-//      * The first key is the one we care about, `days`.
-//      * It is an array of 7 entries, with each entry corresponding
-//      * to the number of commits made to the repo on a day of the week.
-//      * Index 0 is sunday, 1 in monday, etc.
-//      */
-//     console.log(stats)
-//   });
-// };
+  const radSequencer = sequencer({ bpm: 180, onDone: () => myRecorder.stop() });
 
-// const select = document.getElementById('repos');
-// const fragment = document.createDocumentFragment();
+  radSequencer.play(score);
+};
 
-// select.addEventListener('change', onRepoSelect);
+const onRepoSelect = (event) => {
+  const { value: repo } = event.target;
 
-// fetchRepos().then((repos) => {
-//   repos.forEach((repo) => {
-//     const { name } = repo;
-//     const option = document.createElement('option');
-//     option.value = name;
-//     option.textContent = name;
+  githubClient.getRepoStats(user, repo)
+  .then((stats) => {
+    /**
+     * stats are returned as an array of objects.
+     * The first key is the one we care about, `days`.
+     * It is an array of 7 entries, with each entry corresponding
+     * to the number of commits made to the repo on a day of the week.
+     * Index 0 is sunday, 1 in monday, etc.
+     */
+    const data = stats.data.map(datum => datum.days);
+    lastData = data;
+
+    AudioContextProvider((context) => {
+      const destination = context.createMediaStreamDestination();
+      myRecorder = recorder({ stream: destination.stream });
+      myRecorder.start();
+    });
+
+    playScore(data);
+  });
+};
+
+const select = document.getElementById('repos');
+const fragment = document.createDocumentFragment();
+
+select.addEventListener('change', onRepoSelect);
+document.querySelector('button').addEventListener('click', (event) => {
+  event.preventDefault();
+  if (lastData) {
+    playScore(lastData);
+  }
+});
+
+fetchRepos().then((repos) => {
+  repos.forEach((repo) => {
+    const { name } = repo;
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
   
-//     fragment.appendChild(option);
-//   });
+    fragment.appendChild(option);
+  });
   
-//   select.appendChild(fragment);
-// });
+  select.appendChild(fragment);
+});
 
 // every week is a measure. every event is a note. 
 // more numbers in a row is faster?
@@ -51,19 +78,17 @@ const user = 'el-mapache';
 const data = [
   [0, 0, 0, 0, 0, 0, 0],
   [0, 1, 0, 3, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
   [0, 2, 0, 0, 0, 0, 0],
   [0, 1, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 2],
   [0, 0, 0, 0, 0, 0, 0],
 ];
 
-const score = buildScore(data);
+// const score = buildScore(data);
 
-const radSequencer = sequencer({ bpm: 180 });
+// const radSequencer = sequencer({ bpm: 180 });
 
-radSequencer.play(score);
+// radSequencer.play(score);
 
 
 

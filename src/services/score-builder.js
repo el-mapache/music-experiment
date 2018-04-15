@@ -2,7 +2,7 @@ import noteFactory from 'services/note-factory';
 import NOTE_VALUES from 'services/note-values';
 
 // Super naive at this point, just for testing purposes
-const phrygianMap = ['E4', 'F4', 'G4', 'A4', 'B4', 'C4', 'D4'];
+const phrygianMap = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
 
 const makeChords = data =>
   data.reduce((chord, datum) => {
@@ -10,9 +10,9 @@ const makeChords = data =>
     const chordData = {};
 
     if (count) {
-      chordData.note = datum.reduce((notes, el) => {
+      chordData.note = datum.reduce((notes, el, index) => {
         if (el) {
-          notes.push(phrygianMap[el]);
+          notes.push(`${phrygianMap[index]}${Math.floor(Math.random() * (5 - 3) + 3)}`);
         }
 
         return notes;

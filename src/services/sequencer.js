@@ -29,7 +29,9 @@ const serial = (data, handler, onDone) => {
   next();
 };
 
-const defaultOnDone = () => console.log('finished playing');
+const defaultOnDone = () => {
+  console.log('finished playing');
+}
 
 const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   let noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
@@ -40,7 +42,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
       if (bpm) {
         noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
       }
-      
+
       serial(noteGroups, this.run.bind(this), onDone);
     },
 
