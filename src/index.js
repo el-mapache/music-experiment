@@ -16,7 +16,7 @@ let lastData;
 const playScore = (data) => {
   const score = buildScore(data);
 
-  const radSequencer = sequencer({ bpm: 180, onDone: () => myRecorder.stop() });
+  const radSequencer = sequencer({ bpm: 180 });//, onDone: () => myRecorder.stop() });
 
   radSequencer.play(score);
 };
@@ -35,19 +35,44 @@ const onRepoSelect = (event) => {
      */
     const data = stats.data.map(datum => datum.days);
     lastData = data;
-
-    AudioContextProvider((context) => {
-      const destination = context.createMediaStreamDestination();
-      myRecorder = recorder({ stream: destination.stream });
-      myRecorder.start();
-    });
+    console.log(data);
+    // AudioContextProvider((context) => {
+    //   const destination = context.createMediaStreamDestination();
+    //   myRecorder = recorder({ stream: destination.stream });
+    //   myRecorder.start();
+    // });
 
     playScore(data);
   });
 };
 
 const select = document.getElementById('repos');
+const repoSearch = document.getElementById('search-repo');
 const fragment = document.createDocumentFragment();
+
+
+repoSearch.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const { target: form } = event;
+  const { repo, owner } = form;
+
+  if (!repo.value || !owner.value) {
+    throw new Error('Form requires a repo name and owner name fo that repo');
+  }
+
+  githubClient.getRepoStats(
+    owner.value,
+    repo.value
+  )
+  .then((stats) => {
+    const data = stats.data.map(datum => datum.days);
+    lastData = data;
+    console.log(data);
+
+    playScore(data);
+  });
+});
 
 select.addEventListener('change', onRepoSelect);
 document.querySelector('button').addEventListener('click', (event) => {
@@ -83,14 +108,6 @@ const data = [
   [0, 0, 0, 0, 0, 0, 2],
   [0, 0, 0, 0, 0, 0, 0],
 ];
-
-// const score = buildScore(data);
-
-// const radSequencer = sequencer({ bpm: 180 });
-
-// radSequencer.play(score);
-
-
 
 // const chordC5Power = ['C5', 'E6'].map(noteFactory);
 // const a4 = noteFactory('A4');

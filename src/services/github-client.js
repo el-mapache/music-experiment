@@ -12,6 +12,14 @@ const reposForUser = (username) => {
   .catch(error => console.warn(error));
 };
 
+const repoForUser = ({ owner, repo }) => {
+  return githubClient.repos.get({
+    owner,
+    repo,
+  })
+  .catch(error => console.log(error));
+};
+
 const repoCommitStats = ({ owner, repo }) => {
   return githubClient.repos.getStatsCommitActivity({
     owner,
@@ -58,6 +66,7 @@ const getRepoStats = (user, repo) => {
 };
 
 export default {
+  repoForUser,
   reposForUser,
   getRepoStats,
 };

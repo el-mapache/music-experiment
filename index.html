@@ -10,11 +10,16 @@
     </style>
   </head>
   <body>
-    <select id="repos">
-    </select>
+    <select id="repos"></select>
     <button type="button" role="button">
       get contributions for this repo
     </button>
+
+    <form id="search-repo">
+      <input id="repo" type="text" name="repo" placeholder="enter repo name" />
+      <input id="owner" type="text" name="owner" placeholder="enter repo owner" />
+      <button type="submit">get repo</button>
+    </form>
     <script src="build/build.js"></script>
   </body>
 </html>
