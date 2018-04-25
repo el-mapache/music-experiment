@@ -7,6 +7,7 @@ const noteFactory = context => ({ noteName, envelope, peak, type }) => {
     frequency: frequency(noteName),
     peak,
   });
+
   osc.connectTo(osc.context.destinationStream);
   osc.connectTo(osc.context.destination);
 

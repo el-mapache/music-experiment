@@ -16,7 +16,11 @@ const playScore = (data) => {
   const score = buildScore(data);
 
   const radSequencer = sequencer({ bpm: 180, onDone: () => myRecorder.stop() });
-  myRecorder.start();
+  
+  if (!myRecorder.state() === 'recording') {
+    myRecorder.start();
+  }
+
   radSequencer.play(score);
 };
 

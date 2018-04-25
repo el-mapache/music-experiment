@@ -7,13 +7,13 @@ const recorder = context => ({ stream } = { stream: context.destinationStream })
   let chunks = [];
 
   mediaRecorder.ondataavailable = (event) => {
-    console.log('data available!', event.data)
     chunks.push(event.data);
   };
 
   mediaRecorder.onstop = () => {
+    // 'oh cool I can output in webm' - no one, ever
     const blob = new Blob(chunks, { type: 'audio/webm' });
-    console.log(blob)
+
     const downloadLink = document.createElement('a');
     downloadLink.href = URL.createObjectURL(blob);
     downloadLink.download = 'track.webm';
