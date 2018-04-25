@@ -1,9 +1,10 @@
 import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
+import recorder from 'services/recorder';
 
 const user = '18F';
-let myRecorder;
+let myRecorder = recorder();
 
 const fetchRepos = async () => {
   const { data } = await githubClient.reposForUser(user);
@@ -14,8 +15,8 @@ let lastData;
 const playScore = (data) => {
   const score = buildScore(data);
 
-  const radSequencer = sequencer({ bpm: 180 });//, onDone: () => myRecorder.stop() });
-
+  const radSequencer = sequencer({ bpm: 180, onDone: () => myRecorder.stop() });
+  myRecorder.start();
   radSequencer.play(score);
 };
 

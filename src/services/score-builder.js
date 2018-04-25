@@ -40,6 +40,7 @@ const makeChords = data =>
     }
     
     chordData.volume = Math.min(Math.max(count / 100, .0001), 100);
+    console.log(chordData.volume)
     chord.push(chordData);
 
     return chord;
@@ -50,7 +51,7 @@ const generateNoteSequence = chordsFromData =>
   chordsFromData.reduce((sequence, chordObj) => {
     const { notes, volume } = chordObj;
     const chord = notes.map((noteName) => {
-      return noteFactory({ noteName, peak: volume / notes.length });
+      return noteFactory({ noteName, peak: volume });
     });
 
     sequence.push(
