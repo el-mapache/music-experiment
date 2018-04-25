@@ -39,12 +39,20 @@ const noteModifiers = {
 // Notes have to be capitalized to allow for a proper flat (b)
 const validNoteRegex = /([CDEFGAB]){1}(b|#)?([0-9]){1}/;
 
+/**
+ * 
+ * @param {Number} octave 
+ * @return Number distance from BASE_OCTAVE
+ */
 const findOctaveDistance = (octave) => {
   // If the current octave is equal to the base octave, we don't
   // have to do anything!
   let distance = 0;
 
   if (octave < BASE_OCTAVE) {
+    // Supplied octave is less than base_octave, return a negative number so
+    // the number of half steps between the note this octave is attached to
+    // and A4 can be correctly derived
     distance = -(BASE_OCTAVE - octave);
   } else if (octave > BASE_OCTAVE) {
     distance = octave - BASE_OCTAVE;
@@ -56,9 +64,9 @@ const findOctaveDistance = (octave) => {
 /**
  *
  * @param {String} note
- * @param {String} modifier
+ * @param {String} modifier sharp (#) or flat (b)
  *
- * Given a note and a modifier, returns the correct name of the note
+ * Given a note and a pitch modifier, returns the correct name of the note
  * Accounts for the single semitone between B and C, and E and F
  */
 const normalizeSemitones = (note, modifier) => {
@@ -86,19 +94,23 @@ const getSteps = (noteString) => {
     throw new Error('Note string must be in the format {[C-B]}{b|#}{0-9}');
   }
 
-  let note = matches[1];
-  const modifier = matches[2];
-  const octave = matches[3];
-
+  const [_, note, pitchModifier, octave] = matches;
   const octaveDistance = findOctaveDistance(octave);
-  note = normalizeSemitones(note, modifier);
+  const normalizedNote = normalizeSemitones(note, pitchModifier);
 
-  return noteHalfSteps[note] + noteModifiers[modifier] + (octaveDistance * 12);
+  return noteHalfSteps[normalizedNote] + noteModifiers[pitchModifier] + (octaveDistance * 12);
 };
 
+/**
+ * 
+ * Get the actual frequency of a note
+ * @param {String} noteString representation of a note in the format 'Note + #|b + octave'
+ * @return frequency float rounded to 2 significant digits
+ * 
+ */
 const frequency = (noteString) => {
   if (!noteString) {
-    return 0;
+    return .0;
   }
 
   const stepsFromA = getSteps(noteString);

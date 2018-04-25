@@ -47,8 +47,8 @@ const oscillator = context => (oscState, envelope = new Envelope()) => {
 
       gain.gain.linearRampToValueAtTime(0, time);
       gain.gain.linearRampToValueAtTime(peak, time);
-      //gain.gain.linearRampToValueAtTime(peak, time + attack);
-      //gain.gain.linearRampToValueAtTime(hold * peak, attack + sustain + decay + time);
+      // gain.gain.linearRampToValueAtTime(peak, time + attack);
+      // gain.gain.linearRampToValueAtTime(hold * peak, attack + sustain + decay + time);
       osc.start(time);
     },
 
