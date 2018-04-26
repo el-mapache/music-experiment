@@ -4,20 +4,36 @@ import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
 
 const user = '18F';
+
+let lastData;
+let playing = false;
 let myRecorder = recorder();
 
 const fetchRepos = async () => {
   const { data } = await githubClient.reposForUser(user);
   return data;
 };
-let lastData;
 
 const playScore = (data) => {
-  const score = buildScore(data);
+  if (playing) {
+    return;
+  }
 
-  const radSequencer = sequencer({ bpm: 180, onDone: () => myRecorder.stop() });
+  playing = true;
+
+  const score = buildScore(data);
+  const radSequencer = sequencer({
+    bpm: 180,
+    onDone() {
+      if (myRecorder.state !== 'inactive') {
+        myRecorder.stop();
+      }
+
+      playing = false;
+    },
+  });
   
-  if (!myRecorder.state() === 'recording') {
+  if (myRecorder.state !== 'recording') {
     myRecorder.start();
   }
 
@@ -48,9 +64,8 @@ const onRepoSelect = (event) => {
 };
 
 const select = document.getElementById('repos');
+const selectRepoControl = document.getElementById('select-repo'); 
 const repoSearch = document.getElementById('search-repo');
-const fragment = document.createDocumentFragment();
-
 
 repoSearch.addEventListener('submit', (event) => {
   event.preventDefault();
@@ -71,15 +86,17 @@ repoSearch.addEventListener('submit', (event) => {
 });
 
 select.addEventListener('change', onRepoSelect);
-document.querySelector('button').addEventListener('click', (event) => {
+selectRepoControl.addEventListener('click', (event) => {
   event.preventDefault();
   if (lastData) {
     playScore(lastData);
   }
 });
 
-fetchRepos().then((repos) => {
-  repos.forEach((repo) => {
+const populateSelectNode = (dataList) => {
+  const fragment = document.createDocumentFragment();
+
+  dataList.forEach((repo) => {
     const { name } = repo;
     const option = document.createElement('option');
     option.value = name;
@@ -89,4 +106,6 @@ fetchRepos().then((repos) => {
   });
   
   select.appendChild(fragment);
-});
+};
+
+fetchRepos().then(populateSelectNode);

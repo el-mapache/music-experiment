@@ -1,4 +1,5 @@
 import noteFactory from 'services/note-factory';
+import audioChannel from 'services/audio-channel';
 import NOTE_VALUES from 'services/note-values';
 
 // Super naive at this point, just for testing purposes
@@ -46,13 +47,18 @@ const makeChords = data =>
   }, []);
 
 
-const generateNoteSequence = chordsFromData =>
-  chordsFromData.reduce((sequence, chordObj) => {
+const generateNoteSequence = (chordsFromData) => {
+  const channel = audioChannel();
+
+  return chordsFromData.reduce((sequence, chordObj) => {
     const { notes, volume } = chordObj;
     const chord = notes.map((noteName) => {
       const peak = volume;
+
       return noteFactory({ noteName, peak });
     });
+
+    channel.add(chord);
 
     sequence.push(
       chord.map(node => ({
@@ -63,6 +69,7 @@ const generateNoteSequence = chordsFromData =>
     
     return sequence;
   }, []);
+};
 
 const buildScore = data =>
   generateNoteSequence(

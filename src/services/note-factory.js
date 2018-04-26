@@ -8,8 +8,10 @@ const noteFactory = context => ({ noteName, envelope, peak, type }) => {
     peak,
   });
 
+  // TODO: think about how to remove all these connections, now
+  // the factory has too many responsibilites
   osc.connectTo(osc.context.destinationStream);
-  osc.connectTo(osc.context.destination);
+  // osc.connectTo(osc.context.destination);
 
   return osc;
 };

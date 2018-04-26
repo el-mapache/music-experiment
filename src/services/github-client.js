@@ -1,13 +1,17 @@
 import GitHub from '@octokit/rest';
 
+const defaultResultsPerPage = 50;
+
 const githubClient = GitHub({
   requestMedia: 'application/vnd.github.v3+json',
 });
 
-const reposForUser = (username) => {
+// Get a list of repos for the specified user
+// TODO: add a way to page results
+const reposForUser = (username, perPage = defaultResultsPerPage) => {
   return githubClient.repos.getForUser({
     username,
-    per_page: 50,
+    per_page: perPage,
   })
   .catch(error => console.warn(error));
 };
@@ -17,7 +21,7 @@ const repoForUser = ({ owner, repo }) => {
     owner,
     repo,
   })
-  .catch(error => console.log(error));
+  .catch(error => console.warn(error));
 };
 
 const repoCommitStats = ({ owner, repo }) => {
