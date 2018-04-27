@@ -37,7 +37,7 @@ const gliss = {
 // map these to ms or s in the envelope itself
 // figure out usual ranges for these times. possible generate those too
 const generateState = () => {
-  return Math.random() <= 0.5 ? stab : gliss;
+  return Math.random() <= 0.333 ? stab : gliss;
 };
 
 class FilterEnvelope {

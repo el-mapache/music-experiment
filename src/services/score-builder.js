@@ -5,6 +5,22 @@ import NOTE_VALUES from 'services/note-values';
 // Super naive at this point, just for testing purposes
 const phrygianMap = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
 
+const selectNoteValue = (speed) => {
+  let value = NOTE_VALUES.QUARTER;
+
+  if (speed < 2) {
+    value = NOTE_VALUES.WHOLE;
+  } else if (speed > 2 && speed < 10) {
+    value = NOTE_VALUES.HALF;
+  } else if (speed > 10 && speed < 40) {
+    value = NOTE_VALUES.QUARTER;
+  } else if (speed > 40) {
+    value = NOTE_VALUES.SIXTEENTH;
+  }
+
+  return value;
+}
+
 /**
  * Returns a note in the supplied scale and the note's octave
  * as a string
@@ -25,13 +41,18 @@ const makeChords = data =>
   data.reduce((chord, datum) => {
     const { days, count } = datum;
     const chordData = {};
+    chordData.speed = 0;
 
     if (count) {
       chordData.notes = days.reduce((notes, el, index) => {
         if (el) {
           notes.push(
-            getNoteAndOctave(phrygianMap, 7, 3, index)
+            getNoteAndOctave(phrygianMap, 7, 3, index),
           );
+        }
+
+        if (el > chordData.speed) {
+          chordData.speed = el;
         }
 
         return notes;
@@ -51,19 +72,19 @@ const generateNoteSequence = (chordsFromData) => {
   const channel = audioChannel();
 
   return chordsFromData.reduce((sequence, chordObj) => {
-    const { notes, volume } = chordObj;
-    const chord = notes.map((noteName) => {
+    const { notes, volume, speed } = chordObj;
+    const chord = notes.map((note) => {
       const peak = volume;
 
-      return noteFactory({ noteName, peak });
+      return noteFactory({ noteName: note, peak });
     });
 
     channel.add(chord);
-
+    
     sequence.push(
       chord.map(node => ({
         node,
-        noteType: NOTE_VALUES.QUARTER, 
+        noteType:  selectNoteValue(speed),
       }))
     );
     
