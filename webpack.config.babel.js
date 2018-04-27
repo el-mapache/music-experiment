@@ -26,10 +26,5 @@ export default() => ({
       }
     ]
   },
-  devServer: {
-    contentBase: [path.join(__dirname, "build"), path.join(__dirname, "samples"),__dirname,],
-    port: 9000,
-    inline: false
-  }
 });
 
