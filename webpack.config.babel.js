@@ -1,6 +1,5 @@
 import path from 'path';
 import webpack from 'webpack';
-import { HotModuleReplacementPlugin } from 'webpack';
 
 export default() => ({
   mode: 'development',
@@ -11,9 +10,6 @@ export default() => ({
     path: path.join(__dirname, 'build'),
     filename: 'build.js'
   },
-  plugins: [
-    new HotModuleReplacementPlugin()
-  ],
   resolve: {
     modules: [path.resolve(__dirname, 'src'), './node_modules']
   },
