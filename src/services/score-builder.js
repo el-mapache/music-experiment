@@ -30,7 +30,7 @@ const makeChords = data =>
       chordData.notes = days.reduce((notes, el, index) => {
         if (el) {
           notes.push(
-            getNoteAndOctave(phrygianMap, 5, 3, index)
+            getNoteAndOctave(phrygianMap, 7, 3, index)
           );
         }
 

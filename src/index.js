@@ -15,9 +15,9 @@ const fetchRepos = async () => {
 };
 
 const playScore = (data) => {
-  if (playing) {
-    return;
-  }
+  // if (playing) {
+  //   return;
+  // }
 
   playing = true;
 
@@ -33,7 +33,7 @@ const playScore = (data) => {
     },
   });
   
-  if (myRecorder.state !== 'recording') {
+  if (myRecorder.state === 'inactive') {
     myRecorder.start();
   }
 
