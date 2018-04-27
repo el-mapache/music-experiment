@@ -24,11 +24,15 @@ const recorder = context => ({ stream } = { stream: context.destinationStream })
 
   return {
     start() {
-      mediaRecorder.start();
+      if (mediaRecorder.state === 'inactive' || mediaRecorder.state !== 'recording') {
+        mediaRecorder.start();
+      }
     },
 
     stop() {
-      mediaRecorder.stop();
+      if (mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
     }
   }
 };

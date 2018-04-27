@@ -15,28 +15,18 @@ const fetchRepos = async () => {
 };
 
 const playScore = (data) => {
-  // if (playing) {
-  //   return;
-  // }
-
   playing = true;
 
   const score = buildScore(data);
   const radSequencer = sequencer({
     bpm: 180,
     onDone() {
-      if (myRecorder.state !== 'inactive') {
-        myRecorder.stop();
-      }
-
+      myRecorder.stop();
       playing = false;
     },
   });
-  
-  if (myRecorder.state === 'inactive') {
-    myRecorder.start();
-  }
 
+  myRecorder.start();
   radSequencer.play(score);
 };
 
