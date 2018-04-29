@@ -19,14 +19,14 @@ const playScore = (data) => {
 
   const score = buildScore(data);
   const radSequencer = sequencer({
-    bpm: 180,
+    bpm: 168,
     onDone() {
       myRecorder.stop();
       playing = false;
     },
   });
 
-  myRecorder.start();
+  // myRecorder.start();
   radSequencer.play(score);
 };
 
@@ -66,13 +66,16 @@ repoSearch.addEventListener('submit', (event) => {
   if (!repo.value || !owner.value) {
     throw new Error('Form requires a repo name and owner name fo that repo');
   }
-
-  githubClient.getRepoStats(
-    owner.value,
-    repo.value
-  )
-  .then(normalizeRepoStats)
-  .then(playScore);
+  if (lastData) {
+    playScore(lastData);
+  } else {
+    githubClient.getRepoStats(
+      owner.value,
+      repo.value
+    )
+    .then(normalizeRepoStats)
+    .then(playScore);
+  }
 });
 
 select.addEventListener('change', onRepoSelect);

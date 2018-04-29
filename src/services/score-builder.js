@@ -15,7 +15,7 @@ const selectNoteValue = (speed) => {
   } else if (speed > 10 && speed < 40) {
     value = NOTE_VALUES.QUARTER;
   } else if (speed > 40) {
-    value = NOTE_VALUES.SIXTEENTH;
+    value = NOTE_VALUES.EIGHTH;
   }
 
   return value;
@@ -43,25 +43,21 @@ const makeChords = data =>
     const chordData = {};
     chordData.speed = 0;
 
-    if (count) {
-      chordData.notes = days.reduce((notes, el, index) => {
-        if (el) {
-          notes.push(
-            getNoteAndOctave(phrygianMap, 7, 3, index),
-          );
-        }
+    chordData.notes = days.reduce((notes, el, index) => {
+      if (el) {
+        notes.push(
+          getNoteAndOctave(phrygianMap, 7, 3, index),
+        );
+      }
 
-        if (el > chordData.speed) {
-          chordData.speed = el;
-        }
+      if (el > chordData.speed) {
+        chordData.speed = el;
+      }
 
-        return notes;
-      }, []);
-    } else {
-      chordData.notes = [0];
-    }
+      return notes;
+    }, [0]);
 
-    chordData.volume = count / 10;
+    chordData.volume = count / 100;
     chord.push(chordData);
 
     return chord;
@@ -84,7 +80,7 @@ const generateNoteSequence = (chordsFromData) => {
     sequence.push(
       chord.map(node => ({
         node,
-        noteType:  selectNoteValue(speed),
+        noteType: selectNoteValue(speed),
       }))
     );
     
