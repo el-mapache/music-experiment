@@ -2,6 +2,7 @@ import AudioContextProvider from './audio-context-provider';
 import NOTE_VALUES from 'types/note-values';
 
 const secondsPerMinute = 60;
+const msPerSecond = 1000;
 
 const computeBeatsPerSecond = bpm => bpm / secondsPerMinute;
 const computeNoteLength = (bps, noteValue) => (1 / bps) * noteValue;
@@ -89,7 +90,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
         node.stop(noteDuration + noteLength);
       });
 
-      setTimeout(nextNoteFn, timeTilNextNote * 1000);
+      setTimeout(nextNoteFn, timeTilNextNote * msPerSecond);
     }
   };
 };

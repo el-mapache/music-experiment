@@ -1,9 +1,19 @@
-import noteFactory from 'services/note-factory';
+import noteFactory from 'factories/note-factory';
 import audioChannel from 'services/audio-channel';
 import NOTE_VALUES from 'types/note-values';
 
 // Super naive at this point, just for testing purposes
 const phrygianMap = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
+
+const addNoteModifier = (value) => {
+  if (value < 50) {
+    return '';
+  } else if (value > 50 && value < 60) {
+    return '#';
+  } else {
+    return 'b';
+  }
+}
 
 const selectNoteValue = (speed) => {
   let value = NOTE_VALUES.QUARTER;
@@ -33,8 +43,10 @@ const selectNoteValue = (speed) => {
 const getNoteAndOctave = (scale, octaveMin, octaveMax, notePosition) => {
   const octaveRange = Math.random() * (octaveMax - octaveMin) + octaveMin;
   const octave = Math.floor(octaveRange);
+  const modifier = Math.random() < .08 ?
+    addNoteModifier(Math.floor(Math.random() * (64 - 1) + 1)) : '';
 
-  return `${scale[notePosition]}${octave}`;
+  return `${scale[notePosition]}${''}${octave}`;
 };
 
 const makeChords = data =>
@@ -46,7 +58,7 @@ const makeChords = data =>
     chordData.notes = days.reduce((notes, el, index) => {
       if (el) {
         notes.push(
-          getNoteAndOctave(phrygianMap, 6, 3, index),
+          getNoteAndOctave(phrygianMap, 7, 3, index),
         );
       }
 
@@ -57,7 +69,10 @@ const makeChords = data =>
       return notes;
     }, [0]);
 
-    chordData.volume = count / 100;
+    // maybe i can randomly assign these volumes so
+    // like, a single note can randomly have either a higher volume
+    // or not, basically an accent?
+    chordData.volume = count / 100; //chordData.length === 1 ? count / 10 : count / 100;
     chord.push(chordData);
 
     return chord;
@@ -83,7 +98,7 @@ const generateNoteSequence = (chordsFromData) => {
     sequence.push(
       chord.map(node => ({
         node,
-        noteType: NOTE_VALUES.QUARTER//selectNoteValue(speed),
+        noteType: selectNoteValue(speed),
       }))
     );
     

@@ -1,7 +1,7 @@
 import AudioContextProvider from 'services/audio-context-provider';
 import oscillator from 'services/oscillator';
 
-const defaultChannelGain = .8;
+const defaultChannelGain = .1;
 
 const processor = context => context.createScriptProcessor(4096, 1, 1);
 

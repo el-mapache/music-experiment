@@ -7,11 +7,11 @@ const basic = {
 };
 
 const pad = {
-  a: 5000,
-  d: 200,
-  s: 0,
-  r: 2000,
-  h: 1,
+  a: 2000,
+  d: 500,
+  s: 400,
+  r: 1000,
+  h: 30,
 };
 
 const pluck = {

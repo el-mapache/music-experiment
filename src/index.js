@@ -26,7 +26,7 @@ const playScore = (data) => {
 
   const score = buildScore(data);
   const radSequencer = sequencer({
-    bpm: 128,
+    bpm: 180,
     onDone() {
       myRecorder.stop();
       playing = false;
@@ -53,9 +53,9 @@ const normalizeRepoStats = (stats) => {
 
 const getRepoStats = (user, repo) => {
   if (isOffline(true)) {
-    return Promise.resolve({ data: JSON.parse(tock) });
+    return Promise.resolve({ data: JSON.parse(bootstrap) });
   }
-  console.log(user, repo)
+
   return githubClient.getRepoStats(user, repo);
 };
 
