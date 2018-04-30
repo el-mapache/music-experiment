@@ -2,11 +2,7 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
-<<<<<<< HEAD
 import { bootstrap, tock, static18f } from 'data/repos';
-=======
-import { bootstrap, tock, static18f } from './sample-data';
->>>>>>> Adds envelope factory, note and envelope types, minor tweaks, sample data for
 
 const user = '18F';
 
@@ -41,7 +37,7 @@ const playScore = (data) => {
   // );
 
   const radSequencer = sequencer({
-    bpm: 128,
+    bpm: 180,
     onDone() {
       myRecorder.stop();
       playing = false;

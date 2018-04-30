@@ -66,7 +66,7 @@ const generateNoteSequence = (chordsFromData) => {
     sequence.push(
       chord.map(node => ({
         node,
-        noteType: NOTE_VALUES.QUARTER//selectNoteValue(speed),
+        noteType: selectNoteValue(speed),
       }))
     );
     
