@@ -1,5 +1,5 @@
 import AudioContextProvider from './audio-context-provider';
-import Envelope from './envelope';
+import envelope from 'factories/envelope-factory';
 
 const defaultState = {
   frequency: 440,
@@ -7,7 +7,13 @@ const defaultState = {
   peak: 0.8,
 };
 
-const oscillator = context => (oscState, envelope = new Envelope()) => {
+// 15ms ramp down time to provide smooth fade out
+const rampDownDelayTime = 0.0015;
+// zero is generally recognized as a non-finite value so we provide
+// a tiny value instead
+const webAudioZero = 0.0001;
+
+const oscillator = context => (oscState, envelope = envelope()) => {
   const options = { ...defaultState, ...oscState };
   const osc = context.createOscillator();
   const gain = context.createGain();
@@ -45,16 +51,15 @@ const oscillator = context => (oscState, envelope = new Envelope()) => {
     start(time) {
       const { peak } = options;
 
-      gain.gain.linearRampToValueAtTime(0, time);
-      //gain.gain.linearRampToValueAtTime(hold * peak, time);
-      gain.gain.linearRampToValueAtTime(peak, time + attack);
+      gain.gain.setValueAtTime(webAudioZero, time);
+      gain.gain.linearRampToValueAtTime(peak, time);
       gain.gain.linearRampToValueAtTime(hold * peak, attack + sustain + decay + time);
       osc.start(time);
     },
 
     stop(time) {
       const stopTime = attack + sustain + decay + release + time;
-      gain.gain.linearRampToValueAtTime(0.0001, time);
+      gain.gain.exponentialRampToValueAtTime(webAudioZero, time, rampDownDelayTime);
       osc.stop(stopTime);
     },
   };

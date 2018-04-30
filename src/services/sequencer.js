@@ -1,5 +1,5 @@
 import AudioContextProvider from './audio-context-provider';
-import NOTE_VALUES from './note-values';
+import NOTE_VALUES from 'types/note-values';
 
 const secondsPerMinute = 60;
 

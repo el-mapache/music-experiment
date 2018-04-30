@@ -1,6 +1,6 @@
 import noteFactory from 'services/note-factory';
 import audioChannel from 'services/audio-channel';
-import NOTE_VALUES from 'services/note-values';
+import NOTE_VALUES from 'types/note-values';
 
 // Super naive at this point, just for testing purposes
 const phrygianMap = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
@@ -57,7 +57,7 @@ const makeChords = data =>
       return notes;
     }, [0]);
 
-    chordData.volume = count;
+    chordData.volume = count / 100;
     chord.push(chordData);
 
     return chord;
@@ -83,7 +83,7 @@ const generateNoteSequence = (chordsFromData) => {
     sequence.push(
       chord.map(node => ({
         node,
-        noteType: selectNoteValue(speed),
+        noteType: NOTE_VALUES.QUARTER//selectNoteValue(speed),
       }))
     );
     

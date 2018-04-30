@@ -2,7 +2,7 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
-import { bootstrap } from './sample-data';
+import { bootstrap, tock, static18f } from './sample-data';
 
 const user = '18F';
 
@@ -26,7 +26,7 @@ const playScore = (data) => {
 
   const score = buildScore(data);
   const radSequencer = sequencer({
-    bpm: 180,
+    bpm: 128,
     onDone() {
       myRecorder.stop();
       playing = false;
@@ -53,9 +53,9 @@ const normalizeRepoStats = (stats) => {
 
 const getRepoStats = (user, repo) => {
   if (isOffline(true)) {
-    return Promise.resolve({ data: JSON.parse(bootstrap) });
+    return Promise.resolve({ data: JSON.parse(tock) });
   }
-
+  console.log(user, repo)
   return githubClient.getRepoStats(user, repo);
 };
 
@@ -90,7 +90,7 @@ repoSearch.addEventListener('submit', (event) => {
     throw new Error('Form requires a repo name and owner name fo that repo');
   }
 
-  getCommitStatsAndPlay(user, repo);
+  getCommitStatsAndPlay(owner.value, repo.value);
 });
 
 select.addEventListener('change', onRepoSelect);
