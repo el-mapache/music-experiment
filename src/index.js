@@ -2,7 +2,11 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
+<<<<<<< HEAD
 import { bootstrap, tock, static18f } from 'data/repos';
+=======
+import { bootstrap, tock, static18f } from './sample-data';
+>>>>>>> Adds envelope factory, note and envelope types, minor tweaks, sample data for
 
 const user = '18F';
 
@@ -37,7 +41,7 @@ const playScore = (data) => {
   // );
 
   const radSequencer = sequencer({
-    bpm: 180,
+    bpm: 128,
     onDone() {
       myRecorder.stop();
       playing = false;
@@ -63,9 +67,9 @@ const normalizeRepoStats = (stats) => {
 };
 
 const getRepoStats = (user, repo) => {
-  // if (isOffline(false)) {
-  //   return Promise.resolve({ data: JSON.parse(bootstrap) });
-  // }
+  if (isOffline(false)) {
+    return Promise.resolve({ data: JSON.parse(bootstrap) });
+  }
 
   return githubClient.getRepoStats(user, repo);
 };
@@ -128,6 +132,6 @@ const populateSelectNode = (dataList) => {
   select.appendChild(fragment);
 };
 
-if (navigator.onLine) {
+if (!isOffline()) {
   fetchRepos().then(populateSelectNode);
 }
