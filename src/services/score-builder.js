@@ -46,7 +46,7 @@ const makeChords = data =>
     chordData.notes = days.reduce((notes, el, index) => {
       if (el) {
         notes.push(
-          getNoteAndOctave(phrygianMap, 7, 3, index),
+          getNoteAndOctave(phrygianMap, 6, 3, index),
         );
       }
 
@@ -57,7 +57,7 @@ const makeChords = data =>
       return notes;
     }, [0]);
 
-    chordData.volume = count / 100;
+    chordData.volume = count;
     chord.push(chordData);
 
     return chord;
@@ -72,7 +72,10 @@ const generateNoteSequence = (chordsFromData) => {
     const chord = notes.map((note) => {
       const peak = volume;
 
-      return noteFactory({ noteName: note, peak });
+      return noteFactory({
+        noteName: note,
+        peak: (peak / notes.length),
+      });
     });
 
     channel.add(chord);

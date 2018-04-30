@@ -2,10 +2,13 @@ import AudioContextProvider from './audio-context-provider';
 import frequency from './frequency';
 import oscillator from './oscillator';
 
+const types = ['sine', 'square', 'triangle'];
+
 const noteFactory = context => ({ noteName, envelope, peak, type }) => {
   const osc = oscillator({
     frequency: frequency(noteName),
     peak,
+    type: 'trinagle'//types[Math.floor((Math.random() * 2) + 0)],
   });
 
   // TODO: think about how to remove all these connections, now

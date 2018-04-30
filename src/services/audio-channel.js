@@ -9,7 +9,7 @@ import oscillator from 'services/oscillator';
 const audioChannel = context => () => {
   const channelGain = context.createGain();
     
-  channelGain.gain.value = 0.1;
+  channelGain.gain.value = 0.8;
   channelGain.connect(context.destination);
 
   return {
