@@ -2,7 +2,7 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
-import { bootstrap, tock, static18f } from './sample-data';
+import { bootstrap, tock, static18f } from 'data/repos';
 
 const user = '18F';
 

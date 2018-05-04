@@ -1,20 +1,7 @@
 import AudioContextProvider from './audio-context-provider';
-import NOTE_VALUES from 'types/note-values';
+import getNoteTimings from './timing';
 
-const secondsPerMinute = 60;
 const msPerSecond = 1000;
-
-const computeBeatsPerSecond = bpm => bpm / secondsPerMinute;
-const computeNoteLength = (bps, noteValue) => (1 / bps) * noteValue;
-
-// Assumes a 4/4 time signature! Will want to make that variable as well
-const computeNoteLengthMap = bps => ({
-  [NOTE_VALUES.WHOLE]: computeNoteLength(bps, 4),
-  [NOTE_VALUES.HALF]: computeNoteLength(bps, 2),
-  [NOTE_VALUES.QUARTER]: computeNoteLength(bps, 1),
-  [NOTE_VALUES.EIGHTH]: computeNoteLength(bps, .5),
-  [NOTE_VALUES.SIXTEENTH]: computeNoteLength(bps, .25),
-});
 
 const serial = (data, handler, onDone) => {
   function next() {
@@ -35,13 +22,13 @@ const defaultOnDone = () => {
 }
 
 const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
-  let noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
+  let noteValues = getNoteTimings(bpm);
   
   return {
     play(noteGroups, bpm = null) {
       // tempo has changed, update length of each note type
       if (bpm) {
-        noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
+        noteValues = getNoteTimings(bpm);
       }
 
       serial(noteGroups, this.run.bind(this), onDone);
