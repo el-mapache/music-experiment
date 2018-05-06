@@ -26,8 +26,8 @@ const stab = {
   a: 0,
   d: 20,
   s: 0,
-  r: 1,
-  h: 1,
+  r: 0,
+  h: 0,
 };
 
 const gliss = {

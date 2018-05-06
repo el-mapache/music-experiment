@@ -21,6 +21,10 @@ const defaultOnDone = () => {
   console.log('finished playing');
 }
 
+// TODO: this should accept noteGroups.
+// sequences.
+// basically, the sequences needs to have a time signature associated with
+// them, then in the play function we can get those timings
 const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   let noteValues = getNoteTimings(bpm);
   
@@ -30,8 +34,9 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
       if (bpm) {
         noteValues = getNoteTimings(bpm);
       }
-
-      serial(noteGroups, this.run.bind(this), onDone);
+      //debugger
+      noteGroups.forEach(group => serial(group, this.run.bind(this), onDone));
+      //serial(noteGroups, this.run.bind(this), onDone);
     },
 
     /**

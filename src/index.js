@@ -25,6 +25,17 @@ const playScore = (data) => {
   playing = true;
 
   const score = buildScore(data);
+  // const score = buildScore(
+  //   normalizeRepoStats({
+  //     data: JSON.parse(tock)
+  //   })
+  // );
+  // const score2 = buildScore(
+  //   normalizeRepoStats({
+  //     data: JSON.parse(bootstrap)
+  //   })
+  // );
+
   const radSequencer = sequencer({
     bpm: 180,
     onDone() {
@@ -34,7 +45,7 @@ const playScore = (data) => {
   });
 
   // myRecorder.start();
-  radSequencer.play(score);
+  radSequencer.play([score]);
 };
 
 const normalizeRepoStats = (stats) => {
@@ -45,16 +56,16 @@ const normalizeRepoStats = (stats) => {
    * to the number of commits made to the repo on a day of the week.
    * Index 0 is sunday, 1 in monday, etc.
    */
-  const data = stats.data.map(datum => ({ days: datum.days, count: datum.count}));
+  const data = stats.data.map(datum => ({ days: datum.days, count: datum.total}));
   lastData = data;
 
   return lastData;
 };
 
 const getRepoStats = (user, repo) => {
-  if (isOffline(true)) {
-    return Promise.resolve({ data: JSON.parse(bootstrap) });
-  }
+  // if (isOffline(false)) {
+  //   return Promise.resolve({ data: JSON.parse(bootstrap) });
+  // }
 
   return githubClient.getRepoStats(user, repo);
 };
