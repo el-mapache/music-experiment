@@ -7,7 +7,6 @@ const computeNoteLength = (bps, noteValue) => (1 / bps) * noteValue;
 
 // still not accurately generating note values in time signatures
 // other than 4 / 4
-
 const getNoteTimings = (bpm, timeSignature = [4,4]) => {
   const bps = computeBeatsPerSecond(bpm);
   const wholeValue = timeSignature[0];

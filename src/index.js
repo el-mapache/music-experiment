@@ -45,7 +45,7 @@ const playScore = (data) => {
   });
 
   // myRecorder.start();
-  radSequencer.play([score]);
+  radSequencer.play([score], 180);
 };
 
 const normalizeRepoStats = (stats) => {
@@ -56,7 +56,11 @@ const normalizeRepoStats = (stats) => {
    * to the number of commits made to the repo on a day of the week.
    * Index 0 is sunday, 1 in monday, etc.
    */
-  const data = stats.data.map(datum => ({ days: datum.days, count: datum.total}));
+  const data = stats.data.map(datum => ({
+    days: datum.days,
+    count: datum.total || datum.count
+  }));
+
   lastData = data;
 
   return lastData;

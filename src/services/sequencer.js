@@ -29,17 +29,17 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   let noteValues = getNoteTimings(bpm);
   
   return {
-    play(noteGroups, bpm = null) {
+    play(sequences, newBPM = null) {
       if (context.state ==='suspended' || context.state !== 'running') {
         context.resume();
       }
+
       // tempo has changed, update length of each note type
-      if (bpm) {
-        noteValues = getNoteTimings(bpm);
+      if (newBPM && newBPM !== bpm) {
+        noteValues = getNoteTimings(newBPM);
       }
-      //debugger
-      noteGroups.forEach(group => serial(group, this.run.bind(this), onDone));
-      //serial(noteGroups, this.run.bind(this), onDone);
+
+      sequences.forEach(sequence => serial(sequence, this.run.bind(this), onDone));
     },
 
     /**
