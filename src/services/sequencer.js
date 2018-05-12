@@ -1,19 +1,7 @@
 import AudioContextProvider from './audio-context-provider';
-import NOTE_VALUES from './note-values';
+import getNoteTimings from './timing';
 
-const secondsPerMinute = 60;
-
-const computeBeatsPerSecond = bpm => bpm / secondsPerMinute;
-const computeNoteLength = (bps, noteValue) => (1 / bps) * noteValue;
-
-// Assumes a 4/4 time signature! Will want to make that variable as well
-const computeNoteLengthMap = bps => ({
-  [NOTE_VALUES.WHOLE]: computeNoteLength(bps, 4),
-  [NOTE_VALUES.HALF]: computeNoteLength(bps, 2),
-  [NOTE_VALUES.QUARTER]: computeNoteLength(bps, 1),
-  [NOTE_VALUES.EIGHTH]: computeNoteLength(bps, .5),
-  [NOTE_VALUES.SIXTEENTH]: computeNoteLength(bps, .25),
-});
+const msPerSecond = 1000;
 
 const serial = (data, handler, onDone) => {
   function next() {
@@ -33,17 +21,22 @@ const defaultOnDone = () => {
   console.log('finished playing');
 }
 
+// TODO: this should accept noteGroups.
+// sequences.
+// basically, the sequences needs to have a time signature associated with
+// them, then in the play function we can get those timings
 const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
-  let noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
+  let noteValues = getNoteTimings(bpm);
   
   return {
     play(noteGroups, bpm = null) {
       // tempo has changed, update length of each note type
       if (bpm) {
-        noteValues = computeNoteLengthMap(computeBeatsPerSecond(bpm));
+        noteValues = getNoteTimings(bpm);
       }
-
-      serial(noteGroups, this.run.bind(this), onDone);
+      //debugger
+      noteGroups.forEach(group => serial(group, this.run.bind(this), onDone));
+      //serial(noteGroups, this.run.bind(this), onDone);
     },
 
     /**
@@ -89,7 +82,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
         node.stop(noteDuration + noteLength);
       });
 
-      setTimeout(nextNoteFn, timeTilNextNote * 1000);
+      setTimeout(nextNoteFn, timeTilNextNote * msPerSecond);
     }
   };
 };

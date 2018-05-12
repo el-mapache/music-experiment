@@ -1,9 +1,21 @@
-import noteFactory from 'services/note-factory';
+import noteFactory from 'factories/note-factory';
 import audioChannel from 'services/audio-channel';
-import NOTE_VALUES from 'services/note-values';
+import Chord from 'services/chord';
+import NOTE_VALUES from 'types/note-values';
 
 // Super naive at this point, just for testing purposes
-const phrygianMap = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
+// Random thought: should I rearrange the order of these notes periodically?
+const phrygian = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
+
+const addNoteModifier = (value) => {
+  if (value < 50) {
+    return '';
+  } else if (value > 50 && value < 60) {
+    return '#';
+  } else {
+    return 'b';
+  }
+}
 
 const selectNoteValue = (speed) => {
   let value = NOTE_VALUES.QUARTER;
@@ -19,50 +31,21 @@ const selectNoteValue = (speed) => {
   }
 
   return value;
-}
-
-/**
- * Returns a note in the supplied scale and the note's octave
- * as a string
- * 
- * @param {Array} scale list of note names as a string
- * @param {Number} octaveMin minimum potential octave of the note
- * @param {Number} octaveMax Maximum potential octave of the note
- * @param {Number} notePosition Which note to pull from the scale
- */
-const getNoteAndOctave = (scale, octaveMin, octaveMax, notePosition) => {
-  const octaveRange = Math.random() * (octaveMax - octaveMin) + octaveMin;
-  const octave = Math.floor(octaveRange);
-
-  return `${scale[notePosition]}${octave}`;
 };
 
 const makeChords = data =>
-  data.reduce((chord, datum) => {
+  data.reduce((chords, datum) => {
     const { days, count } = datum;
-    const chordData = {};
-    chordData.speed = 0;
+    const chord = new Chord({
+      volume: count / 100,
+      scale: phrygian,
+    });
+    
+    chord.addNotes(days);
+    chords.push(chord);
 
-    chordData.notes = days.reduce((notes, el, index) => {
-      if (el) {
-        notes.push(
-          getNoteAndOctave(phrygianMap, 7, 3, index),
-        );
-      }
-
-      if (el > chordData.speed) {
-        chordData.speed = el;
-      }
-
-      return notes;
-    }, [0]);
-
-    chordData.volume = count / 100;
-    chord.push(chordData);
-
-    return chord;
+    return chords;
   }, []);
-
 
 const generateNoteSequence = (chordsFromData) => {
   const channel = audioChannel();
@@ -72,7 +55,10 @@ const generateNoteSequence = (chordsFromData) => {
     const chord = notes.map((note) => {
       const peak = volume;
 
-      return noteFactory({ noteName: note, peak });
+      return noteFactory({
+        noteName: note,
+        peak: (peak / notes.length),
+      });
     });
 
     channel.add(chord);

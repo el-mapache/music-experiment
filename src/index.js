@@ -2,12 +2,19 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
+import { bootstrap, tock, static18f } from 'data/repos';
 
 const user = '18F';
 
 let lastData;
 let playing = false;
 let myRecorder = recorder();
+
+const isOffline = (debug) => {
+  if (debug || !navigator.onLine) {
+    return true;
+  }
+};
 
 const fetchRepos = async () => {
   const { data } = await githubClient.reposForUser(user);
@@ -18,8 +25,19 @@ const playScore = (data) => {
   playing = true;
 
   const score = buildScore(data);
+  // const score = buildScore(
+  //   normalizeRepoStats({
+  //     data: JSON.parse(tock)
+  //   })
+  // );
+  // const score2 = buildScore(
+  //   normalizeRepoStats({
+  //     data: JSON.parse(bootstrap)
+  //   })
+  // );
+
   const radSequencer = sequencer({
-    bpm: 168,
+    bpm: 180,
     onDone() {
       myRecorder.stop();
       playing = false;
@@ -27,7 +45,7 @@ const playScore = (data) => {
   });
 
   // myRecorder.start();
-  radSequencer.play(score);
+  radSequencer.play([score]);
 };
 
 const normalizeRepoStats = (stats) => {
@@ -44,13 +62,29 @@ const normalizeRepoStats = (stats) => {
   return lastData;
 };
 
+const getRepoStats = (user, repo) => {
+  // if (isOffline(false)) {
+  //   return Promise.resolve({ data: JSON.parse(bootstrap) });
+  // }
+
+  return githubClient.getRepoStats(user, repo);
+};
+
+
+const getCommitStatsAndPlay = (user, repo) => {
+  if (lastData) {
+    playScore(lastData);
+  } else {
+    getRepoStats(user, repo)  
+    .then(normalizeRepoStats)
+    .then(playScore);
+  }
+};
 
 const onRepoSelect = (event) => {
   const { value: repo } = event.target;
 
-  githubClient.getRepoStats(user, repo)
-  .then(normalizeRepoStats)
-  .then(playScore);
+  getCommitStatsAndPlay(user, repo);
 };
 
 const select = document.getElementById('repos');
@@ -66,16 +100,8 @@ repoSearch.addEventListener('submit', (event) => {
   if (!repo.value || !owner.value) {
     throw new Error('Form requires a repo name and owner name fo that repo');
   }
-  if (lastData) {
-    playScore(lastData);
-  } else {
-    githubClient.getRepoStats(
-      owner.value,
-      repo.value
-    )
-    .then(normalizeRepoStats)
-    .then(playScore);
-  }
+
+  getCommitStatsAndPlay(owner.value, repo.value);
 });
 
 select.addEventListener('change', onRepoSelect);
@@ -101,4 +127,6 @@ const populateSelectNode = (dataList) => {
   select.appendChild(fragment);
 };
 
-fetchRepos().then(populateSelectNode);
+if (navigator.onLine) {
+  fetchRepos().then(populateSelectNode);
+}
