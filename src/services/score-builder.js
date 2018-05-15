@@ -2,17 +2,99 @@ import noteFactory from 'factories/note-factory';
 import audioChannel from 'services/audio-channel';
 import Chord from 'services/chord';
 import NOTE_VALUES from 'types/note-values';
+import NOTE_BEAT_VALUES from 'types/note-beat/values';
 
 // Super naive at this point, just for testing purposes
 // Random thought: should I rearrange the order of these notes periodically?
 const phrygian = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
-const noteTypeValueMap = {
-  [NOTE_VALUES.WHOLE]: 1,
-  [NOTE_VALUES.HALF]: 2,
-  [NOTE_VALUES.QUARTER]: 4,
-  [NOTE_VALUES.EIGHT]: 8,
-  undefined: 0
-};
+
+// every measure will have n beat sequences
+// ex. 3/4 will have 3, each with an availble beat of 1
+// ex. 6/8 will have 2, each with an available beat count of 3
+class BeatSequence {
+  constructor({ totalBeats }) {
+    this.totalBeats = totalBeats;
+    this.availableBeats = totalBeats;
+
+    this.beats = [];
+  }
+
+  add(beat) {
+    const { beatLength } = beat;
+    if (beatLength > this.availableBeats) {
+      // carryover
+    } else {
+      this.beats.push(beat);
+      this.availableBeats -= beatLength;
+    }
+  }
+}
+
+/**
+ * new algorithm idea to place notes:
+ * either need to add dots, or 'ties', ie create the next measure with fewer
+ * beats, and pass that new measure into the next measure generation function
+ * 
+ * measure
+ *  properties
+ *    timeSignature object
+ *    beatSequence - main beat sequence
+ *      each beat sequence has additional beat sequences?
+ *  
+ */
+
+class Meter {
+  /**
+   * meter = new Meter([6,8]) =>
+   * 
+   * There are three quarter notes in a single measure of 6/8
+   * 
+   * meter.quarterNotesPerMeasure
+   * >> 3
+   * 
+   * However, 6/8 is a compound duple meter, meaning there are only 2 beats
+   * 
+   * meter.beatCount
+   * >> 2
+   * 
+   * To represent 3 quarter notes, we need a dotted quarter, since a quarter note (1)
+   * and a dot (.5) make 1.5, and 1.5 * 2 = 3
+   * 
+   * meter.beatLength
+   * >> 1.5
+   * 
+   * Each measure should be subdivided into beats. and each of those beats
+   * should be further subdivided into the notes needed to add up to
+   * that number of beats
+   * 
+   */
+  constructor({ timeSignature = [4, 4] }) {
+    this.numerator = timeSignature[0];
+    this.denominator = timeSignature[1];
+    this.quarterNotesPerMeasure = 4 * (this.numerator / this.denominator);
+    this.beatCount = this.getBeatCount();
+    this.beatLength =   this.quarterNotesPerMeasure / this.beatCount;
+  }
+
+  getBeatCount() {
+    switch(this.numerator) {
+      case 6:
+        return 2;
+      case 2:
+      case 3:
+      case 4:
+        return this.numerator;
+    }
+  }
+}
+
+
+class TimeSignature {
+  constructor({ signature = [4, 4] }) {
+    this.beatsPerMeasure = signature[0];
+    this.baseBeatType = beatMap[signature[1]];
+  }
+}
 
 class MeasureBeat {
   constructor({ name }) {
@@ -80,7 +162,7 @@ class Measure {
  *  
 */
 
-const buildMeasures = (soundUnits, timeSignature = [4, 4]) => {
+const buildMeasures = (soundUnits, timeSignature = [6, 8]) => {
   const [ beatsPerMeasure, baseNoteLength ] = timeSignature;
   const safeSoundUnits = soundUnits.slice();
   let measures = [];
