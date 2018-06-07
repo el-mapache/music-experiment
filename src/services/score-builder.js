@@ -2,7 +2,7 @@ import noteFactory from 'factories/note-factory';
 import audioChannel from 'services/audio-channel';
 import Chord from 'services/chord';
 import NOTE_VALUES from 'types/note-values';
-import NOTE_BEAT_VALUES from 'types/note-beat/values';
+import NOTE_BEAT_VALUES from 'types/note-beat-values';
 
 // Super naive at this point, just for testing purposes
 // Random thought: should I rearrange the order of these notes periodically?
@@ -11,29 +11,30 @@ const phrygian = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
 // every measure will have n beat sequences
 // ex. 3/4 will have 3, each with an availble beat of 1
 // ex. 6/8 will have 2, each with an available beat count of 3
-class BeatSequence {
-  constructor({ totalBeats }) {
-    this.totalBeats = totalBeats;
-    this.availableBeats = totalBeats;
+// class BeatSequence {
+//   constructor({ totalBeats }) {
+//     this.totalBeats = totalBeats;
+//     this.availableBeats = totalBeats;
 
-    this.beats = [];
-  }
+//     this.beats = [];
+//   }
 
-  add(beat) {
-    const { beatLength } = beat;
-    if (beatLength > this.availableBeats) {
-      // carryover
-    } else {
-      this.beats.push(beat);
-      this.availableBeats -= beatLength;
-    }
-  }
-}
+//   add(beat) {
+//     const { beatLength } = beat;
+//     if (beatLength > this.availableBeats) {
+//       // carryover
+//     } else {
+//       this.beats.push(beat);
+//       this.availableBeats -= beatLength;
+//     }
+//   }
+// }
 
 /**
  * new algorithm idea to place notes:
  * either need to add dots, or 'ties', ie create the next measure with fewer
  * beats, and pass that new measure into the next measure generation function
+ * !no!   this is too muchhhhhh.
  * 
  * measure
  *  properties
@@ -73,7 +74,7 @@ class Meter {
     this.denominator = timeSignature[1];
     this.quarterNotesPerMeasure = 4 * (this.numerator / this.denominator);
     this.beatCount = this.getBeatCount();
-    this.beatLength =   this.quarterNotesPerMeasure / this.beatCount;
+    this.beatLength = this.quarterNotesPerMeasure / this.beatCount;
   }
 
   getBeatCount() {
@@ -88,36 +89,43 @@ class Meter {
   }
 }
 
+// class TimeSignature {
+//   constructor({ signature = [4, 4] }) {
+//     this.beatsPerMeasure = signature[0];
+//     this.baseBeatType = beatMap[signature[1]];
+//   }
+// }
 
-class TimeSignature {
-  constructor({ signature = [4, 4] }) {
-    this.beatsPerMeasure = signature[0];
-    this.baseBeatType = beatMap[signature[1]];
-  }
-}
-
-class MeasureBeat {
-  constructor({ name }) {
-    this.name = name;
-    this.beatLength = null;
-  }
-}
+// class MeasureBeat {
+//   constructor({ name }) {
+//     this.name = name;
+//     this.beatLength = null;
+//   }
+// }
 
 class Measure {
-  constructor({ beatsPerMeasure }) {
-    this.totalBeatsPerMeasure = beatsPerMeasure;
-    this.availableBeats = this.totalBeatsPerMeasure;
+  constructor({ meter, availableBeats = null }) {
+    this.meter = meter
+    /**
+     * This could be technically incorrect if we were generating a visual
+     * score. In a compound meter, string beats are broken up by dotted notes
+     * e.g. in 6/8 time, there are 3 quarter notes worth of eighth notes
+     * in each measure, but they would be expressed on the page as two
+     * dotted quarter notes.
+     * 
+     * However, since we don't need to represent the score visually, and we aren't
+     * doing anything with strong/weak beats at the moment, we can express the total
+     * available beats of a measure in absolute quarter note terms.
+     */
+    this.totalBeats = this.meter.quarterNotesPerMeasure;
+    this.availableBeats = availableBeats || this.totalBeats;
     this.beats = [];
   }
 
-  addBeat(beat) {
-    const { beatLength } = beat;
-    if (beatLength > this.availableBeats) {
-      //silence
-    } else {
-      this.beats.push(beat);
-      this.availableBeats -= beatLength;
-    }
+  updateAvailableBeats(beatLength) {
+    const nextbeatLength = this.availableBeats - beatLength;
+
+    this.availableBeats = nextbeatLength < 0 ? 0 : nextbeatLength;
   }
 }
 
@@ -165,11 +173,32 @@ class Measure {
 const buildMeasures = (soundUnits, timeSignature = [6, 8]) => {
   const [ beatsPerMeasure, baseNoteLength ] = timeSignature;
   const safeSoundUnits = soundUnits.slice();
+  const meter = new Meter({ timeSignature });
+  let measure;
+  let carryoverBeats = null;
   let measures = [];
-  let measure = new Measure({ beatsPerMeasure });
 
-  safeSoundUnits.forEach((sound) => {
-    const beat = new MeasureBeat({ name: sound.noteType });
+  safeSoundUnits.forEach((chord) => {
+    const beat = chord[0];
+
+    if (!measure) {
+      measure = new Measure({ meter, availableBeats: carryoverBeats });
+      carryoverBeats = null;
+    }
+
+    const { beatLength } = beat;
+    
+    if (beatLength > measure.availableBeats) {
+      carryoverBeats = beatLength - measure.availableBeats;
+    } 
+      
+    measure.updateAvailableBeats(beatLength);
+    measure.beats.push(beat);
+
+    if (!measure.availableBeats) {
+      measures.push(measure);
+      measure = null;
+    }
   });
 
 
@@ -203,6 +232,7 @@ const defaultNoteDuration = (timeSignature) => {
 
 // this need to be based on the time signature too, otherwise
 // we end up with 6/8 time signature and a bunch of whole notes
+// TODO FIX THIS CAUSE THIS IS THE MISSING PIECE ATM
 const selectNoteValue = (speed, timeSignature = []) => {
   let value = defaultNoteDuration(timeSignature);
 
@@ -242,7 +272,7 @@ const generateSequence = (chordsFromData) => {
   const finalNotes = chordsFromData.reduce((sequence, chordObj) => {
     const { notes, volume, speed } = chordObj;
     const chord = notes.map((note) => {
-      const peak = volume;
+      const peak = !note ? 0.001 : volume;
 
       return noteFactory({
         noteName: note,
@@ -253,10 +283,14 @@ const generateSequence = (chordsFromData) => {
     channel.add(chord);
     
     sequence.push(
-      chord.map(node => ({
-        node,
-        noteType: selectNoteValue(speed),
-      }))
+      chord.map((node) => {
+        const noteType = selectNoteValue(speed);
+        return {
+          node,
+          noteType,
+          beatLength: NOTE_BEAT_VALUES[noteType],
+        };
+      })
     );
     
     return sequence;

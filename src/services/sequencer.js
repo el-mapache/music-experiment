@@ -57,7 +57,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
       const now = context.currentTime;
       let timeTilNextNote = 0;
 
-      notesToPlay.forEach(({ node, noteType }) => {
+      notesToPlay.forEach(({ node, noteType, beatLength }) => {
         const noteLength = noteValues[noteType];
         // Get the sustain of a note, and add it to the current time
         const noteDuration = node.duration + now;

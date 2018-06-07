@@ -9,18 +9,13 @@ const computeNoteLength = (bps, noteValue) => (1 / bps) * noteValue;
 // other than 4 / 4
 const getNoteTimings = (bpm, timeSignature = [4,4]) => {
   const bps = computeBeatsPerSecond(bpm);
-  const wholeValue = timeSignature[0];
-  const halfValue = wholeValue / 2;
-  const quarterValue = halfValue / 2;
-  const eighthValue = quarterValue / 2;
-  const sixteenthValue = eighthValue / 2; 
 
   return {
-    [NOTE_VALUES.WHOLE]: computeNoteLength(bps, wholeValue),
-    [NOTE_VALUES.HALF]: computeNoteLength(bps, halfValue),
-    [NOTE_VALUES.QUARTER]: computeNoteLength(bps, quarterValue),
-    [NOTE_VALUES.EIGHTH]: computeNoteLength(bps, eighthValue),
-    [NOTE_VALUES.SIXTEENTH]: computeNoteLength(bps, sixteenthValue),
+    [NOTE_VALUES.WHOLE]: computeNoteLength(bps, 4),
+    [NOTE_VALUES.HALF]: computeNoteLength(bps, 2),
+    [NOTE_VALUES.QUARTER]: computeNoteLength(bps, 1),
+    [NOTE_VALUES.EIGHTH]: computeNoteLength(bps, 0.5),
+    [NOTE_VALUES.SIXTEENTH]: computeNoteLength(bps, 0.25),
   };
 };
 
