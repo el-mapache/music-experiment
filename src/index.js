@@ -93,6 +93,7 @@ const repoSearch = document.getElementById('search-repo');
 
 repoSearch.addEventListener('submit', (event) => {
   event.preventDefault();
+  event.stopImmediatePropagation();
 
   const { target: form } = event;
   const { repo, owner } = form;

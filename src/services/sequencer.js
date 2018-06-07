@@ -30,7 +30,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   
   return {
     play(noteGroups, bpm = null) {
-      if (context.state ==='suspended') {
+      if (context.state ==='suspended' || context.state !== 'running') {
         context.resume();
       }
       // tempo has changed, update length of each note type

@@ -3,7 +3,7 @@ import FilterEnvelope from 'services/envelope';
 
 const selectEnvelopeType = () => {
   //return defaultState;
-  return Math.random() <= 0.5 ? presets.stab : presets.gliss;
+  return Math.random() <= 0.2 ? presets.stab : presets.gliss;
 };
 
 const envelope = (type) => {
