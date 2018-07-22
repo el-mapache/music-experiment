@@ -3,12 +3,13 @@ import frequency from 'services/frequency';
 import oscillator from 'services/oscillator';
 
 const types = ['sine', 'square', 'triangle', 'sawtooth'];
+const getRandomWaveType = () => types[Math.floor(Math.random() * 4)];
 
 const noteFactory = context => ({ noteName, envelope, peak, type }) => {
   const osc = oscillator({
     frequency: frequency(noteName),
     peak,
-    type: 'sine'//types[Math.floor((Math.random() * 2) + 0)],
+    type: 'sine',
   });
 
   // TODO: think about how to remove all these connections, now

@@ -44,7 +44,7 @@ const repoCommitStats = ({ owner, repo }) => {
  * The commit stats API call needs time to compute a repo's
  * commit history. If the first call doesn't populate the data object
  * return a new promise with a recursive call the getStats inside a timeout --
- * the delay should provide enough time for the API to compute a result
+ * the delay should provide enough time for the API to do it's thing
  *
  */
 const getRepoStats = (user, repo) => {
@@ -65,7 +65,7 @@ const getRepoStats = (user, repo) => {
   }
 
   return new Promise((resolve, reject) => {
-    getStats().then((stats) => resolve(stats));
+    getStats().then(stats => resolve(stats));
   });
 };
 
