@@ -6,8 +6,16 @@ const githubClient = GitHub({
   requestMedia: 'application/vnd.github.v3+json',
 });
 
-// Get a list of repos for the specified user
-// TODO: add a way to page results
+const MAX_RETRIES = 10;
+const RETRY_TIMEOUT_MS  = 4000;
+
+/**
+ * Get a list of repos for the specified user
+ * TODO: add a way to page results
+ * @param {String} username Account name whose repos you are requesting
+ * @param {Number} perPage The number of repositories to return in a page of results
+ * @return {} 
+ */
 const reposForUser = (username, perPage = defaultResultsPerPage) => {
   return githubClient.repos.getForUser({
     username,
@@ -40,6 +48,7 @@ const repoCommitStats = ({ owner, repo }) => {
  *
  * @param {String} user
  * @param {String} repo
+ * @returns {Object} The object representing a year's worth of commits.
  *
  * The commit stats API call needs time to compute a repo's
  * commit history. If the first call doesn't populate the data object
@@ -47,31 +56,34 @@ const repoCommitStats = ({ owner, repo }) => {
  * the delay should provide enough time for the API to do its thing
  *
  */
-const getRepoStats = (user, repo) => {
+const getRepoCommitStats = (user, repo) => {
+  let retries = 0;
+
   function getStats() {
     return repoCommitStats({
       owner: user,
       repo
     })
     .then((stats) => {
-      if (stats.data.length) {
+      console.log('the stats', stats)
+      if (stats.data && stats.data.length) {
         return Promise.resolve(stats);
       }
-      // TODO need a max retries here and message if we cant reach gh
 
-      return new Promise((resolve, reject) => {
-        setTimeout(() => resolve(getStats()), 4000);
+      return new Promise((resolve) => {
+        if (retries !== MAX_RETRIES) {
+          retries += 1;
+          setTimeout(() => resolve(getStats()), RETRY_TIMEOUT_MS);
+        }
       });
     });
   }
 
-  return new Promise((resolve, reject) => {
-    getStats().then(stats => resolve(stats));
-  });
+  return getStats();
 };
 
 export default {
   repoForUser,
   reposForUser,
-  getRepoStats,
+  getRepoCommitStats,
 };

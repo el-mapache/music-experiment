@@ -4,12 +4,20 @@ import NOTE_BEAT_VALUES from 'types/note-beat-values';
 const secondsPerMinute = 60;
 
 /**
+ * Convert beats-per-miinute to beats-per-second
  * 
- * @param {number} bpm beats per minute
- * @returns {number} beats per second
+ * @param {Number} bpm beats per minute
+ * @returns {Number} beats per second
  */
 const computeBeatsPerSecond = bpm => bpm / secondsPerMinute;
 
+/**
+ * 
+ * @param {Number} bps Beats per second of audio
+ * @param {Number} noteValue Base length of time a note occupies
+ * @returns {Number} Float representing the real amount of time,
+ *                   in seconds, a tone will sound for a given BPM
+ */
 const computeNoteLength = (bps, noteValue) => (1 / bps) * noteValue;
 
 // TODO: still not accurately generating note values in time signatures
@@ -28,7 +36,7 @@ const getNoteTimings = (bpm, timeSignature = [4,4]) => {
   const bps = computeBeatsPerSecond(bpm);
 
   return Object.entries(NOTE_VALUES).reduce((memo, [ key, value ]) => {
-    memo[key.toLowerCase()] = computeNoteLength(bps, NOTE_BEAT_VALUES[value]);
+    memo[NOTE_VALUES[key]] = computeNoteLength(bps, NOTE_BEAT_VALUES[value]);
     return memo;
   }, {});
 };

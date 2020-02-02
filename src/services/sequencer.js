@@ -2,6 +2,9 @@ import AudioContextProvider from './audio-context-provider';
 import { getNoteTimings } from './timing';
 
 const msPerSecond = 1000;
+const defaultOnDone = () => {
+  console.log('finished playing');
+}
 
 const serial = (data, handler, onDone) => {
   function next() {
@@ -17,16 +20,16 @@ const serial = (data, handler, onDone) => {
   next();
 };
 
-const defaultOnDone = () => {
-  console.log('finished playing');
-}
-
 // TODO: this should accept noteGroups.
 // sequences.
 // basically, the sequences needs to have a time signature associated with
 // them, then in the play function we can get those timings
 const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   let noteValues = getNoteTimings(bpm);
+
+  function hasChangedBPM(newBPM = null) {
+    return newBPM && newBPM !== bpm;
+  }
   
   return {
     play(sequences, newBPM = null) {
@@ -35,7 +38,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
       }
 
       // tempo has changed, update length of each note type
-      if (newBPM && newBPM !== bpm) {
+      if (hasChangedBPM(newBPM)) {
         noteValues = getNoteTimings(newBPM);
       }
 

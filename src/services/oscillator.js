@@ -19,8 +19,8 @@ const msInSecond = 1000;
 /**
  * Handles building an oscillator for a single sound event. Once a context is injected,
  * the oscillator acts as a factory function, constructing a new oscillator and
- * returning an object with methods used to control it. Each oscillator has an
- * accompanying gain node to control loudness.
+ * returning an object with methods used to control it.
+ * Each oscillator has an accompanying gain node to control loudness.
  * 
  * Oscillators are connected to their gain nodes when constructed,
  * and any effects added to it will be added AFTER the gain stage!
@@ -28,7 +28,7 @@ const msInSecond = 1000;
  * @param {WebAudioContext} context inject context into oscillator, exposing it to
  * web audio functionality
  * @returns Oscillator factory function
- *    @param {object} oscState describe the oscillator { frequency: number, type: string, peak: float }
+ *    @param {Object} oscState describe the oscillator { frequency: number, type: string, peak: float }
  *    @param {Envelope} adsr values for the oscillator
  */
 const oscillator = context => (oscState, envelope = envelope()) => {
@@ -69,7 +69,7 @@ const oscillator = context => (oscState, envelope = envelope()) => {
     start(time) {
       const { peak } = options;
 
-      // schedule a move zero out the oscillator's gain
+      // schedule a move to zero out the oscillator's gain
       gain.gain.setValueAtTime(webAudioZero, time);
       // schedule the node's time to max volume
       gain.gain.linearRampToValueAtTime(peak, time + attack);
@@ -80,6 +80,7 @@ const oscillator = context => (oscState, envelope = envelope()) => {
 
     stop(time) {
       const stopTime = attack + sustain + decay + release + time;
+      // Schedule a fade-out
       gain.gain.exponentialRampToValueAtTime(webAudioZero, time, rampDownDelayTime);
       osc.stop(stopTime);
     },

@@ -44,7 +44,6 @@ const playScore = (data) => {
     },
   });
 
-  // myRecorder.start();
   radSequencer.play([score], 180);
 };
 
@@ -69,12 +68,12 @@ const normalizeRepoStats = (stats) => {
   return lastData;
 };
 
-const getRepoStats = (user, repo) => {
+const getRepoCommitStats = (user, repo) => {
   if (isOffline(false)) {
     return Promise.resolve({ data: JSON.parse(bootstrap) });
   }
 
-  return githubClient.getRepoStats(user, repo);
+  return githubClient.getRepoCommitStats(user, repo);
 };
 
 
@@ -82,7 +81,7 @@ const getCommitStatsAndPlay = (user, repo) => {
   if (lastData) {
     playScore(lastData);
   } else {
-    getRepoStats(user, repo)  
+    getRepoCommitStats(user, repo)  
     .then(normalizeRepoStats)
     .then(playScore);
   }
@@ -115,6 +114,7 @@ repoSearch.addEventListener('submit', (event) => {
 select.addEventListener('change', onRepoSelect);
 selectRepoControl.addEventListener('click', (event) => {
   event.preventDefault();
+  // TODO stop this caching when new info is entered
   if (lastData) {
     playScore(lastData);
   }
