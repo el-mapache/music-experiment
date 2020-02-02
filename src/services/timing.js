@@ -27,8 +27,8 @@ const computeNoteLength = (bps, noteValue) => (1 / bps) * noteValue;
 const getNoteTimings = (bpm, timeSignature = [4,4]) => {
   const bps = computeBeatsPerSecond(bpm);
 
-  return Object.entries.reduce((memo, { key, value }) => {
-    memo[key] = computeNoteLength(bps, value);
+  return Object.entries(NOTE_VALUES).reduce((memo, [ key, value ]) => {
+    memo[key.toLowerCase()] = computeNoteLength(bps, NOTE_BEAT_VALUES[value]);
     return memo;
   }, {});
 };

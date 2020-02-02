@@ -1,6 +1,6 @@
 import GitHub from '@octokit/rest';
 
-const defaultResultsPerPage = 50;
+const defaultResultsPerPage = 100;
 
 const githubClient = GitHub({
   requestMedia: 'application/vnd.github.v3+json',
@@ -44,7 +44,7 @@ const repoCommitStats = ({ owner, repo }) => {
  * The commit stats API call needs time to compute a repo's
  * commit history. If the first call doesn't populate the data object
  * return a new promise with a recursive call the getStats inside a timeout --
- * the delay should provide enough time for the API to do it's thing
+ * the delay should provide enough time for the API to do its thing
  *
  */
 const getRepoStats = (user, repo) => {
@@ -57,6 +57,7 @@ const getRepoStats = (user, repo) => {
       if (stats.data.length) {
         return Promise.resolve(stats);
       }
+      // TODO need a max retries here and message if we cant reach gh
 
       return new Promise((resolve, reject) => {
         setTimeout(() => resolve(getStats()), 4000);

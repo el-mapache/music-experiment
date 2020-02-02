@@ -1,5 +1,5 @@
 import AudioContextProvider from './audio-context-provider';
-import getNoteTimings from './timing';
+import { getNoteTimings } from './timing';
 
 const msPerSecond = 1000;
 

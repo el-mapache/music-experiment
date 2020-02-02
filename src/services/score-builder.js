@@ -233,7 +233,8 @@ const defaultNoteDuration = (timeSignature) => {
 // this need to be based on the time signature too, otherwise
 // we end up with 6/8 time signature and a bunch of whole notes
 // TODO FIX THIS CAUSE THIS IS THE MISSING PIECE ATM
-const selectNoteValue = (speed, timeSignature = []) => {
+const selectNoteValue = (speed, timeSignature = [4,4]) => {
+  console.log(speed)
   let value = defaultNoteDuration(timeSignature);
 
   if (speed < 2) {
@@ -254,6 +255,8 @@ const selectNoteValue = (speed, timeSignature = []) => {
 // unit of musical activity
 const makeChords = data =>
   data.reduce((chords, datum) => {
+    // TODO why is datum count undefined?
+    console.log(datum)
     const { days, count } = datum;
     const chord = new Chord({
       volume: count / 100,
@@ -271,6 +274,7 @@ const generateSequence = (chordsFromData) => {
 
   const finalNotes = chordsFromData.reduce((sequence, chordObj) => {
     const { notes, volume, speed } = chordObj;
+
     const chord = notes.map((note) => {
       const peak = !note ? 0.001 : volume;
 

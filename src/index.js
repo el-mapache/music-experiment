@@ -56,10 +56,13 @@ const normalizeRepoStats = (stats) => {
    * to the number of commits made to the repo on a day of the week.
    * Index 0 is sunday, 1 in monday, etc.
    */
-  const data = stats.data.map(datum => ({
-    days: datum.days,
-    count: datum.total || datum.count
-  }));
+  const data = stats.data.map(datum => {
+    console.log(datum)
+    return {
+      days: datum.days,
+      count: datum.total,
+    };
+  });
 
   lastData = data;
 
