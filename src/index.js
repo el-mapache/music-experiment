@@ -24,10 +24,10 @@ const fetchRepos = async () => {
 const playScore = (data) => {
   playing = true;
   myRecorder.start();
- //const score = buildScore(data);
-  const tockCommitHistory = JSON.parse(tock);
-  console.log(tockCommitHistory)
-  const score = buildScore(tockCommitHistory)
+  
+  const score = buildScore(data);
+  // const tockCommitHistory = JSON.parse(tock);
+  // const score = buildScore(tockCommitHistory)
   
   // const score = buildScore(
   //   normalizeRepoStats({
@@ -54,11 +54,10 @@ const normalizeRepoStats = (stats) => {
    * to the number of commits made to the repo on a day of the week.
    * Index 0 is sunday, 1 in monday, etc.
    */
-  const data = stats.data.map(({ days, count }) => {
-    console.log(datum)
+  const data = stats.data.map((datum) => {
     return {
-      days,
-      count
+      days: datum.days,
+      count: datum.total || datum.count
     };
   });
 
@@ -81,8 +80,8 @@ const getCommitStatsAndPlay = (user, repo) => {
     playScore(lastData);
   } else {
     getRepoCommitStats(user, repo)  
-    .then(normalizeRepoStats)
-    .then(playScore);
+      .then(normalizeRepoStats)
+      .then(playScore);
   }
 };
 

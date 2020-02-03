@@ -22,10 +22,6 @@ const serial = (data, handler, onDone) => {
 
 const humanize = (time) => time - 0.01 / 2 + Math.random() * 0.01;
 
-// TODO: this should accept noteGroups.
-// sequences.
-// basically, the sequences needs to have a time signature associated with
-// them, then in the play function we can get those timings
 const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   let noteValues = getNoteTimings(bpm);
 

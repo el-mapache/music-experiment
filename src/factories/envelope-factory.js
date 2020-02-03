@@ -2,7 +2,7 @@ import presets from 'types/envelope-presets';
 import FilterEnvelope from 'models/envelope';
 
 const selectEnvelopeType = () => {
-  return Math.random() <= 0.5 ? presets.basic : presets.gliss;
+  return Math.random() <= 0.5 ? presets.basic : presets.pluck;
 };
 
 /**

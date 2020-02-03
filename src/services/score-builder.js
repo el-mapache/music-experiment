@@ -4,6 +4,8 @@ import Chord from 'services/chord';
 import NOTE_VALUES from 'types/note-values';
 import NOTE_BEAT_VALUES from 'types/note-beat-values';
 
+const MAX_VOLUME = 95;
+
 // Super naive at this point, just for testing purposes
 // Random thought: should I rearrange the order of these notes periodically?
 const phrygian = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
@@ -255,11 +257,9 @@ const selectNoteValue = (speed, timeSignature = [4,4]) => {
 // unit of musical activity
 const makeChords = data =>
   data.reduce((chords, datum) => {
-    // TODO why is datum count undefined?
-    console.log(datum)
     const { days, count } = datum;
     const chord = new Chord({
-      volume: count / 100,
+      volume: Math.min(count, MAX_VOLUME) / 100,
       scale: phrygian,
     });
     
@@ -276,7 +276,7 @@ const generateSequence = (chordsFromData) => {
     const { notes, volume, speed } = chordObj;
 
     const chord = notes.map((note) => {
-      const peak = !note ? 0.001 : volume;
+      const peak = !note ? 0.001 : volume / notes.length;
 
       return noteFactory({
         noteName: note,
