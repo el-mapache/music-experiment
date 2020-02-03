@@ -234,7 +234,7 @@ const defaultNoteDuration = (timeSignature) => {
 // we end up with 6/8 time signature and a bunch of whole notes
 // TODO FIX THIS CAUSE THIS IS THE MISSING PIECE ATM
 const selectNoteValue = (speed, timeSignature = [4,4]) => {
-  console.log(speed)
+
   let value = defaultNoteDuration(timeSignature);
 
   if (speed < 2) {

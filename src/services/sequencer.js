@@ -20,6 +20,8 @@ const serial = (data, handler, onDone) => {
   next();
 };
 
+const humanize = (time) => time - 0.01 / 2 + Math.random() * 0.01;
+
 // TODO: this should accept noteGroups.
 // sequences.
 // basically, the sequences needs to have a time signature associated with
@@ -63,8 +65,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
       notesToPlay.forEach(({ node, noteType, beatLength }) => {
         const noteLength = noteValues[noteType];
         // Get the sustain of a note, and add it to the current time
-        const noteDuration = node.duration + now;
-
+        const noteDuration = humanize(node.duration + now);
         // We want to figure out what the shortest note in this chord is,
         // so we know when to schedule the next note.
 

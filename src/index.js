@@ -2,7 +2,7 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
-import { bootstrap, tock, static18f } from 'data/repos';
+import { bootstrap, tock } from 'data/repos';
 
 const user = '18F';
 
@@ -23,14 +23,13 @@ const fetchRepos = async () => {
 
 const playScore = (data) => {
   playing = true;
-
-  const score = buildScore(data);
+  myRecorder.start();
+ //const score = buildScore(data);
+  const tockCommitHistory = JSON.parse(tock);
+  console.log(tockCommitHistory)
+  const score = buildScore(tockCommitHistory)
+  
   // const score = buildScore(
-  //   normalizeRepoStats({
-  //     data: JSON.parse(tock)
-  //   })
-  // );
-  // const score2 = buildScore(
   //   normalizeRepoStats({
   //     data: JSON.parse(bootstrap)
   //   })
@@ -43,7 +42,7 @@ const playScore = (data) => {
       playing = false;
     },
   });
-
+  
   radSequencer.play([score], 180);
 };
 
@@ -55,11 +54,11 @@ const normalizeRepoStats = (stats) => {
    * to the number of commits made to the repo on a day of the week.
    * Index 0 is sunday, 1 in monday, etc.
    */
-  const data = stats.data.map(datum => {
+  const data = stats.data.map(({ days, count }) => {
     console.log(datum)
     return {
-      days: datum.days,
-      count: datum.total,
+      days,
+      count
     };
   });
 
@@ -138,3 +137,5 @@ const populateSelectNode = (dataList) => {
 if (!isOffline()) {
   fetchRepos().then(populateSelectNode);
 }
+
+document.getElementById('play').addEventListener('click', playScore);

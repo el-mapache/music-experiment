@@ -65,7 +65,6 @@ const getRepoCommitStats = (user, repo) => {
       repo
     })
     .then((stats) => {
-      console.log('the stats', stats)
       if (stats.data && stats.data.length) {
         return Promise.resolve(stats);
       }
