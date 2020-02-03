@@ -2,6 +2,8 @@
 const BASE_OCTAVE = 4;
 // value (in Hz) of A above middle C
 const A_ABOVE_MIDDLE_C = 440;
+// The above note value expressed as a MIDI number
+const MIDI_A4 = 69;
 // represents 1/12th of an octave, the distance between all notes
 // in an equal temperment system
 const EVEN_TEMPERED_RATIO = Math.pow(2, (1/12));
@@ -123,7 +125,26 @@ const frequency = (noteString) => {
 
   // truncate float to 2 digits after the decimal and round them.
   // e.g. G7 -> 3135.9634878539955 -> 3135.96
-  return parseFloat(rawFrequency.toFixed(2));
+  return parseFloat(rawFrequency.toFixed(3));
 };
 
+/**
+ * Convert a frequency to MIDI
+ * @param {Number} frequency A float representing a note's frequency in an even-tempered scale
+ * @returns {Number} A number between 0-127 (inclusive) representing the frequency's MIDI number
+ */
+const toMIDI = (frequency) => {
+  return Math.floor(12 * Math.log2(frequency / A_ABOVE_MIDDLE_C) + MIDI_A4);
+};
+
+/**
+ * Convert from MIDI note to a frequency
+ * @param {Number} midiNumber Corresponds to a frequency on an even-tempered scale
+ * @return {Number} The note's frequency
+ */
+const fromMIDI = (midiNumber) => {
+  return Math.pow(2, (midiNumber - MIDI_A4) / 12) * A_ABOVE_MIDDLE_C
+};
+
+export { toMIDI, fromMIDI };
 export default frequency;
