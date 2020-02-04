@@ -1,5 +1,4 @@
 import path from 'path';
-import webpack from 'webpack';
 
 export default() => ({
   mode: 'development',
@@ -23,4 +22,3 @@ export default() => ({
     ]
   },
 });
-

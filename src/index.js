@@ -2,7 +2,7 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
-import { bootstrap, tock, static18f } from 'data/repos';
+import { bootstrap, tock } from 'data/repos';
 
 const user = '18F';
 
@@ -23,14 +23,13 @@ const fetchRepos = async () => {
 
 const playScore = (data) => {
   playing = true;
-
+  myRecorder.start();
+  
   const score = buildScore(data);
+  // const tockCommitHistory = JSON.parse(tock);
+  // const score = buildScore(tockCommitHistory)
+  
   // const score = buildScore(
-  //   normalizeRepoStats({
-  //     data: JSON.parse(tock)
-  //   })
-  // );
-  // const score2 = buildScore(
   //   normalizeRepoStats({
   //     data: JSON.parse(bootstrap)
   //   })
@@ -43,9 +42,8 @@ const playScore = (data) => {
       playing = false;
     },
   });
-
-  // myRecorder.start();
-  radSequencer.play([score]);
+  
+  radSequencer.play([score], 180);
 };
 
 const normalizeRepoStats = (stats) => {
@@ -56,18 +54,24 @@ const normalizeRepoStats = (stats) => {
    * to the number of commits made to the repo on a day of the week.
    * Index 0 is sunday, 1 in monday, etc.
    */
-  const data = stats.data.map(datum => ({ days: datum.days, count: datum.total}));
+  const data = stats.data.map((datum) => {
+    return {
+      days: datum.days,
+      count: datum.total || datum.count
+    };
+  });
+
   lastData = data;
 
   return lastData;
 };
 
-const getRepoStats = (user, repo) => {
-  // if (isOffline(false)) {
-  //   return Promise.resolve({ data: JSON.parse(bootstrap) });
-  // }
+const getRepoCommitStats = (user, repo) => {
+  if (isOffline(false)) {
+    return Promise.resolve({ data: JSON.parse(bootstrap) });
+  }
 
-  return githubClient.getRepoStats(user, repo);
+  return githubClient.getRepoCommitStats(user, repo);
 };
 
 
@@ -75,9 +79,9 @@ const getCommitStatsAndPlay = (user, repo) => {
   if (lastData) {
     playScore(lastData);
   } else {
-    getRepoStats(user, repo)  
-    .then(normalizeRepoStats)
-    .then(playScore);
+    getRepoCommitStats(user, repo)  
+      .then(normalizeRepoStats)
+      .then(playScore);
   }
 };
 
@@ -108,6 +112,7 @@ repoSearch.addEventListener('submit', (event) => {
 select.addEventListener('change', onRepoSelect);
 selectRepoControl.addEventListener('click', (event) => {
   event.preventDefault();
+  // TODO stop this caching when new info is entered
   if (lastData) {
     playScore(lastData);
   }
@@ -128,6 +133,8 @@ const populateSelectNode = (dataList) => {
   select.appendChild(fragment);
 };
 
-if (navigator.onLine) {
+if (!isOffline()) {
   fetchRepos().then(populateSelectNode);
 }
+
+document.getElementById('play').addEventListener('click', playScore);

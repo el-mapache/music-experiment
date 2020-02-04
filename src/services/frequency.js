@@ -2,9 +2,13 @@
 const BASE_OCTAVE = 4;
 // value (in Hz) of A above middle C
 const A_ABOVE_MIDDLE_C = 440;
+// The above note value expressed as a MIDI number
+const MIDI_A4 = 69;
 // represents 1/12th of an octave, the distance between all notes
 // in an equal temperment system
 const EVEN_TEMPERED_RATIO = Math.pow(2, (1/12));
+const NOTES_PER_OCTAVE = 12;
+const SILENCE = .01;
 const NOTES = {
   C: 'C',
   D: 'D',
@@ -18,8 +22,7 @@ const NOTES = {
 // above middle C. Half steps are given as a negative number.
 // This map shouldn't be used directly! Its purpose is to help
 // compute the relative number of half steps towards or away
-// from A4
-// TODO: do some math to confirm below reasoning
+// from A4.
 // We move negatively away from A because it ensures we
 // account for half steps when jumping around octaves
 const noteHalfSteps = {
@@ -42,7 +45,12 @@ const validNoteRegex = /([CDEFGAB]){1}(b|#)?([0-9]){1}/;
 /**
  * 
  * @param {Number} octave 
- * @return Number distance from BASE_OCTAVE
+ * @return Number octave number distance from BASE_OCTAVE
+ * 
+ * For example:
+ * octave of 4 -> distance of 0 : octave is the same as A4
+ * octave of 6 -> distance of 2 : octave is 2 octaves higher than A4
+ * octave of 2 -> distance of -2 : octave is 2 octaves lower than A4
  */
 const findOctaveDistance = (octave) => {
   // If the current octave is equal to the base octave, we don't
@@ -62,14 +70,13 @@ const findOctaveDistance = (octave) => {
 };
 
 /**
- *
+ * Given a note and a pitch modifier, returns the correct name of the note
+ * Accounts for the single semitone between B and C, and E and F.
  * @param {String} note
  * @param {String} modifier sharp (#) or flat (b)
  *
- * Given a note and a pitch modifier, returns the correct name of the note
- * Accounts for the single semitone between B and C, and E and F
  */
-const normalizeSemitones = (note, modifier) => {
+const resolveEnharmonics = (note, modifier) => {
   let normalized = NOTES[note];
 
   // special rules to handle E-F and B-C
@@ -84,8 +91,7 @@ const normalizeSemitones = (note, modifier) => {
   }
 
   return normalized;
-}
-
+};
 
 const getSteps = (noteString) => {
   const matches = validNoteRegex.exec(noteString);
@@ -96,29 +102,49 @@ const getSteps = (noteString) => {
 
   const [_, note, pitchModifier, octave] = matches;
   const octaveDistance = findOctaveDistance(octave);
-  const normalizedNote = normalizeSemitones(note, pitchModifier);
+  const normalizedNote = resolveEnharmonics(note, pitchModifier);
 
-  return noteHalfSteps[normalizedNote] + noteModifiers[pitchModifier] + (octaveDistance * 12);
+  return noteHalfSteps[normalizedNote] + noteModifiers[pitchModifier] + (octaveDistance * NOTES_PER_OCTAVE);
 };
 
 /**
  * 
- * Get the actual frequency of a note
+ * Get the actual frequency of a note. If no note string is supplied, silence is assumed
  * @param {String} noteString representation of a note in the format 'Note + #|b + octave'
  * @return frequency float rounded to 2 significant digits
  * 
  */
 const frequency = (noteString) => {
   if (!noteString) {
-    return .0;
+    return SILENCE;
   }
 
+  // get number of half steps the supplied note is A4
   const stepsFromA = getSteps(noteString);
   const rawFrequency = A_ABOVE_MIDDLE_C * Math.pow(EVEN_TEMPERED_RATIO, stepsFromA);
 
   // truncate float to 2 digits after the decimal and round them.
   // e.g. G7 -> 3135.9634878539955 -> 3135.96
-  return parseFloat(rawFrequency.toFixed(2));
+  return parseFloat(rawFrequency.toFixed(3));
 };
 
+/**
+ * Convert a frequency to MIDI
+ * @param {Number} frequency A float representing a note's frequency in an even-tempered scale
+ * @returns {Number} A number between 0-127 (inclusive) representing the frequency's MIDI number
+ */
+const toMIDI = (frequency) => {
+  return Math.floor(12 * Math.log2(frequency / A_ABOVE_MIDDLE_C) + MIDI_A4);
+};
+
+/**
+ * Convert from MIDI note to a frequency
+ * @param {Number} midiNumber Corresponds to a frequency on an even-tempered scale
+ * @return {Number} The note's frequency
+ */
+const fromMIDI = (midiNumber) => {
+  return Math.pow(2, (midiNumber - MIDI_A4) / 12) * A_ABOVE_MIDDLE_C
+};
+
+export { toMIDI, fromMIDI };
 export default frequency;
