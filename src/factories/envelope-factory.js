@@ -1,4 +1,4 @@
-import presets from 'types/envelope-presets';
+import presets from 'types/filter-envelope';
 import FilterEnvelope from 'models/envelope';
 
 const selectEnvelopeType = () => {

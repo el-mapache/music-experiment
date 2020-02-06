@@ -3,26 +3,42 @@
   <head>
     <style>
       select {
-        front-size: 17px;
+        font-size: 17px;
         min-width: 200px;
         padding: 2px;
       }
     </style>
+    <link rel="stylesheet" href="build/output.css"/>
   </head>
   <body>
-    <select id="repos"></select>
-    <button type="button" role="button" id="select-repo">
-      get contributions for this repo
-    </button>
-
-    <form id="search-repo">
-      <input id="repo" type="text" name="repo" placeholder="enter repo name" />
-      <input id="owner" type="text" name="owner" placeholder="enter repo owner" />
-      <button type="submit">get repo</button>
-    </form>
-    <div>
-      <button id="play">Play</button>
-    </div>
+    <main class="xl:w-3/4 mx-auto px-6 mt-12">
+      <div>
+        <label class="block font-semibold" for="repos">Example repos</label>
+        <div class="inline-block relative">
+          <select id="repos" name="repos" class="block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline my-1"></select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <form id="search-repo" class="mt-4 rounded-lg border-solid border-2 border-gray-300 py-1 px-3 inline-block">
+        <div class="flex items-center -mx-2">
+          <div class="m-2">
+            <input id="repo" type="text" name="repo" placeholder="enter repo name" class="input" />
+          </div>
+          <div class="m-2">
+            <input id="owner" type="text" name="owner" placeholder="enter repo owner" class="input" />
+          </div>
+          <div class="m-2">
+            <button type="submit" class="btn-primary">
+              Generate
+            </button>
+          </div>
+        </div>
+      </form>
+    </main>
     <script src="build/build.js"></script>
   </body>
 </html>

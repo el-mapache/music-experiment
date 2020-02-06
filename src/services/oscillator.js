@@ -3,6 +3,8 @@ import envelope from 'factories/envelope-factory';
 
 const defaultState = {
   frequency: 440,
+  noteName: 'A4',
+  midi: 69,
   type: 'triangle',
   peak: 0.8,
 };
@@ -64,6 +66,16 @@ const oscillator = context => (oscState, envelope = envelope()) => {
 
     disconnectFrom(node) {
       gain.disconnect(node);
+    },
+
+    /**
+     * Returns a new object representing metadata
+     * about this oscillator object
+     */
+    toJSON() {
+      return {
+        ...options
+      };
     },
 
     start(time) {

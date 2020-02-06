@@ -2,12 +2,24 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
-import { bootstrap, tock } from 'data/repos';
+import { bootstrap, tock, static18f } from 'data/repos';
 
-const user = '18F';
+const testRepos = {
+  tock: {
+    name: 'tock',
+    data: tock
+  },
+  bootstrap: {
+    name: 'bootstrap',
+    data: bootstrap
+  },
+  static18f: {
+    name: 'static18f',
+    data: static18f
+  }
+};
 
 let lastData;
-let playing = false;
 let myRecorder = recorder();
 
 const isOffline = (debug) => {
@@ -16,13 +28,7 @@ const isOffline = (debug) => {
   }
 };
 
-const fetchRepos = async () => {
-  const { data } = await githubClient.reposForUser(user);
-  return data;
-};
-
 const playScore = (data) => {
-  playing = true;
   myRecorder.start();
   
   const score = buildScore(data);
@@ -39,7 +45,6 @@ const playScore = (data) => {
     bpm: 180,
     onDone() {
       myRecorder.stop();
-      playing = false;
     },
   });
   
@@ -86,9 +91,11 @@ const getCommitStatsAndPlay = (user, repo) => {
 };
 
 const onRepoSelect = (event) => {
-  const { value: repo } = event.target;
-
-  getCommitStatsAndPlay(user, repo);
+  const { value: name } = event.target;
+  const repo = testRepos[name];
+  const repoCommitData = JSON.parse(repo.data);
+  
+  playScore(repoCommitData);
 };
 
 const select = document.getElementById('repos');
@@ -110,16 +117,15 @@ repoSearch.addEventListener('submit', (event) => {
 });
 
 select.addEventListener('change', onRepoSelect);
-selectRepoControl.addEventListener('click', (event) => {
-  event.preventDefault();
-  // TODO stop this caching when new info is entered
-  if (lastData) {
-    playScore(lastData);
-  }
-});
 
 const populateSelectNode = (dataList) => {
   const fragment = document.createDocumentFragment();
+
+  const option = document.createElement('option');
+  option.value = '';
+  option.textContent = 'Choose a preloaded repository';
+
+  fragment.appendChild(option);
 
   dataList.forEach((repo) => {
     const { name } = repo;
@@ -133,8 +139,4 @@ const populateSelectNode = (dataList) => {
   select.appendChild(fragment);
 };
 
-if (!isOffline()) {
-  fetchRepos().then(populateSelectNode);
-}
-
-document.getElementById('play').addEventListener('click', playScore);
+populateSelectNode(Object.keys(testRepos).map(r => ({ name: testRepos[r].name })));

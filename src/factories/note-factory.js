@@ -1,13 +1,16 @@
-import AudioContextProvider from 'services/audio-context-provider';
-import frequency from 'services/frequency';
+import frequency, { toMIDI } from 'services/frequency';
 import oscillator from 'services/oscillator';
 
 const types = ['sine', 'square', 'triangle', 'sawtooth'];
 const getRandomWaveType = () => types[Math.floor(Math.random() * 4)];
 
-const noteFactory = context => ({ noteName, envelope, peak, type }) => {
+const noteFactory = ({ noteName, envelope, peak, type }) => {
+  const toneFreq = frequency(noteName);
+
   const osc = oscillator({
-    frequency: frequency(noteName),
+    frequency: toneFreq,
+    noteName,
+    midi: toMIDI(frequency),
     peak,
     type: 'sine',
   });
@@ -19,5 +22,4 @@ const noteFactory = context => ({ noteName, envelope, peak, type }) => {
   return osc;
 };
 
-export { noteFactory };
-export default AudioContextProvider(noteFactory);
+export default noteFactory;

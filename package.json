@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node_modules/.bin/webpack",
-    "watch": "yarn build --watch"
+    "build:js": "node_modules/.bin/webpack",
+    "build:style": "npx tailwind build src/styles/styles.css -o ./build/output.css",
+    "watch": "yarn build:js --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@magenta/music": "^1.12.1",
     "@octokit/rest": "^15.2.4",
     "babel": "^6.23.0",
     "babel-core": "^6.26.0",
@@ -23,7 +25,8 @@
     "babel-register": "^6.26.0",
     "fetch": "^1.1.0",
     "github": "^14.0.0",
-    "soothsayer": "^1.0.4",
+    "soothsayer": "^1.1.4",
+    "tailwindcss": "^1.2.0",
     "webpack": "^4.1.1",
     "webpack-dev-server": "^3.1.11"
   },

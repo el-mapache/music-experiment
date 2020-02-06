@@ -1,8 +1,20 @@
 import AudioContextProvider from './audio-context-provider';
 
+const SUPPORTED_MIME_TYPES = {
+  WEBM: 'audio/webm'
+};
+const RECORDER_STATES = {
+  INACTIVE: 'inactive',
+  RECORDING: 'recording'
+};
+
+function isStopped(state) {
+  return state === RECORDER_STATES.INACTIVE || state !== RECORDER_STATES.RECORDING;
+}
+
 const recorder = context => ({ stream } = { stream: context.destinationStream }) => {
   const mediaRecorder = new MediaRecorder(stream.stream, {
-    mimeType: 'audio/webm',
+    mimeType: SUPPORTED_MIME_TYPES.WEBM,
   });
   let chunks = [];
 
@@ -11,12 +23,12 @@ const recorder = context => ({ stream } = { stream: context.destinationStream })
   };
 
   mediaRecorder.onstop = () => {
-    // 'oh cool I can output in webm' - no one, ever
-    const blob = new Blob(chunks, { type: 'audio/webm' });
+    // 'oh cool, I can output in webm' — no one, ever
+    const blob = new Blob(chunks, { type: SUPPORTED_MIME_TYPES.WEBM });
 
     const downloadLink = document.createElement('a');
     downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = 'track.webm';
+    downloadLink.download = `gh-music-${+new Date}.webm`;
 
     document.body.appendChild(downloadLink);
     downloadLink.click();
@@ -24,13 +36,13 @@ const recorder = context => ({ stream } = { stream: context.destinationStream })
 
   return {
     start() {
-      if (mediaRecorder.state === 'inactive' || mediaRecorder.state !== 'recording') {
+      if (isStopped(mediaRecorder.state)) {
         mediaRecorder.start();
       }
     },
 
     stop() {
-      if (mediaRecorder.state !== 'inactive') {
+      if (!isStopped(mediaRecorder.state)) {
         mediaRecorder.stop();
       }
     }

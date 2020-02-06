@@ -1,6 +1,6 @@
-import path from 'path';
+var path = require('path');
 
-export default() => ({
+module.exports = {
   mode: 'development',
   entry: [
     path.join(__dirname, 'src/index.js'),
@@ -21,4 +21,4 @@ export default() => ({
       }
     ]
   },
-});
+};

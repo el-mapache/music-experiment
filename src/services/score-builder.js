@@ -3,12 +3,14 @@ import audioChannel from 'services/audio-channel';
 import Chord from 'services/chord';
 import NOTE_VALUES from 'types/note-values';
 import NOTE_BEAT_VALUES from 'types/note-beat-values';
+import SCALES from 'types/scales';
+import Measure from 'models/measure';
 
 const MAX_VOLUME = 95;
 
 // Super naive at this point, just for testing purposes
 // Random thought: should I rearrange the order of these notes periodically?
-const phrygian = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
+const phrygian = SCALES.PHRYGIAN;
 
 // every measure will have n beat sequences
 // ex. 3/4 will have 3, each with an availble beat of 1
@@ -105,32 +107,6 @@ class Meter {
 //   }
 // }
 
-class Measure {
-  constructor({ meter, availableBeats = null }) {
-    this.meter = meter
-    /**
-     * This could be technically incorrect if we were generating a visual
-     * score. In a compound meter, string beats are broken up by dotted notes
-     * e.g. in 6/8 time, there are 3 quarter notes worth of eighth notes
-     * in each measure, but they would be expressed on the page as two
-     * dotted quarter notes.
-     * 
-     * However, since we don't need to represent the score visually, and we aren't
-     * doing anything with strong/weak beats at the moment, we can express the total
-     * available beats of a measure in absolute quarter note terms.
-     */
-    this.totalBeats = this.meter.quarterNotesPerMeasure;
-    this.availableBeats = availableBeats || this.totalBeats;
-    this.beats = [];
-  }
-
-  updateAvailableBeats(beatLength) {
-    const nextbeatLength = this.availableBeats - beatLength;
-
-    this.availableBeats = nextbeatLength < 0 ? 0 : nextbeatLength;
-  }
-}
-
 
 // I think we need the timing information here.
 // we need to keep a total of the note values in each measure, and if the next note
@@ -202,7 +178,6 @@ const buildMeasures = (soundUnits, timeSignature = [6, 8]) => {
       measure = null;
     }
   });
-
 
   return measures;
 };
@@ -304,10 +279,14 @@ const generateSequence = (chordsFromData) => {
   return finalNotes;
 };
 
-// should be renamed to build sequence!
-const buildScore = (data, timeSignature) =>
-  generateSequence(
-    makeChords(data)
-  );
+/**
+ * 
+ * @param {Array} repoCommitStats Objects representing a week's worth of commits
+ * @param {Array} timeSignature 
+ */
+const buildScore = (repoCommitStats, timeSignature) => {
+  const noteGroups = makeChords(repoCommitStats);
+  return generateSequence(noteGroups);
+};
 
 export default buildScore;
