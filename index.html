@@ -12,8 +12,11 @@
   </head>
   <body>
     <main class="xl:w-3/4 mx-auto px-6 mt-12">
+      <h2 class="font-hairline text-5xl leading-tight text-indigo-600 mb-12">
+        github commit music generator
+      </h2>
       <div>
-        <label class="block font-semibold" for="repos">Example repos</label>
+        <label class="block font-medium text-gray-700" for="repos">Choose a preloaded repository</label>
         <div class="inline-block relative">
           <select id="repos" name="repos" class="block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline my-1"></select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -23,7 +26,8 @@
           </div>
         </div>
       </div>
-      <form id="search-repo" class="mt-4 rounded-lg border-solid border-2 border-gray-300 py-1 px-3 inline-block">
+      <p class="fonot-semibold my-2">OR</p>
+      <form id="search-repo" class="rounded-lg border-solid border-2 border-gray-300 py-1 px-3 inline-block">
         <div class="flex items-center -mx-2">
           <div class="m-2">
             <input id="repo" type="text" name="repo" placeholder="enter repo name" class="input" />

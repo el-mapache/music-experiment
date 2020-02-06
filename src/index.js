@@ -123,7 +123,7 @@ const populateSelectNode = (dataList) => {
 
   const option = document.createElement('option');
   option.value = '';
-  option.textContent = 'Choose a preloaded repository';
+  option.textContent = 'Select a repo';
 
   fragment.appendChild(option);
 
