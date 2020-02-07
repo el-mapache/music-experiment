@@ -1,5 +1,5 @@
 import AudioContextProvider from './audio-context-provider';
-import envelope from 'factories/envelope-factory';
+import envelopeFactory from 'factories/envelope-factory';
 
 const defaultState = {
   frequency: 440,
@@ -33,7 +33,7 @@ const msInSecond = 1000;
  *    @param {Object} oscState describe the oscillator { frequency: number, type: string, peak: float }
  *    @param {Envelope} adsr values for the oscillator
  */
-const oscillator = context => (oscState, envelope = envelope()) => {
+const oscillator = context => (oscState, envelope = envelopeFactory()) => {
   const options = { ...defaultState, ...oscState };
   const osc = context.createOscillator();
   const gain = context.createGain();

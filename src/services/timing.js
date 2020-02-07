@@ -42,7 +42,7 @@ const getNoteTimings = (bpm, timeSignature = [4,4]) => {
 };
 
 export {
-  computerBeatsPerSecond,
+  computeBeatsPerSecond,
   computeNoteLength,
   getNoteTimings
 };
