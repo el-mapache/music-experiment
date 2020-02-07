@@ -10,13 +10,11 @@ const noteFactory = ({ noteName, envelope, peak, type }) => {
   const osc = oscillator({
     frequency: toneFreq,
     noteName,
-    midi: toMIDI(frequency),
+    midi: toMIDI(toneFreq),
     peak,
     type: 'sine',
   });
 
-  // TODO: think about how to remove all these connections, now
-  // the factory has too many responsibilites
   osc.connectTo(osc.context.destinationStream);
 
   return osc;

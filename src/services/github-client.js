@@ -33,7 +33,7 @@ const repoForUser = ({ owner, repo }) => {
 };
 
 const repoCommitStats = ({ owner, repo }) => {
-  return githubClient.repos.getStatsCommitActivity({
+  return githubClient.repos.getCommitActivityStats({
     owner,
     repo
   })

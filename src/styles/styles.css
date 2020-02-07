@@ -7,7 +7,7 @@ body {
 }
 
 .input {
-  @apply border-solid border-2 rounded border-pink-400 px-3 py-1 text-lg;
+  @apply  transition ease-in duration-500 border-solid border-2 rounded border-pink-400 px-3 py-1 text-lg;
 }
 
 .input:focus, .btn-primary:focus, select:focus {
@@ -15,7 +15,7 @@ body {
 }
 
 .input:focus, select:focus {
-  @apply transition ease-in duration-500 border-indigo-300;
+  @apply border-indigo-300;
 }
 
 .btn-primary {

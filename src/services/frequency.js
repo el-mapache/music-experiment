@@ -47,26 +47,27 @@ const validNoteRegex = /([CDEFGAB]){1}(b|#)?([0-9]){1}/;
  * @param {Number} octave 
  * @return Number octave number distance from BASE_OCTAVE
  * 
- * For example:
+ * @example For example:
  * octave of 4 -> distance of 0 : octave is the same as A4
  * octave of 6 -> distance of 2 : octave is 2 octaves higher than A4
  * octave of 2 -> distance of -2 : octave is 2 octaves lower than A4
  */
-const findOctaveDistance = (octave) => {
+const computeOctaveDistance = (octave) => {
   // If the current octave is equal to the base octave, we don't
   // have to do anything!
   let distance = 0;
 
   if (octave < BASE_OCTAVE) {
-    // Supplied octave is less than base_octave, return a negative number so
-    // the number of half steps between the note this octave is attached to
-    // and A4 can be correctly derived
+    // When the supplied octave is less than base_octave, we 
+    // return a negative number so the number of half steps
+    // between the octave in which this note falls and A4
+    // can be correctly derived
     distance = -(BASE_OCTAVE - octave);
   } else if (octave > BASE_OCTAVE) {
     distance = octave - BASE_OCTAVE;
   }
 
-  return distance;
+  return distance * NOTES_PER_OCTAVE;
 };
 
 /**
@@ -93,7 +94,12 @@ const resolveEnharmonics = (note, modifier) => {
   return normalized;
 };
 
-const getSteps = (noteString) => {
+/**
+ * Compute the number of half steps away from A4
+ * @param {String} noteString The name of the string expressed in standard musical notation e.g. E4
+ * @returns Number The distance of this note from A4 expressed as a number of half steps
+ */
+const getStepsFromA4 = (noteString) => {
   const matches = validNoteRegex.exec(noteString);
 
   if (!matches) {
@@ -101,10 +107,10 @@ const getSteps = (noteString) => {
   }
 
   const [_, note, pitchModifier, octave] = matches;
-  const octaveDistance = findOctaveDistance(octave);
+  const octaveDistance = computeOctaveDistance(octave);
   const normalizedNote = resolveEnharmonics(note, pitchModifier);
 
-  return noteHalfSteps[normalizedNote] + noteModifiers[pitchModifier] + (octaveDistance * NOTES_PER_OCTAVE);
+  return noteHalfSteps[normalizedNote] + noteModifiers[pitchModifier] + octaveDistance;
 };
 
 /**
@@ -120,7 +126,7 @@ const frequency = (noteString) => {
   }
 
   // get number of half steps the supplied note is A4
-  const stepsFromA = getSteps(noteString);
+  const stepsFromA = getStepsFromA4(noteString);
   const rawFrequency = A_ABOVE_MIDDLE_C * Math.pow(EVEN_TEMPERED_RATIO, stepsFromA);
 
   // truncate float to 2 digits after the decimal and round them.
@@ -134,7 +140,7 @@ const frequency = (noteString) => {
  * @returns {Number} A number between 0-127 (inclusive) representing the frequency's MIDI number
  */
 const toMIDI = (frequency) => {
-  return Math.floor(12 * Math.log2(frequency / A_ABOVE_MIDDLE_C) + MIDI_A4);
+  return 12 * Math.log2(frequency / A_ABOVE_MIDDLE_C) + MIDI_A4 | 0;
 };
 
 /**

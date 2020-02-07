@@ -5,105 +5,27 @@ import NOTE_VALUES from 'types/note-values';
 import NOTE_BEAT_VALUES from 'types/note-beat-values';
 import SCALES from 'types/scales';
 import Measure from 'models/measure';
+import Meter from 'models/meter';
 
 const MAX_VOLUME = 95;
+// Zero is a non-finite and thus invalid value in the WebAudio
+// API, so we provide a functionally inaudible volume.
+const WEB_AUDIO_ZERO = .0001;
 
 // Super naive at this point, just for testing purposes
 // Random thought: should I rearrange the order of these notes periodically?
 const phrygian = SCALES.PHRYGIAN;
-
-// every measure will have n beat sequences
-// ex. 3/4 will have 3, each with an availble beat of 1
-// ex. 6/8 will have 2, each with an available beat count of 3
-// class BeatSequence {
-//   constructor({ totalBeats }) {
-//     this.totalBeats = totalBeats;
-//     this.availableBeats = totalBeats;
-
-//     this.beats = [];
-//   }
-
-//   add(beat) {
-//     const { beatLength } = beat;
-//     if (beatLength > this.availableBeats) {
-//       // carryover
-//     } else {
-//       this.beats.push(beat);
-//       this.availableBeats -= beatLength;
-//     }
-//   }
-// }
 
 /**
  * new algorithm idea to place notes:
  * either need to add dots, or 'ties', ie create the next measure with fewer
  * beats, and pass that new measure into the next measure generation function
  * !no!   this is too muchhhhhh.
- * 
- * measure
- *  properties
- *    timeSignature object
- *    beatSequence - main beat sequence
- *      each beat sequence has additional beat sequences?
- *  
- */
-
-class Meter {
-  /**
-   * meter = new Meter([6,8]) =>
-   * 
-   * There are three quarter notes in a single measure of 6/8
-   * 
-   * meter.quarterNotesPerMeasure
-   * >> 3
-   * 
-   * However, 6/8 is a compound duple meter, meaning there are only 2 beats
-   * 
-   * meter.beatCount
-   * >> 2
-   * 
-   * To represent 3 quarter notes, we need a dotted quarter, since a quarter note (1)
-   * and a dot (.5) make 1.5, and 1.5 * 2 = 3
-   * 
-   * meter.beatLength
-   * >> 1.5
-   * 
-   * Each measure should be subdivided into beats. and each of those beats
-   * should be further subdivided into the notes needed to add up to
-   * that number of beats
-   * 
-   */
-  constructor({ timeSignature = [4, 4] }) {
-    this.numerator = timeSignature[0];
-    this.denominator = timeSignature[1];
-    this.quarterNotesPerMeasure = 4 * (this.numerator / this.denominator);
-    this.beatCount = this.getBeatCount();
-    this.beatLength = this.quarterNotesPerMeasure / this.beatCount;
-  }
-
-  getBeatCount() {
-    switch(this.numerator) {
-      case 6:
-        return 2;
-      case 2:
-      case 3:
-      case 4:
-        return this.numerator;
-    }
-  }
-}
 
 // class TimeSignature {
 //   constructor({ signature = [4, 4] }) {
 //     this.beatsPerMeasure = signature[0];
 //     this.baseBeatType = beatMap[signature[1]];
-//   }
-// }
-
-// class MeasureBeat {
-//   constructor({ name }) {
-//     this.name = name;
-//     this.beatLength = null;
 //   }
 // }
 
@@ -244,20 +166,29 @@ const makeChords = data =>
     return chords;
   }, []);
 
+/**
+ * Build an Oscillator playable with the WebAudio API
+ * @param {String} noteName Standard even-tempered name of a note and octave, e.g. B5
+ * @param {Float} derivedPeak The maximum volume of this tone, expressed as a fraction of
+ * the overall volume of the tone cluster, and the number of tones contained therein
+ * @returns {Oscillator} Object containing the information needed to play
+ * the described tone via the WebAudio API
+ */
+const buildNote = (noteName, derivedPeak) =>
+  noteFactory({
+    noteName,
+    peak: !noteName ? WEB_AUDIO_ZERO : derivedPeak
+  });
+
+
+
 const generateSequence = (chordsFromData) => {
   const channel = audioChannel();
 
   const finalNotes = chordsFromData.reduce((sequence, chordObj) => {
     const { notes, volume, speed } = chordObj;
-
-    const chord = notes.map((note) => {
-      const peak = !note ? 0.001 : volume / notes.length;
-
-      return noteFactory({
-        noteName: note,
-        peak: (peak / notes.length),
-      });
-    });
+    const fractionalVolume = volume / (notes.length * 2);
+    const chord = notes.map((note) => buildNote(note, fractionalVolume));
 
     channel.add(chord);
     
@@ -289,4 +220,21 @@ const buildScore = (repoCommitStats, timeSignature) => {
   return generateSequence(noteGroups);
 };
 
+const buildNoteSequence = (repoCommitStats) => {
+  // this represents the overall temporal and timbreic space a group of
+  // sounds occupies...what to call that?
+  const toneClusters = makeChords(repoCommitStats);
+  const noteGroups = toneClusters.reduce((groups, cluster) => {
+    const { notes, volume } = cluster;
+    const fractionalVolume = volume / (notes.length * 2);
+
+    return groups.concat(
+      notes.map((note) => buildNote(note, fractionalVolume).toJSON())
+    );
+  }, []);
+
+  console.log(noteGroups);
+};
+
+export { buildNoteSequence };
 export default buildScore;

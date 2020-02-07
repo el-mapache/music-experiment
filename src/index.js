@@ -1,10 +1,11 @@
 import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
-import buildScore from 'services/score-builder';
+import buildScore, { buildNoteSequence } from 'services/score-builder';
 import recorder from 'services/recorder';
 import { bootstrap, tock, static18f } from 'data/repos';
 
 import melodyModel from 'services/melody-generator';
+
 
 const NOTES = {
   notes: [
@@ -23,13 +24,13 @@ const NOTES = {
     {pitch: 62, startTime: 6.5, endTime: 7.0},
     {pitch: 60, startTime: 7.0, endTime: 8.0},  
   ],
-  totalTime: 8
+  totalTime: 12
 };
 
 melodyModel()
   .then((magenta) => {
-    const qns = magenta.sequences.quantizeNoteSequence(NOTES, 4);
-    magenta.model.continueSequence(qns, 20, 2.0)
+    const qns = magenta.sequences.quantizeNoteSequence(NOTES, 1.5);
+    magenta.model.continueSequence(qns, 25, .8)
       .then((sample) => {
         console.log(magenta.sequences.unquantizeSequence(sample))
       });
@@ -63,6 +64,7 @@ const playScore = (data) => {
   myRecorder.start();
   
   const score = buildScore(data);
+  console.log(buildNoteSequence(data));
   // const tockCommitHistory = JSON.parse(tock);
   // const score = buildScore(tockCommitHistory)
   

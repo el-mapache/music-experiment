@@ -7,7 +7,7 @@ const makeMelodyModel = () => {
     model.initialize()
       .then(() => resolve({
         model,
-        sequences
+        sequences,
       }));
   });
 };
