@@ -134,7 +134,11 @@ const frequency = (noteString) => {
  * @returns {Number} A number between 0-127 (inclusive) representing the frequency's MIDI number
  */
 const toMIDI = (frequency) => {
-  return Math.floor(12 * Math.log2(frequency / A_ABOVE_MIDDLE_C) + MIDI_A4);
+  if (frequency === 0.01) {
+    return 0;
+  }
+
+  return (12 * Math.log2(frequency / A_ABOVE_MIDDLE_C) + MIDI_A4) | 0;
 };
 
 /**

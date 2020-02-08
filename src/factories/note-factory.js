@@ -10,7 +10,7 @@ const noteFactory = ({ noteName, envelope, peak, type }) => {
   const osc = oscillator({
     frequency: toneFreq,
     noteName,
-    midi: toMIDI(frequency),
+    midi: toMIDI(toneFreq),
     peak,
     type: 'sine',
   });
