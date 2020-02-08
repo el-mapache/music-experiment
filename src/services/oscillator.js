@@ -74,7 +74,8 @@ const oscillator = context => (oscState, envelope = envelopeFactory()) => {
      */
     toJSON() {
       return {
-        ...options
+        ...options,
+        duration: this.duration
       };
     },
 

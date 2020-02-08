@@ -22,6 +22,56 @@ const serial = (data, handler, onDone) => {
 
 const humanize = (time) => time - 0.01 / 2 + Math.random() * 0.01;
 
+// Assign timiings to the notes in ms.
+// Does not schedule the notes, that should happen during the `run` call
+/**
+ * Create a magentajs ingestible score
+ * @param {Object} options
+ * @param {Array} options.notes Serialized Oscillator objects
+ * @param {Object} options.noteTimings Map of note names and their corresponding value
+ *  expressed as fractions of a second, based on the tempo and time signature
+ * @returns {Object} Serialized sound information in the format that magentajs wants
+ */
+const toMagentaSequence = ({ notes, noteTiming }) => {
+  let noteStart = 0;
+
+  const unquantizedMagentaSequence = notes.reduce((memo, cluster) => {
+    const noteCluster = cluster.map((note) => {
+      const noteEnd = humanize(noteStart + note.duration + noteTiming[note.noteType]);
+
+      const magentaNote = {
+        pitch: note.midi,
+        startTime: parseFloat(noteStart.toFixed(2)),
+        endTime: parseFloat(noteEnd.toFixed(2))
+      };
+      noteStart = noteEnd;
+
+      return magentaNote
+    });
+    
+
+    memo.notes = memo.notes.concat(noteCluster);
+
+    return memo;
+  }, {
+    notes: [],
+    totalTime: 0,
+    // timeSignatures: [{
+    //   time: 0,
+    //   numerator: 4,
+    //   denominator: 4
+    // }],
+    // tempos: [{
+    //   time: 0,
+    //   qpm: 120
+    // }]
+  });
+
+  unquantizedMagentaSequence.totalTime = parseFloat(noteStart.toFixed(2));
+  //unquantizedMagentaSequence.notes = unquantizedMagentaSequence.notes.slice(0, 20)
+  return unquantizedMagentaSequence;
+};
+
 const sequencer = context => ({ bpm = 108, onDone = defaultOnDone }) => {
   let noteValues = getNoteTimings(bpm);
 
@@ -30,11 +80,6 @@ const sequencer = context => ({ bpm = 108, onDone = defaultOnDone }) => {
   }
   
   return {
-    // sequence notes according to the length of time they will take to sound.
-    // does not schedule the notes, that should happen during the `run` call
-    sequence({ notes, noteTiming }) {
-
-    },
     play(sequences, newBPM = null) {
       if (context.state ==='suspended' || context.state !== 'running') {
         context.resume();
@@ -47,7 +92,6 @@ const sequencer = context => ({ bpm = 108, onDone = defaultOnDone }) => {
 
       sequences.forEach(sequence => serial(sequence, this.run.bind(this), onDone));
     },
-
     /**
      *
      * @param { AudioNodeObject | Array[AudioNodeObjects] } notes
@@ -95,5 +139,5 @@ const sequencer = context => ({ bpm = 108, onDone = defaultOnDone }) => {
   };
 };
 
-export { sequencer };
+export { sequencer, toMagentaSequence };
 export default AudioContextProvider(sequencer);

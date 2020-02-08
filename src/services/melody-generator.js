@@ -1,8 +1,14 @@
+const path = require('path');
 const { sequences } = core;
 const { MusicRNN } = music_rnn;
+const RNN_MODEL_URI = 'https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/melody_rnn';
 
+let model;
 const makeMelodyModel = () => {
-  const model = new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn');
+  if (!model) {
+    model = new MusicRNN(RNN_MODEL_URI);
+  }
+
   return new Promise((resolve) => {
     model.initialize()
       .then(() => resolve({

@@ -7,7 +7,7 @@ import SCALES from 'types/scales';
 import Measure from 'models/measure';
 import Meter from 'models/meter';
 import getNoteTimings from './timing';
-import { sequencer } from './sequencer';
+import { toMagentaSequence } from 'services/sequencer';
 
 const MAX_VOLUME = 95;
 // Zero is a non-finite and thus invalid value in the WebAudio
@@ -80,8 +80,7 @@ const defaultNoteDuration = (timeSignature) => {
 // this need to be based on the time signature too, otherwise
 // we end up with 6/8 time signature and a bunch of whole notes
 // TODO FIX THIS CAUSE THIS IS THE MISSING PIECE ATM
-const selectNoteValue = (speed, timeSignature = [4,4]) => {
-
+const getNoteValue = (speed, timeSignature = [4,4]) => {
   let value = defaultNoteDuration(timeSignature);
 
   if (speed < 2) {
@@ -129,7 +128,6 @@ const buildNote = (noteName, derivedPeak) =>
   });
 
 
-
 const generateSequence = (chordsFromData) => {
   const channel = audioChannel();
 
@@ -142,7 +140,7 @@ const generateSequence = (chordsFromData) => {
     
     sequence.push(
       chord.map((node) => {
-        const noteType = selectNoteValue(speed);
+        const noteType = getNoteValue(speed);
         return {
           node,
           noteType,
@@ -173,22 +171,26 @@ const buildNoteSequence = (repoCommitStats) => {
   // sounds occupies...what to call that?
   const toneClusters = makeChords(repoCommitStats);
   const notes = toneClusters.reduce((groups, cluster) => {
-    const { notes, volume } = cluster;
-    const fractionalVolume = volume / (notes.length * 2);
+    const { notes: tones, volume, speed } = cluster;
+    const fractionalVolume = volume / (tones.length * 2);
+    const noteType = getNoteValue(speed);
 
-    return groups.concat(
-      notes.map((note) => buildNote(note, fractionalVolume).toJSON())
+    groups.push(
+      tones.map((note) => ({
+        ...buildNote(note, fractionalVolume).toJSON(),
+        noteType
+      }))
     );
-  }, []);
-  const meter = new Meter({ timeSignature: [6,8] });
-  const noteTimingsForMeter = getNoteTimings(108, meter.beatLength);
 
-  const unquantizedSequence = sequencer.sequence({
+    return groups;
+  }, []);
+  const meter = new Meter({ timeSignature: [4, 4] });
+  const noteTimingsForMeter = getNoteTimings(120, meter.beatLength);
+
+  return toMagentaSequence({
     notes: notes,
     noteTiming: noteTimingsForMeter
   });
-
-  console.log(notes, noteTimingsForMeter);
 };
 
 export { buildNoteSequence };

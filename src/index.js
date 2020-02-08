@@ -7,35 +7,6 @@ import { bootstrap, tock } from 'data/repos';
 import melodyModel from 'services/melody-generator';
 
 
-const NOTES = {
-  notes: [
-    {pitch: 60, startTime: 0.0, endTime: 0.5},
-    {pitch: 60, startTime: 0.5, endTime: 1.0},
-    {pitch: 67, startTime: 1.0, endTime: 1.5},
-    {pitch: 67, startTime: 1.5, endTime: 2.0},
-    {pitch: 69, startTime: 2.0, endTime: 2.5},
-    {pitch: 69, startTime: 2.5, endTime: 3.0},
-    {pitch: 67, startTime: 3.0, endTime: 4.0},
-    {pitch: 65, startTime: 4.0, endTime: 4.5},
-    {pitch: 65, startTime: 4.5, endTime: 5.0},
-    {pitch: 64, startTime: 5.0, endTime: 5.5},
-    {pitch: 64, startTime: 5.5, endTime: 6.0},
-    {pitch: 62, startTime: 6.0, endTime: 6.5},
-    {pitch: 62, startTime: 6.5, endTime: 7.0},
-    {pitch: 60, startTime: 7.0, endTime: 8.0},  
-  ],
-  totalTime: 12
-};
-
-// melodyModel()
-//   .then((magenta) => {
-//     const qns = magenta.sequences.quantizeNoteSequence(NOTES, 1.5);
-//     magenta.model.continueSequence(qns, 25, .8)
-//       .then((sample) => {
-//         console.log(magenta.sequences.unquantizeSequence(sample))
-//       });
-//   });
-
 const testRepos = {
   tock: {
     name: 'tock',
@@ -57,27 +28,26 @@ const isOffline = (debug) => {
 };
 
 const playScore = (data) => {
-  myRecorder.start();
-  
-  const score = buildScore(data);
-  console.log(buildNoteSequence(data));
-  // const tockCommitHistory = JSON.parse(tock);
-  // const score = buildScore(tockCommitHistory)
-  
-  // const score = buildScore(
-  //   normalizeRepoStats({
-  //     data: JSON.parse(bootstrap)
-  //   })
-  // );
-
-  const radSequencer = sequencer({
-    bpm: 108,
-    onDone() {
-      myRecorder.stop();
-    },
-  });
-  
-  radSequencer.play([score], 108);
+  // const score = buildScore(data);
+  const magentaSequence = buildNoteSequence(data);
+  console.log(magentaSequence)
+  melodyModel()
+    .then((magenta) => {
+      const qns = magenta.sequences.quantizeNoteSequence(magentaSequence, 4);
+      magenta.model.continueSequence(qns, 20,2)
+        .then((sample) => {
+          console.log(sample)
+          console.log(magenta.sequences.unquantizeSequence(sample))
+        });
+    });
+  // const radSequencer = sequencer({
+  //   bpm: 108,
+  //   onDone() {
+  //     myRecorder.stop();
+  //   },
+  // });
+  // myRecorder.start();
+  // radSequencer.play([score], 108);
 };
 
 const normalizeRepoStats = (stats) => {
@@ -128,7 +98,6 @@ const onRepoSelect = (event) => {
 };
 
 const select = document.getElementById('repos');
-const selectRepoControl = document.getElementById('select-repo'); 
 const repoSearch = document.getElementById('search-repo');
 
 repoSearch.addEventListener('submit', (event) => {
