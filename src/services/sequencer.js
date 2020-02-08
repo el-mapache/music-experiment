@@ -22,7 +22,7 @@ const serial = (data, handler, onDone) => {
 
 const humanize = (time) => time - 0.01 / 2 + Math.random() * 0.01;
 
-const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
+const sequencer = context => ({ bpm = 108, onDone = defaultOnDone }) => {
   let noteValues = getNoteTimings(bpm);
 
   function hasChangedBPM(newBPM = null) {
@@ -30,6 +30,11 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
   }
   
   return {
+    // sequence notes according to the length of time they will take to sound.
+    // does not schedule the notes, that should happen during the `run` call
+    sequence({ notes, noteTiming }) {
+
+    },
     play(sequences, newBPM = null) {
       if (context.state ==='suspended' || context.state !== 'running') {
         context.resume();
@@ -58,7 +63,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
       const now = context.currentTime;
       let timeTilNextNote = 0;
 
-      notesToPlay.forEach(({ node, noteType, beatLength }) => {
+      notesToPlay.forEach(({ node, noteType }) => {
         const noteLength = noteValues[noteType];
         // Get the sustain of a note, and add it to the current time
         const noteDuration = humanize(node.duration + now);

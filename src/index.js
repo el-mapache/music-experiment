@@ -2,7 +2,7 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore, { buildNoteSequence } from 'services/score-builder';
 import recorder from 'services/recorder';
-import { bootstrap, tock, static18f } from 'data/repos';
+import { bootstrap, tock } from 'data/repos';
 
 import melodyModel from 'services/melody-generator';
 
@@ -27,14 +27,14 @@ const NOTES = {
   totalTime: 12
 };
 
-melodyModel()
-  .then((magenta) => {
-    const qns = magenta.sequences.quantizeNoteSequence(NOTES, 1.5);
-    magenta.model.continueSequence(qns, 25, .8)
-      .then((sample) => {
-        console.log(magenta.sequences.unquantizeSequence(sample))
-      });
-  });
+// melodyModel()
+//   .then((magenta) => {
+//     const qns = magenta.sequences.quantizeNoteSequence(NOTES, 1.5);
+//     magenta.model.continueSequence(qns, 25, .8)
+//       .then((sample) => {
+//         console.log(magenta.sequences.unquantizeSequence(sample))
+//       });
+//   });
 
 const testRepos = {
   tock: {
@@ -44,10 +44,6 @@ const testRepos = {
   bootstrap: {
     name: 'bootstrap',
     data: bootstrap
-  },
-  static18f: {
-    name: 'static18f',
-    data: static18f
   }
 };
 
@@ -75,13 +71,13 @@ const playScore = (data) => {
   // );
 
   const radSequencer = sequencer({
-    bpm: 180,
+    bpm: 108,
     onDone() {
       myRecorder.stop();
     },
   });
   
-  radSequencer.play([score], 180);
+  radSequencer.play([score], 108);
 };
 
 const normalizeRepoStats = (stats) => {

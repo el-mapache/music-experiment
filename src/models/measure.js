@@ -1,9 +1,14 @@
+/**
+ * @param {Object} props
+ * @param {Meter} props.meter An instance of the Meter class
+ * @param {Number} props.availableBeats How many beats we have available in this measure
+ */
 class Measure {
   constructor({ meter, availableBeats = null }) {
     this.meter = meter
     /**
      * This could be technically incorrect if we were generating a visual
-     * score. In a compound meter, string beats are broken up by dotted notes
+     * score. In a compound meter, strong beats are broken up by dotted notes
      * e.g. in 6/8 time, there are 3 quarter notes worth of eighth notes
      * in each measure, but they would be expressed on the page as two
      * dotted quarter notes.
@@ -11,6 +16,7 @@ class Measure {
      * However, since we don't need to represent the score visually, and we aren't
      * doing anything with strong/weak beats at the moment, we can express the total
      * available beats of a measure in absolute quarter note terms.
+     * @type {Number}
      */
     this.totalBeats = this.meter.quarterNotesPerMeasure;
     this.availableBeats = availableBeats || this.totalBeats;

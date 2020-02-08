@@ -25,7 +25,7 @@ const NOTES = {
 // from A4.
 // We move negatively away from A because it ensures we
 // account for half steps when jumping around octaves
-const noteHalfSteps = {
+const NOTE_HALF_STEPS = {
   'C': -9,
   'D': -7,
   'E': -5,
@@ -34,13 +34,13 @@ const noteHalfSteps = {
   'A': 0,
   'B': 2,
 };
-const noteModifiers = {
+const NOTE_ACCIDENTALS = {
   'b': -1,
   '#': 1,
   undefined: 0,
 };
 // Notes have to be capitalized to allow for a proper flat (b)
-const validNoteRegex = /([CDEFGAB]){1}(b|#)?([0-9]){1}/;
+const NOTE_REG_EXP = /([CDEFGAB]){1}(b|#)?([0-9]){1}/;
 
 /**
  * 
@@ -100,7 +100,7 @@ const resolveEnharmonics = (note, modifier) => {
  * @returns Number The distance of this note from A4 expressed as a number of half steps
  */
 const getStepsFromA4 = (noteString) => {
-  const matches = validNoteRegex.exec(noteString);
+  const matches = NOTE_REG_EXP.exec(noteString);
 
   if (!matches) {
     throw new Error('Note string must be in the format {[C-B]}{b|#}{0-9}');
@@ -110,7 +110,7 @@ const getStepsFromA4 = (noteString) => {
   const octaveDistance = computeOctaveDistance(octave);
   const normalizedNote = resolveEnharmonics(note, pitchModifier);
 
-  return noteHalfSteps[normalizedNote] + noteModifiers[pitchModifier] + octaveDistance;
+  return NOTE_HALF_STEPS[normalizedNote] + NOTE_ACCIDENTALS[pitchModifier] + octaveDistance;
 };
 
 /**

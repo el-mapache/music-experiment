@@ -7,7 +7,7 @@ body {
 }
 
 .input {
-  @apply  transition ease-in duration-500 border-solid border-2 rounded border-pink-400 px-3 py-1 text-lg;
+  @apply  transition ease-in duration-300 border-solid border-2 rounded border-pink-400 px-3 py-1 text-lg;
 }
 
 .input:focus, .btn-primary:focus, select:focus {
