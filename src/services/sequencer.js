@@ -22,8 +22,8 @@ const serial = (data, handler, onDone) => {
 
 const humanize = (time) => time - 0.01 / 2 + Math.random() * 0.01;
 
-const sequencer = context => ({ bpm = 120, onDone = defaultOnDone }) => {
-  let noteValues = getNoteTimings(bpm);
+const sequencer = context => ({ bpm = 120, onDone = defaultOnDone, beatLength }) => {
+  let noteValues = getNoteTimings(bpm, beatLength);
 
   function hasChangedBPM(newBPM = null) {
     return newBPM && newBPM !== bpm;

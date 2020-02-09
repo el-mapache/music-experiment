@@ -1,3 +1,15 @@
+/**
+ * This module has soo many responsibilities. generating oscillators, hooking up web audio
+ * nodes, getting timing info...needs to be broken up
+ * 
+ * Steps to be refactored / extracted:
+ * 1). accepts a time signature or defaults to 4/4, makes a Meter obj
+ * 2). make tonecluster objects
+ * 3). from toneclusters, generate a sequence of notes
+ *    sequence will have pitch info, start + end timing, time signature info, tempo
+ * 4). sequence is used to generate the actual web audio nodes and channel info?
+ * 
+ */
 import noteFactory from 'factories/note-factory';
 import audioChannel from 'services/audio-channel';
 import Chord from 'services/chord';
@@ -8,7 +20,6 @@ import Measure from 'models/measure';
 import Meter from 'models/meter';
 
 const MAX_VOLUME = 95;
-const WEB_AUDIO_ZERO = .0001;
 
 // Super naive at this point, just for testing purposes
 // Random thought: should I rearrange the order of these notes periodically?
@@ -112,7 +123,7 @@ const makeChords = data =>
 
 const generateSequence = (chordsFromData) => {
   const channel = audioChannel();
-
+ 
   const finalNotes = chordsFromData.reduce((sequence, chordObj) => {
     const { notes, volume, speed } = chordObj;
 
@@ -142,7 +153,10 @@ const generateSequence = (chordsFromData) => {
   }, []);
   console.log('final notes', finalNotes);
   console.log('measures',   buildMeasures(finalNotes));
-  return finalNotes;
+  return {
+    notes: finalNotes,
+    meter: new Meter({ timeSignature: [6, 8]})
+  };
 };
 
 /**

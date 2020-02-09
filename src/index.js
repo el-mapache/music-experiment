@@ -41,15 +41,16 @@ const playScore = (data) => {
   //     data: JSON.parse(bootstrap)
   //   })
   // );
-
+console.log(score)
   const radSequencer = sequencer({
     bpm: 180,
     onDone() {
       myRecorder.stop();
     },
+    beatLength: score.meter.beatLength
   });
   
-  radSequencer.play([score], 180);
+  radSequencer.play([score.notes], 180);
 };
 
 const normalizeRepoStats = (stats) => {
