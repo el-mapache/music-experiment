@@ -8,65 +8,11 @@ import Measure from 'models/measure';
 import Meter from 'models/meter';
 
 const MAX_VOLUME = 95;
+const WEB_AUDIO_ZERO = .0001;
 
 // Super naive at this point, just for testing purposes
 // Random thought: should I rearrange the order of these notes periodically?
 const phrygian = SCALES.PHRYGIAN;
-
-// class TimeSignature {
-//   constructor({ signature = [4, 4] }) {
-//     this.beatsPerMeasure = signature[0];
-//     this.baseBeatType = beatMap[signature[1]];
-//   }
-// }
-
-// class MeasureBeat {
-//   constructor({ name }) {
-//     this.name = name;
-//     this.beatLength = null;
-//   }
-// }
-
-
-// I think we need the timing information here.
-// we need to keep a total of the note values in each measure, and if the next note
-// would be greater than the available beats in the measure, we have to add a rest.
-/**
- * 
- */
-/**
- * basically i need to be able to:
- * 
- * class Measure
- *    this.totalBeats = baseBeatsPerMeasure
- *    this.availableBeats = this.totalBeats
- *    this.beats = [];
- * 
- *    add(soundUnit)
- *      this.beats.push(soundUnit)
- *      this.availableBeats -= soundUnit.length;
- *    
- * 
- * 
- * let measure = new Measure(totalBeats);
- * for each sound unit -> 
- *  if measure.availableBeats >= getRealBeatLength(soundUnit)
- *    measure.add(soundUnit)
- *  else
- *    measure.add(rests that take up all remaining available beats)
- *    measures.push(measure);
- *    measure.length = 0;
- *    measure.add(soundUnit)
- * 
- *  getRealBeatLength (soundUnit, baseBeatLength) ->
- *    get sound unit type
- *    if it equals baseBeatLength
- *      returnbeatLength = 1
- *   else if it doesnt equal baseNoteLength
- *     beatLength = value out of timing map (maybe do this anyway)
- *
- *  
-*/
 
 const buildMeasures = (soundUnits, timeSignature = [6, 8]) => {
   const [ beatsPerMeasure, baseNoteLength ] = timeSignature;
@@ -130,7 +76,7 @@ const defaultNoteDuration = (timeSignature) => {
 // this need to be based on the time signature too, otherwise
 // we end up with 6/8 time signature and a bunch of whole notes
 // TODO FIX THIS CAUSE THIS IS THE MISSING PIECE ATM
-const selectNoteValue = (speed, timeSignature = [4,4]) => {
+const getNoteValue = (speed, timeSignature = [4,4]) => {
 
   let value = defaultNoteDuration(timeSignature);
 
@@ -183,7 +129,7 @@ const generateSequence = (chordsFromData) => {
     
     sequence.push(
       chord.map((node) => {
-        const noteType = selectNoteValue(speed);
+        const noteType = getNoteValue(speed);
         return {
           node,
           noteType,
