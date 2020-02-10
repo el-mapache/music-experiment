@@ -2,7 +2,7 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
-import ui from 'ui/index';
+
 
 let lastData;
 let myRecorder = recorder();
@@ -58,7 +58,6 @@ const getRepoCommitStats = (user, repo) => {
   return githubClient.getRepoCommitStats(user, repo);
 };
 
-
 const getCommitStatsAndPlay = (user, repo) => {
   if (lastData) {
     playScore(lastData);
@@ -68,28 +67,13 @@ const getCommitStatsAndPlay = (user, repo) => {
       .then(playScore);
   }
 };
-
-const onRepoSelect = (event) => {
-  const { value: name } = event.target;
-  const repo = testRepos[name];
-  const repoCommitData = JSON.parse(repo.data);
-  
-  playScore(repoCommitData);
+// TODO: This should really be 2 separate functions
+const generate = (data, isCached) => {
+  if (isCached) {
+    playScore(data)
+  } else {
+    getCommitStatsAndPlay(data.owner, data.repo);
+  }
 };
 
-// const select = document.getElementById('repos');
-const repoSearch = document.getElementById('search-repo');
-
-repoSearch.addEventListener('submit', (event) => {
-  event.preventDefault();
-  event.stopImmediatePropagation();
-
-  const { target: form } = event;
-  const { repo, owner } = form;
-
-  if (!repo.value || !owner.value) {
-    throw new Error('Form requires a repo name and owner name for that repo');
-  }
-
-  getCommitStatsAndPlay(owner.value, repo.value);
-});
+export default generate;

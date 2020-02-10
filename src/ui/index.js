@@ -7,7 +7,7 @@ import RepoFormDispatcher from 'ui/repo-form-dispatcher';
 const App = () => (
   <StateProvider>
     <RadioGroup
-      label="Choose an option below."
+      label="Choose one"
       helpText="You can always change your mind."
       name="toggle-repo-form-type"
     />

@@ -12,14 +12,19 @@ const initialState = {
   },
   formUI: {
     activeFormName: '',
+    // so sloppy!!
+    cachedRepos: {
+      'tock': 0,
+      'bootstrap': 1
+    },
     preloadedRepos: [{
       name: 'tock',
       owner: '18f',
-      data: tock
+      data: JSON.parse(tock)
     }, {
       name: 'bootstrap',
       owner: 'twitter',
-      data: bootstrap
+      data: JSON.parse(bootstrap)
     }],
     activeRepo: {
       name: '',

@@ -30,7 +30,7 @@ const PreloadedRepoForm = ({ setChecked }) => {
   return (
     <div>
       <p class="block font-bold text-xl text-indigo-700 mb-1" role="label">
-        Choose a preloaded repository
+        Preloaded repos
       </p>
       <div class="button-group">
         { preloadedRepos.map(repo => {
