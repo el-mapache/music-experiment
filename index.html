@@ -10,41 +10,17 @@
     </style>
     <link rel="stylesheet" href="build/output.css"/>
   </head>
-  <body>
-    <main class="xl:w-3/4 mx-auto px-6 mt-12">
-      <h2 class="font-hairline text-4xl leading-tight tracking-wide text-indigo-600 mb-12">
+  <body class="position-relative overflow-x-hidden">
+    <div class="fancy-accent bg-pink-200"></div>
+    <main class="xl:w-3/4 mx-auto px-6 mt-6">
+      <h1 class="font-hairline text-4xl leading-tight tracking-wide text-indigo-600 mb-12">
         GitHub commit
-        <span class="block font-light font-sans text-indigo-700 text-5xl -mt-3">music generator</span>
-      </h2>
-      <div>
-        <label class="block font-light text-gray-600" for="repos">Choose a preloaded repository</label>
-        <div class="inline-block relative">
-          <select id="repos" name="repos" class="block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight my-1"></select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path>
-            </svg>
-          </div>
-        </div>
+        <span class="block font-semibold font-serif text-indigo-700 text-6xl -mt-4">music generator</span>
+      </h1>
+      <div id="app"></div>
+      <div class="advanced m-2 w-64 h-16 rounded-lg py-1 px-3">
+        <p></p>
       </div>
-      <p class="font-semibold my-2">OR</p>
-      <form id="search-repo" class="rounded-lg border-solid border-2 border-gray-300 py-1 px-3 inline-block">
-        <div class="flex items-center -mx-2">
-          <div class="m-2">
-            <label for="repo" class="block font-light text-gray-600">Repository name</label>
-            <input id="repo" type="text" name="repo" placeholder="enter repo name" class="input" />
-          </div>
-          <div class="m-2">
-            <label for="owner" class="block font-light text-gray-600">Repository owner</label>
-            <input id="owner" type="text" name="owner" placeholder="enter repo owner" class="input" />
-          </div>
-          <div class="m-2 mt-8">
-            <button type="submit" class="btn-primary">
-              Generate
-            </button>
-          </div>
-        </div>
-      </form>
     </main>
     <script src="build/build.js"></script>
   </body>

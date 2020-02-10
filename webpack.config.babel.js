@@ -16,8 +16,14 @@ module.exports = {
     rules: [
       {
         test: /.js?$/,
+        loader: 'babel-loader',
         exclude: /node_modules/,
         include: path.join(__dirname, 'src'),
+        options: {
+          babelrc: true,
+          extends: path.join(__dirname + '/.babelrc'),
+          cacheDirectory: true
+        }
       }
     ]
   },

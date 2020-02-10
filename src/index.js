@@ -2,29 +2,26 @@ import githubClient from 'services/github-client';
 import sequencer from 'services/sequencer';
 import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
-import { bootstrap, tock, static18f } from 'data/repos';
+import ui from 'ui/index';
 
+const testRepost = {}
 
-const testRepos = {
-  tock: {
-    name: 'tock',
-    data: tock
-  },
-  bootstrap: {
-    name: 'bootstrap',
-    data: bootstrap
-  },
-  static18f: {
-    name: 'static18f',
-    data: static18f
-  }
-};
+// const testRepos = {
+//   tock: {
+//     name: 'tock',
+//     data: tock
+//   },
+//   bootstrap: {
+//     name: 'bootstrap',
+//     data: bootstrap
+//   }
+// };
 
 let lastData;
 let myRecorder = recorder();
 
-const isOffline = (debug) => {
-  if (debug || !navigator.onLine) {
+const isOffline = () => {
+  if (!navigator.onLine) {
     return true;
   }
 };
@@ -33,15 +30,7 @@ const playScore = (data) => {
   myRecorder.start();
   
   const score = buildScore(data);
-  // const tockCommitHistory = JSON.parse(tock);
-  // const score = buildScore(tockCommitHistory)
-  
-  // const score = buildScore(
-  //   normalizeRepoStats({
-  //     data: JSON.parse(bootstrap)
-  //   })
-  // );
-console.log(score)
+
   const radSequencer = sequencer({
     bpm: 180,
     onDone() {
@@ -74,8 +63,9 @@ const normalizeRepoStats = (stats) => {
 };
 
 const getRepoCommitStats = (user, repo) => {
-  if (isOffline(false)) {
-    return Promise.resolve({ data: JSON.parse(bootstrap) });
+  if (isOffline()) {
+    // here we should have an error
+    console.log('No internet connection detected. Please choose an example repo')
   }
 
   return githubClient.getRepoCommitStats(user, repo);
@@ -100,11 +90,11 @@ const onRepoSelect = (event) => {
   playScore(repoCommitData);
 };
 
-const select = document.getElementById('repos');
-const selectRepoControl = document.getElementById('select-repo'); 
-const repoSearch = document.getElementById('search-repo');
+// const select = document.getElementById('repos');
+// const repoSearch = document.getElementById('search-repo');
 
 repoSearch.addEventListener('submit', (event) => {
+  debugger
   event.preventDefault();
   event.stopImmediatePropagation();
 
@@ -112,33 +102,33 @@ repoSearch.addEventListener('submit', (event) => {
   const { repo, owner } = form;
 
   if (!repo.value || !owner.value) {
-    throw new Error('Form requires a repo name and owner name fo that repo');
+    throw new Error('Form requires a repo name and owner name for that repo');
   }
 
   getCommitStatsAndPlay(owner.value, repo.value);
 });
 
-select.addEventListener('change', onRepoSelect);
+//select.addEventListener('change', onRepoSelect);
 
-const populateSelectNode = (dataList) => {
-  const fragment = document.createDocumentFragment();
+//const populateSelectNode = (dataList) => {
+//   const fragment = document.createDocumentFragment();
 
-  const option = document.createElement('option');
-  option.value = '';
-  option.textContent = 'Select a repo';
+//   const option = document.createElement('option');
+//   option.value = '';
+//   option.textContent = 'Select a repo';
 
-  fragment.appendChild(option);
+//   fragment.appendChild(option);
 
-  dataList.forEach((repo) => {
-    const { name } = repo;
-    const option = document.createElement('option');
-    option.value = name;
-    option.textContent = name;
+//   dataList.forEach((repo) => {
+//     const { name } = repo;
+//     const option = document.createElement('option');
+//     option.value = name;
+//     option.textContent = name;
   
-    fragment.appendChild(option);
-  });
+//     fragment.appendChild(option);
+//   });
   
-  select.appendChild(fragment);
-};
+//   select.appendChild(fragment);
+// };
 
-populateSelectNode(Object.keys(testRepos).map(r => ({ name: testRepos[r].name })));
+// populateSelectNode(Object.keys(testRepos).map(r => ({ name: testRepos[r].name })));
