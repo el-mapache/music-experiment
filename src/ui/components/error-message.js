@@ -7,7 +7,7 @@ const ErrorMessage = ({ forState }) => {
   const { error } = state[forState];
 
   return (
-    <p class="text-red-500 text-lg italic mt-2 h-4">
+    <p class="text-red-600 text-md italic mt-2 h-4">
       {error}
     </p>
   );

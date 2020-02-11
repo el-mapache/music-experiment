@@ -28,6 +28,7 @@ const RepoFormDispatcher = () => {
     preloadedRepos
   } = formUI;
   const hasActiveRepo = activeRepo.name && activeRepo.owner;
+  // TODO use a class name
   const disableBtn = !hasActiveRepo || commitData.status === 'error' ? ' opacity-25 pointer-events-none' : ''
   const handleSubmit = () => {
     // TODO: selector here

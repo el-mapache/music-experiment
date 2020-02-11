@@ -28,10 +28,10 @@ body {
 }
 
 .input-group.error label {
-  @apply text-pink-600;
+  @apply text-red-600;
 }
 .input-group.error input {
-  @apply border-pink-200;
+  @apply border-red-600;
 }
 
 select {
