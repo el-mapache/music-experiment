@@ -36,8 +36,6 @@ const RepoFormDispatcher = () => {
       return;
     }
 
-    const isCached = cachedRepos[activeRepo.name];
-
     if (typeof isCached !== 'undefined') {
       actions.COMMIT_DATA.load(dispatch)(preloadedRepos[isCached].data);
     } else {

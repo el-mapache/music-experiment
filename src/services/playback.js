@@ -7,7 +7,7 @@ let lastData;
 let myRecorder = recorder();
 
 const playScore = (data) => {
-  myRecorder.start();
+  //myRecorder.start();
   
   const score = buildScore(data);
 
@@ -18,7 +18,7 @@ const playScore = (data) => {
   
   return radSequencer.play([score.notes], 180)
     .then(() => {
-      myRecorder.stop();
+      //myRecorder.stop();
     });
 };
 

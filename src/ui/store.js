@@ -1,4 +1,4 @@
-import { h, createContext } from 'preact';
+import { h, createContext, isValidElement } from 'preact';
 import { bootstrap, tock } from 'data/repos';
 import { useReducer } from 'preact/hooks';
 import { ACTION_TYPES } from 'ui/actions';
@@ -13,7 +13,13 @@ const PLAYER_STATUS = {
   PLAYING: 'playing',
   PAUSED: 'paused',
   STOPPED: 'stopped',
+  READY: 'ready',
   IDLE: 'idle'
+};
+
+const preloadedRepoData = {
+  'tock': JSON.parse(tock),
+  'bootstrap': JSON.parse(bootstrap)
 };
 
 const initialState = {
@@ -39,11 +45,9 @@ const initialState = {
     preloadedRepos: [{
       name: 'tock',
       owner: '18f',
-      data: JSON.parse(tock)
     }, {
       name: 'bootstrap',
       owner: 'twitter',
-      data: JSON.parse(bootstrap)
     }],
   },
   activeRepo: {
@@ -57,17 +61,41 @@ const initialState = {
   }
 };
 
+const updatePlayerStatus = (status) => {
+  if (
+    status === PLAYER_STATUS.PLAYING ||
+    status === PLAYER_STATUS.PAUSED
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 // TODO: Starting to seem like i need to break these out...
 function appReducer(state, action) {
   const { type, ...rest } = action;
 
   switch(type) {
     case ACTION_TYPES.SET_REPO: {
+      const { status } = state.player;
+      const preloadedData = preloadedRepoData[rest.name];
+      const nextPlayerStatus = updatePlayerStatus(status) ? PLAYER_STATUS.READY : status;
+
       return {
         ...state,
         activeRepo: {
           name: rest.name,
           owner: rest.owner
+        },
+        // ideally these stores would listen to this event
+        player: {
+          ...state.player,
+          status: nextPlayerStatus
+        },
+        commitData: {
+          ...state.commitData,
+          data: preloadedData
         }
       };
     }
@@ -173,5 +201,24 @@ const StateProvider = ({ children }) => {
   return <Provider value={{ state, dispatch }}>{children}</Provider>;
 };
 
-export { store };
+const playerStatusSelector = (state) => {
+  const { player } = state;
+  
+  return {
+    isPlaying() {
+      return player.status === PLAYER_STATUS.PLAYING;
+    },
+    isStopped() {
+      return player.status === PLAYER_STATUS.STOPPED;
+    },
+    isIdle() {
+      return player.status === PLAYER_STATUS.IDLE;
+    },
+    isPaused() {
+      return player.status === PLAYER_STATUS.PAUSED;
+    }
+  }
+};
+
+export { store, playerStatusSelector, PLAYER_STATUS };
 export default StateProvider;
