@@ -1,9 +1,11 @@
 import { h } from 'preact';
 import { useContext } from 'preact/hooks';
 import { store } from 'ui/store';
-import PreloadedRepoForm from 'ui/preloaded-repo-form';
-import SearchRepoForm from 'ui/search-repo-form';
-import generateMusic from 'services/generate';
+import PreloadedRepoForm from 'ui/components/preloaded-repo-form';
+import SearchRepoForm from 'ui/components/search-repo-form';
+import scoreGenerator from 'services/score-generator';
+
+const preventSubmit = event => event.preventDefault();
 
 const renderForm = (activeForm) => {
   if (!activeForm) {
@@ -14,10 +16,6 @@ const renderForm = (activeForm) => {
     <PreloadedRepoForm /> :
     <SearchRepoForm />;
 };
-
-const handleFormSubmit = (event) => {
-  event.preventDefault();
-};  
 
 const RepoFormDispatcher = () => {
   const { state } = useContext(store);
@@ -32,13 +30,16 @@ const RepoFormDispatcher = () => {
   const handleSubmit = () => {
     const isCached = cachedRepos[activeRepo.name];
 
+    // move these to actions once verified
     if (typeof isCached !== 'undefined') {
-      generateMusic(preloadedRepos[isCached].data, true);
+      scoreGenerator.fromCache(preloadedRepos[isCached].data);
+    } else {
+      scoreGenerator.fromWeb(activeRepo.owner, activeRepo.name);
     }
   };
 
   return (
-    <form id="search-repo" class="w-1/2" onClick={handleFormSubmit}>
+    <form id="search-repo" class="w-1/2" onClick={preventSubmit}>
       { renderForm(activeFormName) }
       <div class="mt-10">
         <button

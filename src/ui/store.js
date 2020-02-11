@@ -109,6 +109,9 @@ function appReducer(state, action) {
         formUI: {
           ...state.formUI,
           activeFormName: rest.formName
+        },
+        activeRepo: {
+          ...initialState.activeRepo
         }
       };
     }

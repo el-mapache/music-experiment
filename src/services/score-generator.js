@@ -58,22 +58,15 @@ const getRepoCommitStats = (user, repo) => {
   return githubClient.getRepoCommitStats(user, repo);
 };
 
-const getCommitStatsAndPlay = (user, repo) => {
-  if (lastData) {
-    playScore(lastData);
-  } else {
-    getRepoCommitStats(user, repo)  
+const scoreGenerator = {
+  fromCache(data) {
+    playScore(data)
+  },
+  fromWeb(repoOwner, repoName) {
+    return getRepoCommitStats(repoOwner, repoName)  
       .then(normalizeRepoStats)
       .then(playScore);
   }
 };
-// TODO: This should really be 2 separate functions
-const generate = (data, isCached) => {
-  if (isCached) {
-    playScore(data)
-  } else {
-    getCommitStatsAndPlay(data.owner, data.repo);
-  }
-};
 
-export default generate;
+export default scoreGenerator;

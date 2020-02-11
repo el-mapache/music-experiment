@@ -19,13 +19,13 @@ class Canvas {
   }
 
   scaleForDevice() {  
-    this.el.width = this.el.offsetWidth * PIXEL_RATIO;
-    this.el.height = this.el.offsetHeight * PIXEL_RATIO;
-    ctx.setTransform(PIXEL_RATIO, 0, 0, PIXEL_RATIO, 0, 0);
+    this.el.width = this.el.offsetWidth * this.pixelRatio;
+    this.el.height = this.el.offsetHeight * this.pixelRatio;
+    ctx.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
   }
 
   draw() {
-    
+
   }
 }
 
