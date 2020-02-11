@@ -1,7 +1,7 @@
 import { actions } from 'ui/actions';
 import { h } from 'preact';
-import { useContext } from 'preact/hooks';
 import { store } from 'ui/store';
+import { useContext } from 'preact/hooks';
 import withCheckable from 'ui/with-checkable';
 
 

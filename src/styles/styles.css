@@ -23,7 +23,7 @@ body {
   @apply transition ease-in duration-200 border-solid border-2 rounded border-gray-400 px-3 py-1 text-lg;
 }
 
-.input:focus, .btn-primary:focus, select:focus {
+.input:focus, button:focus, select:focus {
   @apply outline-none
 }
 
@@ -47,11 +47,11 @@ select:focus {
 }
 
 .btn-primary {
-  @apply transition-colors ease-in duration-200 bg-teal-400 text-black p-2 rounded-lg;
+  @apply transition-colors ease-in duration-200 bg-teal-400 text-black p-3 rounded-lg;
 }
 
 .btn-primary:focus, .btn-primary:hover {
-  @apply bg-teal-600 shadow-md text-white;
+  @apply bg-teal-500 shadow-md text-white;
 }
 
 .form-group {
@@ -128,6 +128,18 @@ select:focus {
 }
 
 .unchecked {
-  @apply bg-gray-200;
+  @apply bg-gray-200 cursor-default;
   opacity: .4;
+}
+
+.fill-button {
+  @apply border-4 border-solid border-gray-700 p-2 rounded-full text-center;
+  background-image: linear-gradient(to top, #68D391 50%, transparent 50%);
+  background-size: 200% 200%;
+  transition: background-position 200ms, color 100ms ease;
+}
+
+.fill-button:hover:not(.unchecked), .fill-button.active {
+  @apply text-white fill-current;
+  background-position: 0 100%;
 }

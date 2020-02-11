@@ -1,4 +1,5 @@
-import scoreGenerator from 'services/score-generator';
+import githubClient from 'services/github-client';
+
 
 const ACTION_TYPES = {
   COMMIT_DATA: {
@@ -24,10 +25,10 @@ const actions = {
     }
   },
   COMMIT_DATA: {
-    fetchData: dispatch => (owner, name) => {
+    fetch: dispatch => (owner, name) => {
       dispatch({ type: ACTION_TYPES.COMMIT_DATA.FETCHING });
 
-      scoreGenerator.fromWeb(owner, name)
+      githubClient.getRepoCommitStats(owner, name)
         .then((data) => dispatch({
           type: ACTION_TYPES.COMMIT_DATA.SUCCESS,
           data
@@ -37,7 +38,13 @@ const actions = {
             type: ACTION_TYPES.COMMIT_DATA.ERROR,
             error: `No commit data found for repo "${name}"!`
           })
-        })
+        });
+    },
+    load: dispatch => data => {
+      dispatch({
+        type: ACTION_TYPES.COMMIT_DATA.SUCCESS,
+        data
+      });
     }
   },
   setRepo(name, owner) {

@@ -5,7 +5,7 @@ import { actions } from 'ui/actions';
 import ErrorMessage from 'ui/components/error-message';
 import PreloadedRepoForm from 'ui/components/preloaded-repo-form';
 import SearchRepoForm from 'ui/components/search-repo-form';
-import scoreGenerator from 'services/score-generator';
+
 
 const preventSubmit = event => event.preventDefault();
 
@@ -38,11 +38,10 @@ const RepoFormDispatcher = () => {
 
     const isCached = cachedRepos[activeRepo.name];
 
-    // move these to actions once verified
     if (typeof isCached !== 'undefined') {
-      scoreGenerator.fromCache(preloadedRepos[isCached].data);
+      actions.COMMIT_DATA.load(dispatch)(preloadedRepos[isCached].data);
     } else {
-      actions.COMMIT_DATA.fetchData(dispatch)(activeRepo.owner, activeRepo.name);
+      actions.COMMIT_DATA.fetch(dispatch)(activeRepo.owner, activeRepo.name);
     }
   };
 
