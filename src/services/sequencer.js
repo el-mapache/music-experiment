@@ -2,9 +2,6 @@ import AudioContextProvider from './audio-context-provider';
 import { getNoteTimings } from './timing';
 
 const msPerSecond = 1000;
-const defaultOnDone = () => {
-  console.log('finished playing');
-}
 
 const serial = (data, handler, onDone) => {
   function next() {
@@ -22,7 +19,7 @@ const serial = (data, handler, onDone) => {
 
 const humanize = (time) => time - 0.01 / 2 + Math.random() * 0.01;
 
-const sequencer = context => ({ bpm = 120, onDone = defaultOnDone, beatLength }) => {
+const sequencer = context => ({ bpm = 120, beatLength }) => {
   let noteValues = getNoteTimings(bpm, beatLength);
 
   function hasChangedBPM(newBPM = null) {
@@ -40,7 +37,9 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone, beatLength })
         noteValues = getNoteTimings(newBPM);
       }
 
-      sequences.forEach(sequence => serial(sequence, this.run.bind(this), onDone));
+      return new Promise((resolve, reject) => {
+        sequences.forEach(sequence => serial(sequence, this.run.bind(this), resolve));
+      });
     },
 
     /**
@@ -58,7 +57,7 @@ const sequencer = context => ({ bpm = 120, onDone = defaultOnDone, beatLength })
       const now = context.currentTime;
       let timeTilNextNote = 0;
 
-      notesToPlay.forEach(({ node, noteType, beatLength }) => {
+      notesToPlay.forEach(({ node, noteType }) => {
         const noteLength = noteValues[noteType];
         // Get the sustain of a note, and add it to the current time
         const noteDuration = humanize(node.duration + now);

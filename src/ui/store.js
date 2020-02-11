@@ -8,9 +8,20 @@ const STATUS_TYPES = {
   SUCCESS: 'success',
   IDLE: 'idle',
   BUSY: 'busy'
-}
+};
+const PLAYER_STATUS = {
+  PLAYING: 'playing',
+  PAUSED: 'paused',
+  STOPPED: 'stopped',
+  IDLE: 'idle'
+};
 
 const initialState = {
+  player: {
+    status: PLAYER_STATUS.IDLE,
+    totalTime: '',
+    timeRemaining: ''
+  },
   recorder: {
     isActive: false,
   },
@@ -127,6 +138,24 @@ function appReducer(state, action) {
           status: STATUS_TYPES.SUCCESS,
           error: '',
           data: rest.data
+        }
+      }
+    }
+    case ACTION_TYPES.PLAYER.PLAY: {
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          status: PLAYER_STATUS.PLAYING
+        }
+      }
+    }
+    case ACTION_TYPES.PLAYER.DONE: {
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          status: PLAYER_STATUS.STOPPED
         }
       }
     }

@@ -13,13 +13,13 @@ const playScore = (data) => {
 
   const radSequencer = sequencer({
     bpm: 180,
-    onDone() {
-      myRecorder.stop();
-    },
     beatLength: score.meter.beatLength
   });
   
-  radSequencer.play([score.notes], 180);
+  return radSequencer.play([score.notes], 180)
+    .then(() => {
+      myRecorder.stop();
+    });
 };
 
 const normalizeRepoStats = (data) => {
@@ -43,8 +43,8 @@ const normalizeRepoStats = (data) => {
 };
 
 const playback = {
-  playScore(data) {
-    normalizeRepoStats(data)
+  play(data) {
+    return normalizeRepoStats(data)
       .then(playScore);
   }
 };

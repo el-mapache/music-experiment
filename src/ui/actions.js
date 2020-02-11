@@ -1,4 +1,5 @@
 import githubClient from 'services/github-client';
+import playback from 'services/playback';
 
 
 const ACTION_TYPES = {
@@ -9,6 +10,10 @@ const ACTION_TYPES = {
   },
   FORM_UI: {
     SET_FORM_NAME: 'formUI.setActiveName'
+  },
+  PLAYER: {
+    PLAY: 'player.play',
+    DONE: 'player.done'
   },
   SET_REPO: 'setRepo',
   SET_REPO_NAME: 'setRepoName',
@@ -45,6 +50,16 @@ const actions = {
         type: ACTION_TYPES.COMMIT_DATA.SUCCESS,
         data
       });
+    }
+  },
+  PLAYER: {
+    play: dispatch => data => {
+      dispatch({ type: ACTION_TYPES.PLAYER.PLAY });
+
+      playback.play(data)
+        .then(() => {
+          dispatch({ type: ACTION_TYPES.PLAYER.DONE });
+        })
     }
   },
   setRepo(name, owner) {
