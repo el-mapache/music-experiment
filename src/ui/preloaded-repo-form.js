@@ -3,11 +3,10 @@ import { useContext } from 'preact/hooks';
 import { store, ACTIONS } from 'ui/store';
 import withCheckable from 'ui/with-checkable';
 
-const { FORM_UI } = ACTIONS;
 
 const RadioButton = ({ id, label, name, checked, value, onClick }) => {
   const handleClick = () => {
-    onClick(FORM_UI.setRepo(id, value));
+    onClick(ACTIONS.setRepo(id, value));
   };
 
   return (
@@ -25,7 +24,7 @@ const RadioButton = ({ id, label, name, checked, value, onClick }) => {
 
 const PreloadedRepoForm = ({ setChecked }) => {
   const { dispatch, state } = useContext(store);
-  const { formUI: { preloadedRepos, activeRepo } } = state;
+  const { formUI: { preloadedRepos }, activeRepo } = state;
 
   return (
     <div>

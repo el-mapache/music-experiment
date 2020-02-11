@@ -26,57 +26,84 @@ const initialState = {
       owner: 'twitter',
       data: JSON.parse(bootstrap)
     }],
-    activeRepo: {
-      name: '',
-      owner: ''
-    }
   },
+  activeRepo: {
+    name: '',
+    owner: ''
+  }
 };
 
 const ACTION_TYPES = {
   FORM_UI: {
-    SET_REPO: 'formUI.setRepo',
     SET_FORM_NAME: 'formUI.setActiveName'
-  }
+  },
+  SET_REPO: 'setRepo',
+  SET_REPO_NAME: 'setRepoName',
+  SET_REPO_OWNER: 'setRepoOwner',
 };
 
 const ACTIONS = {
   FORM_UI: {
-    setRepo(name, owner) {
-      return {
-        type: ACTION_TYPES.FORM_UI.SET_REPO,
-        name,
-        owner
-      };
-    },
     setType(formName) {
-      console.log('hii')
       return {
         type: ACTION_TYPES.FORM_UI.SET_FORM_NAME,
         formName
       }
     }
-  }
+  },
+  setRepo(name, owner) {
+    return {
+      type: ACTION_TYPES.SET_REPO,
+      name,
+      owner
+    };
+  },
+  setRepoName(name) {
+    return {
+      type: ACTION_TYPES.SET_REPO_NAME,
+      name,
+    };
+  },
+  setRepoOwner(owner) {
+    return {
+      type: ACTION_TYPES.SET_REPO_OWNER,
+      owner
+    };
+  },
 };
 
 function appReducer(state, action) {
   const { type, ...rest } = action;
 
   switch(type) {
-    case ACTION_TYPES.FORM_UI.SET_REPO: {
+    case ACTION_TYPES.SET_REPO: {
       return {
         ...state,
-        formUI: {
-          ...state.formUI,
-          activeRepo: {
-            name: rest.name,
-            owner: rest.owner
-          }
+        activeRepo: {
+          name: rest.name,
+          owner: rest.owner
+        }
+      };
+    }
+    case ACTION_TYPES.SET_REPO_NAME: {
+      return {
+        ...state,
+        activeRepo: {
+          ...state.activeRepo,
+          name: rest.name
+        }
+      };
+    }
+    case ACTION_TYPES.SET_REPO_OWNER: {
+      return {
+        ...state,
+        activeRepo: {
+          ...state.activeRepo,
+          owner: rest.owner
         }
       };
     }
     case ACTION_TYPES.FORM_UI.SET_FORM_NAME: {
-      console.log('action')
       return {
         ...state,
         formUI: {

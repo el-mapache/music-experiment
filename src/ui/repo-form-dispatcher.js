@@ -21,10 +21,9 @@ const handleFormSubmit = (event) => {
 
 const RepoFormDispatcher = () => {
   const { state } = useContext(store);
-  const { formUI } = state;
+  const { formUI, activeRepo } = state;
   const {
     activeFormName,
-    activeRepo,
     cachedRepos,
     preloadedRepos
   } = formUI;
