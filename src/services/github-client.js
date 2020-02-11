@@ -41,6 +41,8 @@ const repoCommitStats = ({ owner, repo }) => {
     console.warn(
       `Error getting stats for ${repo}`, error.message
     );
+
+    throw new Error(`Error getting stats for ${repo}`);
   });
 };
 

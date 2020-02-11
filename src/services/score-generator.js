@@ -52,7 +52,7 @@ const normalizeRepoStats = (stats) => {
 const getRepoCommitStats = (user, repo) => {
   if (isOffline()) {
     // here we should have an error
-    console.log('No internet connection detected. Please choose an example repo')
+    throw new Error('Oops! The internet doesn\'t want to cooperate! Choose a preloaded repo instead.');
   }
 
   return githubClient.getRepoCommitStats(user, repo);
@@ -63,9 +63,8 @@ const scoreGenerator = {
     playScore(data)
   },
   fromWeb(repoOwner, repoName) {
-    return getRepoCommitStats(repoOwner, repoName)  
-      .then(normalizeRepoStats)
-      .then(playScore);
+    return getRepoCommitStats(repoOwner, repoName);
+      //.then(normalizeRepoStats)
   }
 };
 

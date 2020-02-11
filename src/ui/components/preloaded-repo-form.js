@@ -1,12 +1,12 @@
 import { h } from 'preact';
 import { useContext } from 'preact/hooks';
-import { store, ACTIONS } from 'ui/store';
+import { store, actions } from 'ui/store';
 import withCheckable from 'ui/with-checkable';
 
 
 const RadioButton = ({ id, label, name, checked, value, onClick }) => {
   const handleClick = () => {
-    onClick(ACTIONS.setRepo(id, value));
+    onClick(actions.setRepo(id, value));
   };
 
   return (

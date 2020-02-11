@@ -1,6 +1,8 @@
 import { h } from 'preact';
 import { useContext } from 'preact/hooks';
 import { store } from 'ui/store';
+import { actions } from 'ui/actions';
+import ErrorMessage from 'ui/components/error-message';
 import PreloadedRepoForm from 'ui/components/preloaded-repo-form';
 import SearchRepoForm from 'ui/components/search-repo-form';
 import scoreGenerator from 'services/score-generator';
@@ -18,29 +20,35 @@ const renderForm = (activeForm) => {
 };
 
 const RepoFormDispatcher = () => {
-  const { state } = useContext(store);
-  const { formUI, activeRepo } = state;
+  const { dispatch, state } = useContext(store);
+  const { formUI, activeRepo, commitData } = state;
   const {
     activeFormName,
     cachedRepos,
     preloadedRepos
   } = formUI;
   const hasActiveRepo = activeRepo.name && activeRepo.owner;
-  const disableBtn = !hasActiveRepo ? ' opacity-25 pointer-events-none' : ''
+  const disableBtn = !hasActiveRepo || commitData.status === 'error' ? ' opacity-25 pointer-events-none' : ''
   const handleSubmit = () => {
+    // TODO: selector here
+    if (commitData.status === 'fetching') {
+      return;
+    }
+
     const isCached = cachedRepos[activeRepo.name];
 
     // move these to actions once verified
     if (typeof isCached !== 'undefined') {
       scoreGenerator.fromCache(preloadedRepos[isCached].data);
     } else {
-      scoreGenerator.fromWeb(activeRepo.owner, activeRepo.name);
+      actions.COMMIT_DATA.fetchData(dispatch)(activeRepo.owner, activeRepo.name);
     }
   };
 
   return (
     <form id="search-repo" class="w-1/2" onClick={preventSubmit}>
       { renderForm(activeFormName) }
+      <ErrorMessage forState='commitData' />
       <div class="mt-10">
         <button
           type="submit"
@@ -48,7 +56,7 @@ const RepoFormDispatcher = () => {
           disabled={!hasActiveRepo}
           onClick={handleSubmit}
         >
-          Generate score
+          Generate music
         </button>
       </div>
     </form>

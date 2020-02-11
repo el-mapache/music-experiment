@@ -1,6 +1,7 @@
+import { actions } from 'ui/actions';
 import { h } from 'preact';
 import { useContext } from 'preact/hooks';
-import { store, ACTIONS } from 'ui/store.js';
+import { store } from 'ui/store.js';
 import withCheckable from 'ui/with-checkable';
 
 const RadioToggle = ({ label, helpText, className, setChecked, ...rest }) => {
@@ -12,7 +13,7 @@ const RadioToggle = ({ label, helpText, className, setChecked, ...rest }) => {
   return (
     <div
       class={`radio-group-input mr-4 border-blue-400 w-1/2 ${className}${checked}`}
-      onClick={() => dispatch(ACTIONS.FORM_UI.setType(id))}
+      onClick={() => dispatch(actions.FORM_UI.setType(id))}
     >
       <input id={id} type="radio" name={name} class="hidden radio" />
       <label for={id} class="flex items-top cursor-pointer text-xl">

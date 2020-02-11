@@ -1,6 +1,14 @@
 import { h, createContext } from 'preact';
 import { bootstrap, tock } from 'data/repos';
 import { useReducer } from 'preact/hooks';
+import { ACTION_TYPES } from 'ui/actions';
+
+const STATUS_TYPES = {
+  ERROR: 'error',
+  SUCCESS: 'success',
+  IDLE: 'idle',
+  BUSY: 'busy'
+}
 
 const initialState = {
   recorder: {
@@ -30,48 +38,15 @@ const initialState = {
   activeRepo: {
     name: '',
     owner: ''
+  },
+  commitData: {
+    status: STATUS_TYPES.IDLE,
+    data: null,
+    error: ''
   }
 };
 
-const ACTION_TYPES = {
-  FORM_UI: {
-    SET_FORM_NAME: 'formUI.setActiveName'
-  },
-  SET_REPO: 'setRepo',
-  SET_REPO_NAME: 'setRepoName',
-  SET_REPO_OWNER: 'setRepoOwner',
-};
-
-const ACTIONS = {
-  FORM_UI: {
-    setType(formName) {
-      return {
-        type: ACTION_TYPES.FORM_UI.SET_FORM_NAME,
-        formName
-      }
-    }
-  },
-  setRepo(name, owner) {
-    return {
-      type: ACTION_TYPES.SET_REPO,
-      name,
-      owner
-    };
-  },
-  setRepoName(name) {
-    return {
-      type: ACTION_TYPES.SET_REPO_NAME,
-      name,
-    };
-  },
-  setRepoOwner(owner) {
-    return {
-      type: ACTION_TYPES.SET_REPO_OWNER,
-      owner
-    };
-  },
-};
-
+// TODO: Starting to seem like i need to break these out...
 function appReducer(state, action) {
   const { type, ...rest } = action;
 
@@ -91,6 +66,11 @@ function appReducer(state, action) {
         activeRepo: {
           ...state.activeRepo,
           name: rest.name
+        },
+        commitData: {
+          ...state.commitData,
+          status: STATUS_TYPES.IDLE,
+          error: ''
         }
       };
     }
@@ -100,6 +80,11 @@ function appReducer(state, action) {
         activeRepo: {
           ...state.activeRepo,
           owner: rest.owner
+        },
+        commitData: {
+          ...state.commitData,
+          status: STATUS_TYPES.IDLE,
+          error: ''
         }
       };
     }
@@ -115,6 +100,36 @@ function appReducer(state, action) {
         }
       };
     }
+    case ACTION_TYPES.COMMIT_DATA.FETCHING: {
+      return {
+        ...state,
+        commitData: {
+          ...state.commitData,
+          status: STATUS_TYPES.FETCHING
+        }
+      }
+    }
+    case ACTION_TYPES.COMMIT_DATA.ERROR: {
+      return {
+        ...state,
+        commitData: {
+          ...state.commitData,
+          status: STATUS_TYPES.ERROR,
+          error: rest.error
+        }
+      }
+    }
+    case ACTION_TYPES.COMMIT_DATA.SUCCESS: {
+      return {
+        ...state,
+        commitData: {
+          ...state.commitData,
+          status: STATUS_TYPES.SUCCESS,
+          error: '',
+          data: rest.data
+        }
+      }
+    }
     default:
       return state;
   }
@@ -129,5 +144,5 @@ const StateProvider = ({ children }) => {
   return <Provider value={{ state, dispatch }}>{children}</Provider>;
 };
 
-export { store, ACTIONS };
+export { store };
 export default StateProvider;

@@ -20,11 +20,18 @@ body {
 }
 
 .input {
-  @apply transition-colors ease-in duration-200 border-solid border-2 rounded border-gray-400 px-3 py-1 text-lg;
+  @apply transition ease-in duration-200 border-solid border-2 rounded border-gray-400 px-3 py-1 text-lg;
 }
 
 .input:focus, .btn-primary:focus, select:focus {
   @apply outline-none
+}
+
+.input-group.error label {
+  @apply text-pink-600;
+}
+.input-group.error input {
+  @apply border-pink-200;
 }
 
 select {
