@@ -26,9 +26,9 @@ const CurrentTrack = ({ activeRepo, status }) => {
     </p>
   );
 };
-const MemoCurrentTrack = memo(CurrentTrack, (prev, next) =>
-  prev.status === next.status
-);
+const MemoCurrentTrack = memo(CurrentTrack, (prev, next) => {
+  return prev.status === next.status && next.active;
+});
 
 const PlayControls = () => {
   const { dispatch, state } = useContext(store);
@@ -44,7 +44,7 @@ const PlayControls = () => {
 
   return (
     <div>
-      <MemoCurrentTrack activeRepo={activeRepo} status={player.status} />
+      <MemoCurrentTrack activeRepo={activeRepo} status={player.status} active={active} />
       <div class="mt-2" onClick={handlePlayScore}>
         <button class={`fill-button h-16 w-16 ${unchecked} ${active}`}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26">
