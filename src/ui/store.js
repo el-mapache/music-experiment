@@ -1,21 +1,10 @@
-import { h, createContext, isValidElement } from 'preact';
+import { h, createContext } from 'preact';
 import { bootstrap, tock } from 'data/repos';
 import { useReducer } from 'preact/hooks';
 import { ACTION_TYPES } from 'ui/actions';
+import PLAYER_STATUS from 'ui/types/player-status';
+import COMMIT_DATA_STATUS from 'ui/types/commit-status';
 
-const STATUS_TYPES = {
-  ERROR: 'error',
-  SUCCESS: 'success',
-  IDLE: 'idle',
-  BUSY: 'busy'
-};
-const PLAYER_STATUS = {
-  PLAYING: 'playing',
-  PAUSED: 'paused',
-  STOPPED: 'stopped',
-  READY: 'ready',
-  IDLE: 'idle'
-};
 
 const preloadedRepoData = {
   'tock': JSON.parse(tock),
@@ -55,7 +44,7 @@ const initialState = {
     owner: ''
   },
   commitData: {
-    status: STATUS_TYPES.IDLE,
+    status: COMMIT_DATA_STATUS.IDLE,
     data: null,
     error: ''
   }
@@ -108,7 +97,7 @@ function appReducer(state, action) {
         },
         commitData: {
           ...state.commitData,
-          status: STATUS_TYPES.IDLE,
+          status: COMMIT_DATA_STATUS.IDLE,
           error: ''
         }
       };
@@ -122,7 +111,7 @@ function appReducer(state, action) {
         },
         commitData: {
           ...state.commitData,
-          status: STATUS_TYPES.IDLE,
+          status: COMMIT_DATA_STATUS.IDLE,
           error: ''
         }
       };
@@ -144,7 +133,7 @@ function appReducer(state, action) {
         ...state,
         commitData: {
           ...state.commitData,
-          status: STATUS_TYPES.FETCHING
+          status: COMMIT_DATA_STATUS.FETCHING
         }
       }
     }
@@ -153,7 +142,7 @@ function appReducer(state, action) {
         ...state,
         commitData: {
           ...state.commitData,
-          status: STATUS_TYPES.ERROR,
+          status: COMMIT_DATA_STATUS.ERROR,
           error: rest.error
         }
       }
@@ -163,9 +152,13 @@ function appReducer(state, action) {
         ...state,
         commitData: {
           ...state.commitData,
-          status: STATUS_TYPES.SUCCESS,
+          status: COMMIT_DATA_STATUS.SUCCESS,
           error: '',
           data: rest.data
+        },
+        player: {
+          ...state.player,
+          status: PLAYER_STATUS.READY
         }
       }
     }

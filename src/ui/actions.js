@@ -34,10 +34,12 @@ const actions = {
       dispatch({ type: ACTION_TYPES.COMMIT_DATA.FETCHING });
 
       githubClient.getRepoCommitStats(owner, name)
-        .then((data) => dispatch({
-          type: ACTION_TYPES.COMMIT_DATA.SUCCESS,
-          data
-        }))
+        .then((stats) => {
+          dispatch({
+            type: ACTION_TYPES.COMMIT_DATA.SUCCESS,
+            data: stats.data
+          })
+        })
         .catch(() => {
           dispatch({
             type: ACTION_TYPES.COMMIT_DATA.ERROR,

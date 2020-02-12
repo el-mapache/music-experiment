@@ -47,7 +47,7 @@ const RadioGroup = ({ name, label, helpText }) => {
         helpText="Search for repos on GitHub"
         className="flex-1"
         name={name}
-        id="search-repos"
+        id="search-repo"
       />
     </div>
   );

@@ -2,7 +2,8 @@ import { actions } from 'ui/actions';
 import { h } from 'preact';
 import { memo } from 'preact/compat';
 import { useContext } from 'preact/hooks';
-import { store, PLAYER_STATUS } from 'ui/store';
+import { store } from 'ui/store';
+import PLAYER_STATUS from 'ui/types/player-status';
 
 
 const messageHandler = message => (owner, name) =>

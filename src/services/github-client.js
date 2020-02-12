@@ -52,35 +52,12 @@ const repoCommitStats = ({ owner, repo }) => {
  * @param {String} repo
  * @returns {Object} The object representing a year's worth of commits.
  *
- * The commit stats API call needs time to compute a repo's
- * commit history. If the first call doesn't populate the data object
- * return a new promise with a recursive call the getStats inside a timeout --
- * the delay should provide enough time for the API to do its thing
- *
  */
 const getRepoCommitStats = (user, repo) => {
-  let retries = 0;
-
-  function getStats() {
-    return repoCommitStats({
-      owner: user,
-      repo
-    })
-    .then((stats) => {
-      if (stats.data && stats.data.length) {
-        return Promise.resolve(stats.data);
-      }
-
-      return new Promise((resolve) => {
-        if (retries !== MAX_RETRIES) {
-          retries += 1;
-          setTimeout(() => resolve(getStats()), RETRY_TIMEOUT_MS);
-        }
-      });
-    });
-  }
-
-  return getStats();
+  return repoCommitStats({
+    owner: user,
+    repo
+  });
 };
 
 export default {
