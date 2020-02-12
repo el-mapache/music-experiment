@@ -143,3 +143,7 @@ select:focus {
   @apply text-white fill-current;
   background-position: 0 100%;
 }
+
+.disabled {
+  @apply opacity-25 pointer-events-none;
+}

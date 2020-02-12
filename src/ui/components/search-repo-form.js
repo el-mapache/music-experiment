@@ -9,20 +9,24 @@ const handleInput = (dispatch, action) => event =>
 
 const preventSubmit = event => event.preventDefault();
 
+const hasError = (status) =>
+  status === COMMIT_DATA_STATUS.ERROR;
+const isFetching = (status) =>
+  status === COMMIT_DATA_STATUS.FETCHING;
+
 const SearchRepoForm = () => {
   const { dispatch, state: { activeRepo, commitData } } = useContext(store);
   const hasActiveRepo = activeRepo.name && activeRepo.owner;
   // TODO use a class name
-  const disableBtn = !hasActiveRepo || commitData.status === 'error' ? ' opacity-25 pointer-events-none' : ''
+  const disabled = !hasActiveRepo ||
+    hasError(commitData.status) ||
+    isFetching(commitData.status) ? 'disabled' : ''
   const updateActiveRepoName = handleInput(dispatch, actions.setRepoName);
   const updateActiveRepoOwner = handleInput(dispatch, actions.setRepoOwner);
-  const error = commitData.status === 'error' ?
-    'error' : '';
+  const error = hasError(commitData.status) ? 'error' : '';
   
-  const handleSubmit = () => {
-    if (commitData.status !== COMMIT_DATA_STATUS.FETCHING) {
-      actions.COMMIT_DATA.fetch(dispatch)(activeRepo.owner, activeRepo.name);
-    }
+  const handleSubmit = () => { 
+    actions.COMMIT_DATA.fetch(dispatch)(activeRepo.owner, activeRepo.name);
   };
 
   return (
@@ -58,8 +62,8 @@ const SearchRepoForm = () => {
         </div>
         <button
           type="submit"
-          class={`btn-primary ${disableBtn} self-end -my-1`}
-          disabled={!hasActiveRepo}
+          class={`btn-primary ${disabled} self-end -my-1`}
+          disabled={disabled}
           onClick={handleSubmit}
         >
           Get commit data 
