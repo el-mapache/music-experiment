@@ -117,6 +117,10 @@ function appReducer(state, action) {
       };
     }
     case ACTION_TYPES.FORM_UI.SET_FORM_NAME: {
+      // TODO: Another good selector candidate
+      const nextActiveRepo = state.player.status === PLAYER_STATUS.IDLE ? 
+        initialState.activeRepo : state.activeRepo;
+
       return {
         ...state,
         formUI: {
@@ -124,7 +128,7 @@ function appReducer(state, action) {
           activeFormName: rest.formName
         },
         activeRepo: {
-          ...initialState.activeRepo
+          ...nextActiveRepo
         },
         commitData: {
           ...initialState.commitData,

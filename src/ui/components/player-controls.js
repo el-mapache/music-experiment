@@ -21,9 +21,9 @@ const CurrentTrack = ({ activeRepo, status }) => {
   const messageFn = DISPLAY_MESSAGES[status];
 
   return (
-    <p>
+    <h2 class="text-2xl">
       {messageFn(activeRepo.owner, activeRepo.name)}
-    </p>
+    </h2>
   );
 };
 const MemoCurrentTrack = memo(CurrentTrack, (prev, next) => {
@@ -43,7 +43,7 @@ const PlayControls = () => {
   };
 
   return (
-    <div>
+    <div class={`mt-8${!data ? ' hidden' : ''}`}>
       <MemoCurrentTrack activeRepo={activeRepo} status={player.status} active={active} />
       <div class="mt-2" onClick={handlePlayScore}>
         <button class={`fill-button h-16 w-16 ${unchecked} ${active}`}>

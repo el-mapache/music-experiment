@@ -22,21 +22,21 @@ const SearchRepoForm = () => {
   const [ repoInfo, setRepoInfo ] = useState(initialState);
   const { dispatch, state: { commitData } } = useContext(store);
   const hasActiveRepo = repoInfo.name && repoInfo.owner;
-  const disabled = !hasActiveRepo ||
-    hasError(commitData.status) ||
-    isFetching(commitData.status) ? 'disabled' : ''
+  const disabled = !hasActiveRepo || isFetching(commitData.status) ? 'disabled' : '';
+  const error = hasError(commitData.status) ? 'error' : '';
+
   const updateActiveRepoName = (event) =>
     setRepoInfo(info => ({
       ...info,
       name: event.target.value
     }));
-  const updateActiveRepoOwner = (event) =>
+
+    const updateActiveRepoOwner = (event) =>
     setRepoInfo(info => ({
       ...info,
       owner: event.target.value
   }));
-  const error = hasError(commitData.status) ? 'error' : '';
-  
+
   const handleSubmit = () => {
     actions.COMMIT_DATA.fetch(dispatch)(repoInfo.owner, repoInfo.name);
   };
@@ -45,7 +45,7 @@ const SearchRepoForm = () => {
     <form id="search-repo" class="w-full" onClick={preventSubmit}>
       <div class="flex items-center -mx-2">
         <div class={`m-2 my-0 input-group ${error}`}>
-          <label for="repo" class={`block font-bold text-xl text-indigo-700 mb-1 ${error}`}>
+          <label for="repo" class={`block font-normal text-lg text-black mb-1 ${error}`}>
             Repo name
           </label>
           <input
@@ -59,7 +59,7 @@ const SearchRepoForm = () => {
           />
         </div>
         <div class={`m-2 my-0 input-group ${error}`}>
-          <label for="owner" class={`block font-bold text-xl text-indigo-700 mb-1 ${error}`}>
+          <label for="owner" class={`block font-normal text-lg text-black mb-1 ${error}`}>
             Repo owner
           </label>
           <input

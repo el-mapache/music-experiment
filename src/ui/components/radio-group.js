@@ -12,11 +12,11 @@ const RadioToggle = ({ label, helpText, className, setChecked, ...rest }) => {
 
   return (
     <div
-      class={`radio-group-input mr-4 border-blue-400 w-1/2 ${className}${checked}`}
+      class={`radio-group-input mr-4 border-indigo-400 w-1/2 ${className}${checked}`}
       onClick={() => dispatch(actions.FORM_UI.setType(id))}
     >
       <input id={id} type="radio" name={name} class="hidden radio" />
-      <label for={id} class="flex items-top cursor-pointer text-xl">
+      <label for={id} class="flex items-top cursor-pointer text-lg">
         <span class="radio-control"></span>
         <span class="label">
           {label}
@@ -31,10 +31,10 @@ const RadioButton = withCheckable(RadioToggle);
 
 const RadioGroup = ({ name, label, helpText }) => {
   return (
-    <div class="radio-group w-2/3 mb-10 mt-10" role="radiogroup">
+    <div class="radio-group w-2/3 mb-10 mt-8" role="radiogroup">
       <div role="label" class="w-full block mb-1">
-        <h2 class="block font-bold text-xl text-indigo-700">{label}</h2>
-        <em class="font-medium font-serif text-gray-600">{helpText}</em>
+        <h2 class="block font-bold text-lg text-black">{label}</h2>
+        <em class="font-medium font-serif text-gray-800">{helpText}</em>
       </div>
       <RadioButton
         label="Use a preloaded repo"

@@ -47,11 +47,11 @@ select:focus {
 }
 
 .btn-primary {
-  @apply transition-colors ease-in duration-200 bg-teal-400 text-black p-3 rounded-lg;
+  @apply transition ease-in duration-200 bg-purple-300 text-black p-3 rounded-lg;
 }
 
 .btn-primary:focus, .btn-primary:hover {
-  @apply bg-teal-500 shadow-md text-white;
+  @apply bg-purple-500 shadow-md text-white;
 }
 
 .form-group {
@@ -67,7 +67,7 @@ select:focus {
 }
 
 .radio-button {
-  @apply transition ease-in duration-200 rounded py-2;
+  @apply transition ease-in duration-200 rounded text-gray-700;
 }
 
 .radio-button > label:hover {
@@ -86,7 +86,7 @@ select:focus {
   @apply bg-gray-500;
 }
 .radio-button.checked {
-  @apply bg-orange-300;
+  @apply bg-indigo-600 text-white;
   box-shadow: 0 0px 3px 0 rgba(0, 0, 0, 0.1), 0 0px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
@@ -103,7 +103,7 @@ select:focus {
 }
 
 .radio-group-input .help-text {
-  @apply block font-normal font-serif text-gray-700;
+  @apply block font-normal text-gray-700;
 }
 
 .radio-group-input:last-child {
@@ -115,7 +115,7 @@ select:focus {
 }
 
 .radio-group-input.checked {
-  @apply bg-blue-100;
+  @apply bg-indigo-100;
 }
 
 .radio-group-input.checked > label .radio-control {
@@ -124,7 +124,7 @@ select:focus {
 }
 
 .radio-group-input.checked label .label {
-  @apply text-indigo-700 font-semibold;
+  @apply text-black font-semibold;
 }
 
 .unchecked {

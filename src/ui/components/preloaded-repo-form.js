@@ -12,10 +12,10 @@ const RadioButton = ({ id, label, name, checked, value, onClick }) => {
 
   return (
     <div
-      class={`radio-button ${checked}`}
+      class={`radio-button py-2 ${checked}`}
       onClick={handleClick}
     >
-      <label for={id} class="text-gray-700 font-bold py-3 px-4">
+      <label for={id} class="font-bold text-lg py-3 px-4">
         {label}
       </label>
       <input id={id} type="radio" class="hidden toggle" value={value} name={name} />
@@ -29,7 +29,7 @@ const PreloadedRepoForm = ({ setChecked }) => {
 
   return (
     <div>
-      <p class="block font-bold text-xl text-indigo-700 mb-1" role="label">
+      <p class="block font-bold text-lg text-black mb-1" role="label">
         Preloaded repos
       </p>
       <div class="button-group">

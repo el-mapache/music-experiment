@@ -6,13 +6,13 @@ import PlayControls from 'ui/components/player-controls';
 
 const App = () => (
   <StateProvider>
-    <PlayControls />
     <RadioGroup
       label="Choose one"
       helpText="You can always change your mind."
       name="toggle-repo-form-type"
     />
     <RepoFormDispatcher />
+    <PlayControls />
   </StateProvider>
 );
 
