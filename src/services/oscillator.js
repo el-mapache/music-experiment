@@ -1,22 +1,10 @@
 import AudioContextProvider from './audio-context-provider';
-import envelopeFactory from 'factories/envelope-factory';
-
-const defaultState = {
-  frequency: 440,
-  noteName: 'A4',
-  midi: 69,
-  type: 'triangle',
-  peak: 0.8,
-};
 
 // 15ms ramp down time to provide smooth fade out
 const rampDownDelayTime = 0.0015;
 // zero is generally recognized as a non-finite value so we provide
 // a tiny value instead
-const webAudioZero = 0.0001;
-
-// for converting a number in seconds to milliseconds
-const msInSecond = 1000;
+const webAudioZero = .0001;
 
 /**
  * Handles building an oscillator for a single sound event. Once a context is injected,
@@ -33,27 +21,20 @@ const msInSecond = 1000;
  *    @param {Object} oscState describe the oscillator { frequency: number, type: string, peak: float }
  *    @param {Envelope} adsr values for the oscillator
  */
-const oscillator = context => (oscState, envelope = envelopeFactory()) => {
-  const options = { ...defaultState, ...oscState };
+const oscillator = context => (oscSettings) => {
   const osc = context.createOscillator();
   const gain = context.createGain();
-  const attack = envelope.a / msInSecond;
-  const decay = envelope.d / msInSecond;
-  const sustain = envelope.s / msInSecond;
-  const release = envelope.r / msInSecond;
-  const hold = envelope.h / 100;
 
-  osc.type = options.type;
-  osc.frequency.value = options.frequency;
+  osc.frequency.value = oscSettings.frequency;
   osc.connect(gain);
 
   return {
     get duration() {
-      return decay + sustain;
+      return oscSettings.duration;
     },
 
     get envelope() {
-      return envelope;
+      return oscSettings.envelope;
     },
 
     get context() {
@@ -74,24 +55,26 @@ const oscillator = context => (oscState, envelope = envelopeFactory()) => {
      */
     toJSON() {
       return {
-        ...options
+        ...oscSettings
       };
     },
 
     start(time) {
-      const { peak } = options;
+      const { peak } = oscSettings;
+      const envelope = this.envelope;
 
       // schedule a move to zero out the oscillator's gain
       gain.gain.setValueAtTime(webAudioZero, time);
       // schedule the node's time to max volume
-      gain.gain.linearRampToValueAtTime(peak, time + attack);
+      gain.gain.linearRampToValueAtTime(peak, time + envelope.attack);
       // schedule time node should play at volume
-      gain.gain.linearRampToValueAtTime(hold * peak, attack + sustain + decay + time);
+      gain.gain.linearRampToValueAtTime(envelope.hold * peak, envelope.attack + envelope.sustain + envelope.decay + time);
       osc.start(time);
     },
 
     stop(time) {
-      const stopTime = attack + sustain + decay + release + time;
+      const envelope = this.envelope;
+      const stopTime = envelope.attack + envelope.sustain + envelope.decay + envelope.release + time;
       // Schedule a fade-out
       gain.gain.exponentialRampToValueAtTime(webAudioZero, time, rampDownDelayTime);
       osc.stop(stopTime);

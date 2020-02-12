@@ -17,50 +17,40 @@ const serial = (data, handler, onDone) => {
   next();
 };
 
-const humanize = (time) => time - 0.01 / 2 + Math.random() * 0.01;
+const humanize = (time) => {
+  return time - .01 / 2 + Math.random() * .01;
+}
 
-const sequencer = context => ({ bpm = 120, beatLength }) => {
-  let noteValues = getNoteTimings(bpm, beatLength);
-
-  function hasChangedBPM(newBPM = null) {
-    return newBPM && newBPM !== bpm;
-  }
-  
+const sequencer = context => () => {
   return {
-    play(sequences, newBPM = null) {
+    play(sequences) {
       if (context.state ==='suspended' || context.state !== 'running') {
         context.resume();
       }
 
-      // tempo has changed, update length of each note type
-      if (hasChangedBPM(newBPM)) {
-        noteValues = getNoteTimings(newBPM);
-      }
-
-      return new Promise((resolve, reject) => {
-        sequences.forEach(sequence => serial(sequence, this.run.bind(this), resolve));
+      return new Promise((resolve) => {
+        sequences.forEach(sequence =>
+          serial(sequence, this.run.bind(this), resolve)
+        );
       });
     },
 
     /**
-     *
-     * @param { AudioNodeObject | Array[AudioNodeObjects] } notes
-     * @param { Number } bpm
+     * Schedules when to play notes
+     * @param {Chord} An instance of the chord class
+     * @param {Number} bpm
      *
      * Given one or several AudioNode objects, play them all at the current time,
      * for the length of time indicated by the object
-     * TODO: Should this be a note object that inherits from an audionode object,
-     * and provides its length?
      */
-    run(notes, nextNoteFn) {
-      const notesToPlay = Array.isArray(notes) ? notes : [notes];
+    run(chord, nextNoteFn) {
+      const tonesToPlay = chord.oscillators;
       const now = context.currentTime;
       let timeTilNextNote = 0;
 
-      notesToPlay.forEach(({ node, noteType }) => {
-        const noteLength = noteValues[noteType];
-        // Get the sustain of a note, and add it to the current time
-        const noteDuration = humanize(node.duration + now);
+      tonesToPlay.forEach((tone) => {
+        const { timing, duration } = tone;
+        const humanized = humanize(now + duration);
         // We want to figure out what the shortest note in this chord is,
         // so we know when to schedule the next note.
 
@@ -71,17 +61,17 @@ const sequencer = context => ({ bpm = 120, beatLength }) => {
         // but the A continues to sound as the next 3 notes are played.
         // TODO: this double if thing feel reaaaal clunky
         if (!timeTilNextNote) {
-          timeTilNextNote = noteLength;
+          timeTilNextNote = timing;
         }
 
-        if (noteLength < timeTilNextNote) {
-          timeTilNextNote = noteLength
+        if (timing < timeTilNextNote) {
+          timeTilNextNote = timing
         }
 
         // start should ramp gain up to current time, then play
-        node.start(now);
+        tone.osc.start(now);
         // stop should ramp gain down to stop time, then stop
-        node.stop(noteDuration + noteLength);
+        tone.osc.stop(humanized + timing);
       });
 
       setTimeout(nextNoteFn, timeTilNextNote * msPerSecond);

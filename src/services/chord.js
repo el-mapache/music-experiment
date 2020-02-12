@@ -1,3 +1,5 @@
+import SCALES from 'types/scales';
+
 /**
  * Returns a note in the supplied scale and the note's octave
  * as a string
@@ -34,7 +36,7 @@ class Chord {
    * @param {Array} props.scale The musical scale this group of tones pulls from, represented as a 7-element list
    * @returns Chord
    */
-  constructor({ volume, scale }) {
+  constructor({ volume, scale = SCALES.PHRYGIAN }) {
     // Speed helps determine the length of the note. 0 -> slowest, 100 -> fastest
     this.speed = 0;
     // maybe i can randomly assign these volumes so
@@ -50,14 +52,14 @@ class Chord {
   // TODO: this assumes collection of data in 7 day format,
   // which I dont love
   addNotes(data) {
-    this.notes = data.reduce((notes, el, index) => {
-      if (el) {
+    this.notes = data.reduce((notes, count, index) => {
+      if (count) {
         notes.push(
           getNoteAndOctave(this.scale, 7, 3, index),
         );
       }
 
-      this.speed = Math.max(el, this.speed);
+      this.speed = Math.max(count, this.speed);
 
       return notes;
     }, [0]);

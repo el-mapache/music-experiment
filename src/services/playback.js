@@ -1,6 +1,7 @@
 import sequencer from 'services/sequencer';
-import buildScore from 'services/score-builder';
 import recorder from 'services/recorder';
+import buildNoteSequence from 'services/note-sequence';
+import audioGraph from 'models/audio-graph';
 
 
 let lastData;
@@ -9,14 +10,17 @@ let myRecorder = recorder();
 const playScore = (data) => {
   //myRecorder.start();
   
-  const score = buildScore(data);
-
-  const radSequencer = sequencer({
+  const sequence = buildNoteSequence({
+    commitStats: data,
     bpm: 180,
-    beatLength: score.meter.beatLength
+    timeSignature: [6, 8]
   });
   
-  return radSequencer.play([score.notes], 180)
+  const finalSequence = audioGraph(sequence);
+
+  const commitSequencer = sequencer();
+  
+  return commitSequencer.play([finalSequence.toneClusters], 180)
     .then(() => {
       //myRecorder.stop();
     });
