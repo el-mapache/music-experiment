@@ -3,6 +3,7 @@ import { h } from 'preact';
 import { store  } from 'ui/store';
 import { useContext } from 'preact/hooks';
 import COMMIT_DATA_STATUS from 'ui/types/commit-status';
+import ErrorMessage from 'ui/components/error-message';
 
 const handleInput = (dispatch, action) => event =>
   dispatch(action(event.target.value));
@@ -17,7 +18,6 @@ const isFetching = (status) =>
 const SearchRepoForm = () => {
   const { dispatch, state: { activeRepo, commitData } } = useContext(store);
   const hasActiveRepo = activeRepo.name && activeRepo.owner;
-  // TODO use a class name
   const disabled = !hasActiveRepo ||
     hasError(commitData.status) ||
     isFetching(commitData.status) ? 'disabled' : ''
@@ -68,7 +68,8 @@ const SearchRepoForm = () => {
         >
           Get commit data 
         </button>
-      </div> 
+      </div>
+      <ErrorMessage forState='commitData' />
     </form>
   );
 };

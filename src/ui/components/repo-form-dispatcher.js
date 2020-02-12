@@ -1,7 +1,6 @@
 import { h } from 'preact';
 import { useContext } from 'preact/hooks';
 import { store } from 'ui/store';
-import ErrorMessage from 'ui/components/error-message';
 import PreloadedRepoForm from 'ui/components/preloaded-repo-form';
 import SearchRepoForm from 'ui/components/search-repo-form';
 
@@ -21,12 +20,7 @@ const RepoFormDispatcher = () => {
 
   const FormComponent = FORM_TYPES[activeFormName] || FORM_TYPES.default;
 
-  return (
-    <div>
-      <FormComponent />
-      <ErrorMessage forState='commitData' />
-    </div>
-  );
+  return <FormComponent />;
 };
 
 export default RepoFormDispatcher;
