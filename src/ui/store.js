@@ -125,6 +125,10 @@ function appReducer(state, action) {
         },
         activeRepo: {
           ...initialState.activeRepo
+        },
+        commitData: {
+          ...initialState.commitData,
+          data: state.commitData.data,
         }
       };
     }
