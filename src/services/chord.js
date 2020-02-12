@@ -47,6 +47,15 @@ class Chord {
     // @example E4
     this.notes = [];
     this.scale = scale;
+    this.time = null;
+  }
+
+  get totalTime() {
+    return this.time;
+  }
+
+  set totalTime(value) {
+    this.time = value;
   }
 
   // TODO: this assumes collection of data in 7 day format,

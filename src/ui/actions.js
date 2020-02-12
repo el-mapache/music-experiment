@@ -35,7 +35,8 @@ const actions = {
 
       githubClient.getRepoCommitStats(owner, name)
         .then((stats) => {
-          dispatch({ type: ACTION_TYPES.SET_REPO, owner, name });
+          dispatch({ type: ACTION_TYPES.SET_REPO_NAME, name });
+          dispatch({ type: ACTION_TYPES.SET_REPO_OWNER, owner });
           dispatch({
             type: ACTION_TYPES.COMMIT_DATA.SUCCESS,
             data: stats.data
@@ -51,7 +52,7 @@ const actions = {
     load: dispatch => data => {
       dispatch({
         type: ACTION_TYPES.COMMIT_DATA.SUCCESS,
-        data
+        data: data
       });
     }
   },

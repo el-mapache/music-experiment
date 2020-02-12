@@ -7,7 +7,7 @@ const types = ['sine', 'square', 'triangle', 'sawtooth'];
 const getRandomWaveType = () => types[Math.floor(Math.random() * 4)];
 
 class Tone {
-  constructor({ noteName, timing, peak,  noteType, envelope = envelopeFactory(), toneType = 'sine' }) {
+  constructor({ noteName, timing, peak,  noteType, envelope = envelopeFactory(), toneType = 'triangle' }) {
     this.noteType = noteType;
     this.noteName = noteName;
     this.frequency = frequency(noteName);

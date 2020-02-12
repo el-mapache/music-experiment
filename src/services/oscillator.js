@@ -25,6 +25,7 @@ const oscillator = context => (oscSettings) => {
   const osc = context.createOscillator();
   const gain = context.createGain();
 
+  osc.type = oscSettings.toneType;
   osc.frequency.value = oscSettings.frequency;
   osc.connect(gain);
 

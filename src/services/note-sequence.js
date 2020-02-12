@@ -3,7 +3,7 @@ import Meter from 'models/meter';
 import Chord from 'services/chord';
 import NOTE_VALUES from 'types/note-values';
 
-const MAX_VOLUME = .85;
+const MAX_VOLUME = 85;
 
 const defaultNoteDuration = (timeSignature) => {
   const baselineDuration = timeSignature[1];
@@ -60,13 +60,22 @@ const makeChords = data =>
 // why am i mapping everything so many times
 const buildNoteSequence = ({ commitStats, timeSignature, bpm }) => { 
   let startTime = 0;
+  let finalTime = 0;
+
   const meter = new Meter({ timeSignature, tempo: bpm });
   const chords = makeChords(commitStats);
   const toneClusters = chords.reduce((clusters, cluster) => {
     const { volume, speed } = cluster;
-    const fractionalVolume = volume / cluster.notes.length;
-    const noteType = getNoteValue(speed);
+    const clusterLen = cluster.notes.length;
+    const fractionalVolume = volume / (clusterLen * 2);
+    const noteType = getNoteValue(speed, meter.timeSignature);
 
+    // Reset chord time at each iteration so that the overall
+    // length of the piece is not counted per tone, but per tone cluster
+    // For example, if a cluster has 7 tones, we want each of those
+    // tones to account for a single unit of time when calculating the
+    // total length of the song.
+    let clusterTime = 0;
     cluster.notes = cluster.notes.map((note) => {
       const tone = new Tone({
         noteName: note,
@@ -75,12 +84,18 @@ const buildNoteSequence = ({ commitStats, timeSignature, bpm }) => {
         noteType: noteType,
       });
 
-      tone.addTimingInfo(startTime);
-      startTime = tone.endTime;
+      // Every tone in a chords should occupy the same starting
+      // point in time
+      tone.addTimingInfo(clusterTime);
+      clusterTime = tone.endTime;
 
       return tone;
     });
 
+    startTime += (clusterTime / clusterLen);
+    finalTime += (startTime / chords.length);
+
+    cluster.totalTime = finalTime;
     clusters.push(cluster);
 
     return clusters;
@@ -88,7 +103,7 @@ const buildNoteSequence = ({ commitStats, timeSignature, bpm }) => {
 
   return {
     toneClusters,
-    totalTime: parseFloat(startTime.toFixed(2))
+    totalTime: parseFloat(finalTime.toFixed(2))
   };
 };
 

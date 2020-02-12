@@ -13,7 +13,8 @@ const AudioGraph = (sequence) => {
         return {
           osc,
           timing: note.timing,
-          duration: note.duration 
+          duration: note.duration,
+          endTime: note.endTime
         };
       });
   });

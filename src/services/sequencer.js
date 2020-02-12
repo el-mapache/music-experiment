@@ -1,5 +1,4 @@
 import AudioContextProvider from './audio-context-provider';
-import { getNoteTimings } from './timing';
 
 const msPerSecond = 1000;
 
@@ -19,18 +18,42 @@ const serial = (data, handler, onDone) => {
 
 const humanize = (time) => {
   return time - .01 / 2 + Math.random() * .01;
-}
+};
+
+const subscribers = new Map();
+let playingTime = 0;
 
 const sequencer = context => () => {
   return {
+    subscribe(name, handler) {
+      if (!name) {
+        throw new TypeError('.subscribe requires a key to reference.');
+      }
+
+      if (typeof handler !== 'function') {
+        throw new TypeError('.subscribe requires a function as its second argument.');
+      }
+      subscribers.set(name, handler);
+    },
     play(sequences) {
       if (context.state ==='suspended' || context.state !== 'running') {
         context.resume();
       }
+      
+      // good candidate for a leading edge debounce
+      subscribers.forEach((fn) => fn(playingTime));
+      const playTimeCounter = setInterval(() => {
+        subscribers.forEach((fn) => fn(playingTime));
+        playingTime += 1;
+      }, msPerSecond);
 
       return new Promise((resolve) => {
         sequences.forEach(sequence =>
-          serial(sequence, this.run.bind(this), resolve)
+          serial(sequence, this.run.bind(this), () => {
+            clearInterval(playTimeCounter);
+            playingTime = 0;
+            resolve();
+          })
         );
       });
     },
