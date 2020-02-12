@@ -155,7 +155,6 @@ function appReducer(state, action) {
       return {
         ...state,
         commitData: {
-          ...state.commitData,
           status: COMMIT_DATA_STATUS.SUCCESS,
           error: '',
           data: rest.data

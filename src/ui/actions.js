@@ -35,6 +35,7 @@ const actions = {
 
       githubClient.getRepoCommitStats(owner, name)
         .then((stats) => {
+          dispatch({ type: ACTION_TYPES.SET_REPO, owner, name });
           dispatch({
             type: ACTION_TYPES.COMMIT_DATA.SUCCESS,
             data: stats.data

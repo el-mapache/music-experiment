@@ -1,12 +1,15 @@
 import { actions } from 'ui/actions';
 import { h } from 'preact';
 import { store  } from 'ui/store';
-import { useContext } from 'preact/hooks';
+import { useContext, useState } from 'preact/hooks';
 import COMMIT_DATA_STATUS from 'ui/types/commit-status';
 import ErrorMessage from 'ui/components/error-message';
 
-const handleInput = (dispatch, action) => event =>
-  dispatch(action(event.target.value));
+
+const initialState = {
+  owner: '',
+  name: ''
+};
 
 const preventSubmit = event => event.preventDefault();
 
@@ -16,17 +19,26 @@ const isFetching = (status) =>
   status === COMMIT_DATA_STATUS.FETCHING;
 
 const SearchRepoForm = () => {
-  const { dispatch, state: { activeRepo, commitData } } = useContext(store);
-  const hasActiveRepo = activeRepo.name && activeRepo.owner;
+  const [ repoInfo, setRepoInfo ] = useState(initialState);
+  const { dispatch, state: { commitData } } = useContext(store);
+  const hasActiveRepo = repoInfo.name && repoInfo.owner;
   const disabled = !hasActiveRepo ||
     hasError(commitData.status) ||
     isFetching(commitData.status) ? 'disabled' : ''
-  const updateActiveRepoName = handleInput(dispatch, actions.setRepoName);
-  const updateActiveRepoOwner = handleInput(dispatch, actions.setRepoOwner);
+  const updateActiveRepoName = (event) =>
+    setRepoInfo(info => ({
+      ...info,
+      name: event.target.value
+    }));
+  const updateActiveRepoOwner = (event) =>
+    setRepoInfo(info => ({
+      ...info,
+      owner: event.target.value
+  }));
   const error = hasError(commitData.status) ? 'error' : '';
   
-  const handleSubmit = () => { 
-    actions.COMMIT_DATA.fetch(dispatch)(activeRepo.owner, activeRepo.name);
+  const handleSubmit = () => {
+    actions.COMMIT_DATA.fetch(dispatch)(repoInfo.owner, repoInfo.name);
   };
 
   return (
@@ -42,7 +54,7 @@ const SearchRepoForm = () => {
             name="repo"
             placeholder="enter repo name"
             class={`input ${error}`}
-            value={activeRepo.name}
+            value={repoInfo.name}
             onInput={updateActiveRepoName}
           />
         </div>
@@ -56,7 +68,7 @@ const SearchRepoForm = () => {
             name="owner"
             placeholder="enter repo owner"
             class={`input ${error}`}
-            value={activeRepo.owner}
+            value={repoInfo.owner}
             onInput={updateActiveRepoOwner}
           />
         </div>
