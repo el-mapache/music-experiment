@@ -1,7 +1,14 @@
 {
     "presets": [
-        "env",
-        "es2015"
+        "@babel/preset-env"
     ],
-    "plugins": ["transform-async-to-generator", "transform-object-rest-spread"]
+    "plugins": [
+        "transform-async-to-generator",
+        "@babel/plugin-proposal-object-rest-spread",
+        [
+            "@babel/plugin-transform-react-jsx", {
+            "pragma": "h",
+            "pragmaFrag": "Fragment"
+        }]
+    ]
 }
