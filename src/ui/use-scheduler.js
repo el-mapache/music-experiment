@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'preact/hooks';
 import { commitSequencerSubscriber } from 'services/playback';
 
-const initialState = {
-  tick: 0
-};
 
-const subscriptionName = 'useSchedule'
-
-const useScheduler = () => {
+const useScheduler = (name, initialState) => {
   const [ state, setState ] = useState(initialState);
 
   useEffect(() => {
-    commitSequencerSubscriber(subscriptionName, (currentTime) => {
-      setState({ tick: currentTime });
+    commitSequencerSubscriber(name, (nextState) => {
+      setState(state => ({
+        ...state,
+        ...nextState
+      }));
     }, [])
   });
  
   return state;
 }
 
-export { useScheduler };
+export default useScheduler;

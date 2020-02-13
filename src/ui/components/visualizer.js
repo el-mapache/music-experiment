@@ -1,6 +1,6 @@
 import { h, createRef } from 'preact';
 import p5 from 'p5'
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 
 const p5Events = [
   'movedX',
@@ -24,30 +24,54 @@ const p5Events = [
   'keyTyped',
   'keyIsDown',
   'draw',
+  'handleRedraw',
+  
 ];
 
 const Visualizer = (props) => {
   const canvasRef = createRef();
+  const [ myp5, setP5 ] = useState(null)
+  const [ isDrawing, setIsDrawing ] = useState(false);
 
   useEffect(() => {
-    const myp5 = new p5((p) => {
+    const p5Inst = new p5((p, args) => {
       p5Events.forEach((override) => {
         if (override in props) {
           p[override] = (...args) => {
-            props[override](p, ...args)
+            props[override](p, ...args);
           }
         }
       });
+
+      return p;
     });
 
-    myp5.createCanvas(400, 250).parent(canvasRef.current);
-    myp5.frameRate(60);
-    myp5.displayDensity(1)
+    p5Inst.createCanvas(400, 250).parent(canvasRef.current);
+
+    if (props.setup) {
+      props.setup(p5Inst);
+    }
+
+    setP5(p5Inst);
 
     return () => {
-      myp5.remove();
+      p5Inst.remove();
     }
   }, []);
+
+  if (!props.isActive && myp5 && myp5._loop) {
+    myp5.noLoop();
+  }
+
+  if (props.chord && props.isActive) {
+    if (!myp5._loop) {
+      myp5.loop()
+    }
+
+    myp5.draw = () => {
+      props.draw(myp5, props.chord);
+    }
+  }
 
   return <section ref={canvasRef} style={{overflow: 'hidden'}}></section>;
 };

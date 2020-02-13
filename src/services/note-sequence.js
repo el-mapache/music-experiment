@@ -104,7 +104,7 @@ const buildNoteSequence = ({ commitStats, timeSignature, bpm }) => {
 
   return {
     toneClusters,
-    totalTime: parseFloat(finalTime.toFixed(2))
+    totalTime: finalTime
   };
 };
 

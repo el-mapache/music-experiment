@@ -16,7 +16,8 @@ const initialState = {
   player: {
     status: PLAYER_STATUS.IDLE,
     totalTime: '',
-    timeRemaining: ''
+    timeRemaining: '',
+    currentTime: ''
   },
   recorder: {
     isActive: false,
@@ -185,6 +186,15 @@ function appReducer(state, action) {
         player: {
           ...state.player,
           status: PLAYER_STATUS.STOPPED
+        }
+      }
+    }
+    case ACTION_TYPES.PLAYER.RESET_CURRENT_TIME: {
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          currentTime: 0
         }
       }
     }

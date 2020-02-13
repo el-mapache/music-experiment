@@ -13,7 +13,8 @@ const ACTION_TYPES = {
   },
   PLAYER: {
     PLAY: 'player.play',
-    DONE: 'player.done'
+    DONE: 'player.done',
+    RESET_CURRENT_TIME: 'player.resetCurrentTime'
   },
   SET_REPO: 'setRepo',
   SET_REPO_NAME: 'setRepoName',
@@ -64,6 +65,11 @@ const actions = {
         .then(() => {
           dispatch({ type: ACTION_TYPES.PLAYER.DONE });
         })
+    },
+    resetCurrentTime() {
+      return {
+        type: ACTION_TYPES.PLAYER.RESET_CURRENT_TIME
+      };
     }
   },
   setRepo(name, owner) {

@@ -1,4 +1,4 @@
-import frequency, { toMIDI } from 'services/frequency';
+import frequency from 'services/frequency';
 import envelopeFactory from 'factories/envelope-factory';
 
 const WEB_AUDIO_ZERO = .0001;
@@ -32,8 +32,8 @@ class Tone {
 
   addTimingInfo(offsetStartTime) {
     const noteEnd = offsetStartTime + this.duration + this.timing;
-    this.startTime = parseFloat(offsetStartTime.toFixed(2)),
-    this.endTime = parseFloat(noteEnd.toFixed(2))
+    this.startTime = offsetStartTime;
+    this.endTime = noteEnd;
   }
 
   humanize(time) {
@@ -42,4 +42,3 @@ class Tone {
 }
 
 export { Tone };
-
