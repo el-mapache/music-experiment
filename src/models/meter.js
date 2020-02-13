@@ -1,3 +1,4 @@
+import { getNoteTimings } from 'services/timing';
 /**
  * @class Meter
  * 
@@ -35,7 +36,8 @@ class Meter {
    * @param {Object} props
    * @params {Array} props.timeSignature 
    */
-  constructor({ timeSignature = [4, 4] }) {
+  constructor({ timeSignature = [4, 4], tempo = 120 }) {
+    this.tempo = tempo;
     /**
      * @type {Number} 
     */ 
@@ -56,6 +58,7 @@ class Meter {
     this.quarterNotesPerMeasure = 4 * (this.numerator / this.denominator);
     this.beatsPerBar = this.getBeatsPerBar();
     this.beatLength = this.quarterNotesPerMeasure / this.beatsPerBar;
+    this.noteTiming = getNoteTimings(this.tempo, this.beatLength);
   }
 
   getBeatsPerBar() {
@@ -67,6 +70,10 @@ class Meter {
       case 4:
         return this.numerator;
     }
+  }
+
+  getTimeForNote(type) {
+    return this.noteTiming[type];
   }
 }
 

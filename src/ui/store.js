@@ -4,6 +4,7 @@ import { useReducer } from 'preact/hooks';
 import { ACTION_TYPES } from 'ui/actions';
 import PLAYER_STATUS from 'ui/types/player-status';
 import COMMIT_DATA_STATUS from 'ui/types/commit-status';
+import buildNoteSequence from 'services/build-note-sequence';
 
 
 const preloadedRepoData = {
@@ -84,7 +85,7 @@ function appReducer(state, action) {
         },
         commitData: {
           ...state.commitData,
-          data: preloadedData
+          data: buildNoteSequence(preloadedData)
         }
       };
     }
@@ -161,7 +162,7 @@ function appReducer(state, action) {
         commitData: {
           status: COMMIT_DATA_STATUS.SUCCESS,
           error: '',
-          data: rest.data
+          data: buildNoteSequence(rest.data)
         },
         player: {
           ...state.player,

@@ -20,10 +20,11 @@ const audioChannel = context => ({ gain = defaultChannelGain } = {}) => {
   channelGain.connect(context.destination);
 
   return {
-    add(audioNodes) {
-      const nodes = Array.isArray(audioNodes) ? audioNodes : [audioNodes];
-
-      nodes.forEach((audioNode) => {  
+    addNode(audioNode) {
+      audioNode.connectTo(channelGain);
+    },
+    addNodes(audioNodes) {
+      audioNodes.forEach((audioNode) => {
         audioNode.connectTo(channelGain);
       });
     }

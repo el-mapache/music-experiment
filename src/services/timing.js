@@ -4,14 +4,6 @@ import NOTE_BEAT_VALUES from 'types/note-beat-values';
 const secondsPerMinute = 60;
 
 /**
- * Convert beats-per-miinute to beats-per-second
- * 
- * @param {Number} bpm beats per minute
- * @returns {Number} beats per second
- */
-const computeBeatsPerSecond = bpm => bpm / secondsPerMinute;
-
-/**
  * 
  * @param {Number} bpm Beats per minute
  * @param {Number} rawBeatLength Length of a single beat in 4 / 4 time
@@ -49,8 +41,6 @@ const getNoteTimings = (bpm, beatLength = 1.5) => {
 };
 
 export {
-  computeBeatsPerSecond,
-  computeNoteLength,
   getNoteTimings
 };
 export default getNoteTimings;

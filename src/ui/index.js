@@ -2,7 +2,7 @@ import {h, render } from 'preact';
 import StateProvider from 'ui/store';
 import RadioGroup from 'ui/components/radio-group';
 import RepoFormDispatcher from 'ui/components/repo-form-dispatcher';
-import PlayControls from 'ui/components/player-controls';
+import Playback from 'ui/components/playback';
 
 const App = () => (
   <StateProvider>
@@ -12,7 +12,7 @@ const App = () => (
       name="toggle-repo-form-type"
     />
     <RepoFormDispatcher />
-    <PlayControls />
+    <Playback />
   </StateProvider>
 );
 

@@ -6,7 +6,8 @@ import withCheckable from 'ui/with-checkable';
 
 
 const RadioButton = ({ id, label, name, checked, value, onClick }) => {
-  const handleClick = () => {
+  const handleClick = (event) => {
+    event.preventDefault();
     onClick(actions.setRepo(id, value));
   };
 
