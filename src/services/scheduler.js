@@ -20,15 +20,23 @@ const humanize = (time) => {
   return time - .01 / 2 + Math.random() * .01;
 };
 
-
 const subscribers = {
   'timer': [],
   'sound': [] 
 };
+
+const getWebAudioTime = (now, totalPlayTime) => now - totalPlayTime;
+const notifyTimerSubs = (now, total) => ({
+  tick: getWebAudioTime(now, total)
+});
+
 let playingTime = 0;
 
-const scheduler = context => ({ onRun } = {onRun: null}) => {
+const scheduler = context => () => {
   return {
+    now() {
+      return context.currentTime;
+    },
     subscribe(name, handler) {
       if (!name) {
         throw new TypeError('.subscribe requires a key to reference.');
@@ -43,26 +51,28 @@ const scheduler = context => ({ onRun } = {onRun: null}) => {
       }
     },
     play(sequence) {
-      if (context.state ==='suspended' || context.state !== 'running') {
+      if (context.state === 'suspended' || context.state !== 'running') {
         context.resume();
       }
 
       const toNotify = subscribers.timer;
 
       return new Promise((resolve) => {
-        // good candidate for a leading edge debounce
-        toNotify.forEach((fn) => fn({ tick: playingTime }));
-
         const playTimeCounter = setInterval(() => {
-          toNotify.forEach((fn) => fn({ tick: playingTime }));
-          playingTime += 1;
+          toNotify.forEach((fn) => fn(notifyTimerSubs(this.now(), playingTime)));
         }, msPerSecond);
           
         serial(sequence, this.run.bind(this), () => {
+          toNotify.forEach((fn) => fn(notifyTimerSubs(this.now(), playingTime)));
           clearInterval(playTimeCounter);
-          playingTime = 0;
+          playingTime = this.now();
+          context.suspend();
+
+
           resolve();
         });
+
+        toNotify.forEach((fn) => fn(notifyTimerSubs(this.now(), playingTime)));
       });
     },
 
@@ -83,9 +93,9 @@ const scheduler = context => ({ onRun } = {onRun: null}) => {
      */
     run(chord, nextNoteFn) {
       const tonesToPlay = chord.oscillators;
-      const now = context.currentTime;
+      const now = this.now();
       const toNotify = subscribers.sound;
-
+      
       let timeTilNextNote = 0;
 
       tonesToPlay.forEach((tone) => {

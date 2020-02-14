@@ -117,7 +117,7 @@ select:focus {
 }
 
 .radio-group-input.checked {
-  @apply bg-indigo-100 shadow-lg;
+  @apply bg-gray-100 shadow-xl;
 }
 
 .radio-group-input.checked > label .radio-control {
@@ -148,4 +148,22 @@ select:focus {
 
 .disabled {
   @apply opacity-25 pointer-events-none;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }

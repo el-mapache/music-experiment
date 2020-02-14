@@ -15,9 +15,10 @@ const preloadedRepoData = {
 const initialState = {
   player: {
     status: PLAYER_STATUS.IDLE,
-    totalTime: '',
+    totalTime: 0,
     timeRemaining: '',
-    currentTime: ''
+    currentTime: 0,
+    graph: null
   },
   recorder: {
     isActive: false,
@@ -176,7 +177,8 @@ function appReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          status: PLAYER_STATUS.PLAYING
+          status: PLAYER_STATUS.PLAYING,
+          currentTime: 0
         }
       }
     }
@@ -185,16 +187,27 @@ function appReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          status: PLAYER_STATUS.STOPPED
+          status: PLAYER_STATUS.STOPPED,
+          totalTime: rest.totalTime,
+          graph: null
         }
-      }
+      };
     }
-    case ACTION_TYPES.PLAYER.RESET_CURRENT_TIME: {
+    case ACTION_TYPES.PLAYER.UPDATE_TIME: {
       return {
         ...state,
         player: {
           ...state.player,
-          currentTime: 0
+          currentTime: rest.currentTime
+        }
+      };
+    }
+    case ACTION_TYPES.PLAYER.VIZ: {
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          graph: rest.graph
         }
       }
     }

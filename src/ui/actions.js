@@ -14,7 +14,8 @@ const ACTION_TYPES = {
   PLAYER: {
     PLAY: 'player.play',
     DONE: 'player.done',
-    RESET_CURRENT_TIME: 'player.resetCurrentTime'
+    UPDATE_TIME: 'player.updateTime',
+    VIZ: 'player.viz',
   },
   SET_REPO: 'setRepo',
   SET_REPO_NAME: 'setRepoName',
@@ -61,14 +62,29 @@ const actions = {
     play: dispatch => data => {
       dispatch({ type: ACTION_TYPES.PLAYER.PLAY });
 
-      playback.play(data)
-        .then(() => {
-          dispatch({ type: ACTION_TYPES.PLAYER.DONE });
+      playback.buildAudioGraph(data)
+        .then((graph) => {
+          dispatch({
+            type: ACTION_TYPES.PLAYER.VIZ,
+            graph
+          });
+
+          return graph;
+        })
+        .then((graph) => {
+          return playback.play(graph);
+        })
+        .then((graph) => {
+          dispatch({
+            type: ACTION_TYPES.PLAYER.DONE,
+            totalTime: graph.context.currentTime
+          });
         })
     },
-    resetCurrentTime() {
+    updateTime(time) {
       return {
-        type: ACTION_TYPES.PLAYER.RESET_CURRENT_TIME
+        type: ACTION_TYPES.PLAYER.UPDATE_TIME,
+        currentTime: time.tick
       };
     }
   },

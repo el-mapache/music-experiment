@@ -4,6 +4,7 @@ import oscillator from 'services/oscillator';
 
 const AudioGraph = (sequence) => {
   const channel = audioChannel();
+  const analyserNode = analyser({ fftSize: 128 });
 
   sequence.toneClusters.forEach((toneCluster) => {
     toneCluster.oscillators = toneCluster.notes.map(note => {
@@ -23,47 +24,48 @@ const AudioGraph = (sequence) => {
       });
   });
 
-  channel.channel.connect(analyser({ fftSize: 128 }));
-  analyser.connect(analyser.context.destination);
+  channel.channel.connect(analyserNode);
+  analyserNode.connect(analyserNode.context.destination);
 
   return {
     channel,
-    analyser,
-    sequence
+    analyser: analyserNode,
+    sequence,
+    context: analyserNode.context
   };
 };
 
-class Graph {
-  constructor(fftSize) {
-    this.output = audioChannel();
-    this.analyser = analyser({ fftSize });
+// class Graph {
+//   constructor(fftSize) {
+//     this.output = audioChannel();
+//     this.analyser = analyser({ fftSize });
 
-    this.output.channel.connect(this.analyser);
-    this.analyser.connect(this.analyser.context.destination);
-  }
+//     this.output.channel.connect(this.analyser);
+//     this.analyser.connect(this.analyser.context.destination);
+//   }
 
-  build(sequence) {
-    sequence.toneClusters.forEach((toneCluster) => {
-      toneCluster.oscillators = toneCluster.notes.map(note => {
-          const osc = oscillator(note);
-          osc.connectTo(osc.context.destinationStream);
-          this.output.addNode(osc);
+//   build(sequence) {
+//     sequence.toneClusters.forEach((toneCluster) => {
+//       toneCluster.oscillators = toneCluster.notes.map(note => {
+//           const osc = oscillator(note);
+//           osc.connectTo(osc.context.destinationStream);
+//           this.output.addNode(osc);
   
-          return {
-            osc,
-            noteName: note.noteName,
-            frequency: note.frequency,
-            peak: note.peak,
-            timing: note.timing,
-            duration: note.duration,
-            endTime: note.endTime
-          };
-        });
-    });
+//           return {
+//             osc,
+//             noteName: note.noteName,
+//             frequency: note.frequency,
+//             peak: note.peak,
+//             timing: note.timing,
+//             duration: note.duration,
+//             endTime: note.endTime
+//           };
+//         });
+//     });
   
-    return sequence;
-  }
-}
+//     return sequence;
+//   }
+// }
 
-export { Graph };
+// export { Graph };
 export default AudioGraph;

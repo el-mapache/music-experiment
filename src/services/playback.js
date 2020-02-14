@@ -7,14 +7,20 @@ const commitSequencer = scheduler();
 let lastData;
 let myRecorder = recorder();
 
-
 const playback = {
-  play(sequence) {
+  buildAudioGraph(initialSequence) {
+    return new Promise((resolve) => {
+      const graph = audioGraph(initialSequence);
+
+      resolve(graph);
+    });
+  },
+  play(graph) {
     //myRecorder.start();
-    const { sequence: finalSequence } = audioGraph(sequence);
-    const notesToSequence = finalSequence.toneClusters.slice();
+    const notesToSequence = graph.sequence.toneClusters.slice();
     return commitSequencer.play(notesToSequence)
       .then(() => {
+        return graph;
         //myRecorder.stop();
       });
   }

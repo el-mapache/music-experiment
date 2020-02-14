@@ -1,64 +1,136 @@
-// window.onload = function() {
+import { h, createRef } from 'preact';
+import { store } from 'ui/store';
+import { useContext, useEffect, useState } from 'preact/hooks';
+
+const getPixelRatio = context => {
+  var backingStore =
+    context.backingStorePixelRatio ||
+    context.webkitBackingStorePixelRatio ||
+    context.mozBackingStorePixelRatio ||
+    context.msBackingStorePixelRatio ||
+    context.oBackingStorePixelRatio ||
+    context.backingStorePixelRatio ||
+    1;
   
-//   var file = document.getElementById("thefile");
-//   var audio = document.getElementById("audio");
-  
-//   file.onchange = function() {
-//     var files = this.files;
-//     audio.src = URL.createObjectURL(files[0]);
-//     audio.load();
-//     audio.play();
-//     var context = new AudioContext();
-//     var src = context.createMediaElementSource(audio);
-//     var analyser = context.createAnalyser();
+  return (window.devicePixelRatio || 1) / backingStore;
+};
 
-//     var canvas = document.getElementById("canvas");
-//     canvas.width = window.innerWidth;
-//     canvas.height = window.innerHeight;
-//     var ctx = canvas.getContext("2d");
+// not optimal but it works!
 
-//     src.connect(analyser);
-//     analyser.connect(context.destination);
+const BarViz = (props) => {
+  const { state: { player: { graph, status }} } = useContext(store);
+  const canvasRef = createRef();
+  const playing = status === 'playing';
+  const [isActive, setActive] = useState(false);
 
-//     analyser.fftSize = 256;
+  useEffect(() => {
+    if (playing) {
+      setActive(true);
+    }
+  }, [playing]);
 
-//     var bufferLength = analyser.frequencyBinCount;
-//     console.log(bufferLength);
+  useEffect(() => {
+    if (!graph) return
+    let animationRequest;
+    let canvas = canvasRef.current;
+    let context = canvas.getContext('2d');
+    let ratio = getPixelRatio(context);
+    // We need to store values to the original unscaled size of the 
+    // canvas. Since this function runs again every time the component
+    // mounts we dont want to continually add the scaled values to it
+    let width = canvas.width;
+    let height = canvas.height;
+    canvas.addEventListener('onanimationend', hide);
 
-//     var dataArray = new Uint8Array(bufferLength);
+    canvas.width = (canvas.width * ratio);
+    canvas.height = (canvas.height * ratio);
+    context.scale(ratio, ratio);
 
-//     var WIDTH = canvas.width;
-//     var HEIGHT = canvas.height;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
-//     var barWidth = (WIDTH / bufferLength) * 2.5;
-//     var barHeight;
-//     var x = 0;
+    let x = 0;
+    let dataArray;
+    let barWidth;
+    let barHeight;
+    let bufferLength;
 
-//     function renderFrame() {
-//       requestAnimationFrame(renderFrame);
+    const render = () => {
+      const h = canvas.height / ratio;
+      const w = canvas.width / ratio;
+      context.clearRect(0, 0, w, h);
+      x = 0;
 
-//       x = 0;
+      graph.analyser.getByteFrequencyData(dataArray);
+      context.fillStyle = "#CBD5E0";
+      context.fillRect(0, 0, w, h);
 
-//       analyser.getByteFrequencyData(dataArray);
-
-//       ctx.fillStyle = "#000";
-//       ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-//       for (var i = 0; i < bufferLength; i++) {
-//         barHeight = dataArray[i];
+      /**
+       * Start at 1 because according to the nyquist theorum, N * samplerate/frequency,
+       * where N is 0, the frequency here will also be zero. This means that the
+       * bar will always be at max height due to the calculations below used
+       * to draw. Also, nobody will miss 1 frequency : D
+       */
+      for (let i = 1; i < bufferLength; i++) {
+        const frequencyData = dataArray[i];
+        barHeight = frequencyData;
         
-//         var r = barHeight + (25 * (i/bufferLength));
-//         var g = 250 * (i/bufferLength);
-//         var b = 50;
+        // The louder the sound, the more indigo it turns, the quieter,
+        // the yellower
+        let r = Math.max(244 - frequencyData, 76);
+        let g = Math.max(226 - frequencyData, 81);
+        let b = Math.max(9 - frequencyData, 191);
+      
+        let finalHeight = barHeight ? barHeight * (i / 20) / ratio : 0; 
+        context.fillStyle = `rgba(${r},${g},${b}, .8)`;
 
-//         ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
-//         ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+        // Since this is amplitude displayed linearly, the first elem is always the attack
+        // of the sound (I think), therefore the loudest, so clamp it manually
+        if (!i) {
+          finalHeight = barHeight - 150;
+        }
 
-//         x += barWidth + 1;
-//       }
-//     }
+        context.fillRect(x, h - finalHeight, barWidth, finalHeight);
 
-//     audio.play();
-//     renderFrame();
-//   };
-// };
+        x += barWidth + 1;
+      }
+
+      animationRequest = requestAnimationFrame(render);
+    };
+
+    if (graph) {
+      bufferLength = graph.analyser.frequencyBinCount;
+      barWidth = ((canvas.width / ratio) / bufferLength) * 2.5;
+      dataArray = new Uint8Array(bufferLength);
+      render();
+    }
+
+    return () => {
+      // Restore the canvas to its defaults
+      canvas.width = width;
+      canvas.height = height;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      cancelAnimationFrame(animationRequest);
+      canvas.removeEventListener('onanimationend', hide);
+    };
+  }, [graph]);
+
+  const hide = () => {
+    if (!isActive) {
+      setActive(false);
+    }
+  };
+
+  return isActive && (
+    <canvas
+      class={`viz ${props.className} overflow-hidden`}
+      style={{ animation: `${playing ? "fade-in" : "fade-out"} .75s` }}
+      ref={canvasRef}
+      height="100"
+      width="400"
+    >
+    </canvas>
+  );
+};
+
+export default BarViz;
