@@ -26,7 +26,6 @@ const BarViz = (props) => {
   const hide = useCallback(() => {
     if (isActive && !playing) {
       setActive(false);
-      console.log(canvasRef)
     }
   }, [isActive, playing, setActive]);
   
@@ -67,7 +66,6 @@ const BarViz = (props) => {
     canvasRef.current.addEventListener('animationend', handler);
 
     return () => {
-      console.log('unhande', canvasRef)
       canvasRef.current && canvasRef.current.removeEventListener('animationend', handler);
     };
   }, [canvasRef.current]);

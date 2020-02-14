@@ -56,6 +56,7 @@ const SearchRepoForm = () => {
             class={`input ${error}`}
             value={repoInfo.name}
             onInput={updateActiveRepoName}
+            autofocus
           />
         </div>
         <div class={`m-2 my-0 input-group ${error}`}>

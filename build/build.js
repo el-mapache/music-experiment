@@ -12469,15 +12469,15 @@ var RadioGroup = function RadioGroup(_ref2) {
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("h2", {
     "class": "block font-bold text-lg text-black"
   }, label), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("em", {
-    "class": "font-medium font-serif text-gray-800"
+    "class": "font-medium font-serif text-gray-700"
   }, helpText)), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(RadioButton, {
-    label: "Use a preloaded repo",
-    helpText: "Select from a prefetched repo",
+    label: "Listen to a preloaded repo",
+    helpText: "Select a repo",
     name: name,
     id: "preloaded-repo"
   }), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(RadioButton, {
     label: "Let me enter a repo",
-    helpText: "Search for repos on GitHub",
+    helpText: "Search GitHub",
     className: "flex-1",
     name: name,
     id: "search-repo"
@@ -12633,7 +12633,8 @@ var SearchRepoForm = function SearchRepoForm() {
     placeholder: "enter repo name",
     "class": "input ".concat(error),
     value: repoInfo.name,
-    onInput: updateActiveRepoName
+    onInput: updateActiveRepoName,
+    autofocus: true
   })), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
     "class": "m-2 my-0 input-group ".concat(error)
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("label", {

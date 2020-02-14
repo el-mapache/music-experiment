@@ -34,17 +34,17 @@ const RadioGroup = ({ name, label, helpText }) => {
     <div class="radio-group w-2/3 mb-10 mt-8" role="radiogroup">
       <div role="label" class="w-full block mb-1">
         <h2 class="block font-bold text-lg text-black">{label}</h2>
-        <em class="font-medium font-serif text-gray-800">{helpText}</em>
+        <em class="font-medium font-serif text-gray-700">{helpText}</em>
       </div>
       <RadioButton
-        label="Use a preloaded repo"
-        helpText="Select from a prefetched repo"
+        label="Listen to a preloaded repo"
+        helpText="Select a repo"
         name={name}
         id="preloaded-repo"
       />
       <RadioButton
         label="Let me enter a repo"
-        helpText="Search for repos on GitHub"
+        helpText="Search GitHub"
         className="flex-1"
         name={name}
         id="search-repo"

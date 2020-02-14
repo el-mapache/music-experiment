@@ -10,14 +10,20 @@
     </style>
     <link rel="stylesheet" href="build/output.css"/>
   </head>
-  <body class="position-relative overflow-x-hidden">
+  <body class="position-relative overflow-hidden">
     <div class="fancy-accent bg-pink-200"></div>
     <main class="xl:w-3/4 mx-auto mt-12">
-      <header>
-        <h1 class="font-thin text-4xl leading-tight tracking-wide text-indigo-600 mb-6">
+      <header class="mb-2">
+        <h1 class="font-thin text-4xl leading-tight tracking-wide text-indigo-700 mb-6">
           GitHub commit
-          <span class="block font-semibold font-serif text-indigo-700 text-6xl -mt-4">music generator</span>
+          <span class="block font-bold font-serif text-indigo-900 text-6xl -mt-4">music generator</span>
         </h1>
+        <p class="text-gray-600 w-1/2 text-xl font-normal leading-8 mb-10">
+          Generate a chiptune from any public GitHub repo, using its last year of commit data.
+        </p>        
+        <!-- <div class="p-3 bg-indigo-800 items-center text-indigo-100 leading-none lg:rounded flex lg:inline-flex" role="alert">
+          <span class="font-semibold mr-2 text-left flex-auto">This app plays sound, so make sure you adjust your device's volume!</span>
+        </div> -->
       </header>
       <section id="app"></section>
       <div class="advanced m-2 w-64 h-16 rounded-lg py-1 px-3">
