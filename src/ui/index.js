@@ -21,7 +21,6 @@ const App = () => {
     <div>
       <RadioGroup
         label="Choose one"
-        helpText="You can always change your mind."
         name="toggle-repo-form-type"
       />
       <RepoFormDispatcher />

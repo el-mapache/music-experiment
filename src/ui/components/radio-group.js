@@ -20,7 +20,7 @@ const RadioToggle = ({ label, helpText, className, setChecked, ...rest }) => {
         <span class="radio-control"></span>
         <span class="label">
           {label}
-          <em class="help-text text-lg">{helpText}</em>
+          <span class="help-text text-lg">{helpText}</span>
         </span>
       </label>
     </div>
@@ -31,7 +31,7 @@ const RadioButton = withCheckable(RadioToggle);
 
 const RadioGroup = ({ name, label, helpText }) => {
   return (
-    <div class="radio-group w-2/3 mb-10 mt-8" role="radiogroup">
+    <div class="radio-group w-2/3 mb-8 mt-8" role="radiogroup">
       <div role="label" class="w-full block mb-1">
         <h2 class="block font-bold text-lg text-black">{label}</h2>
         <em class="font-medium font-serif text-gray-700">{helpText}</em>

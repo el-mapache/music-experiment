@@ -35,7 +35,7 @@ const PlayControls = () => {
   };
 
   return (
-    <section class={`mt-4${!data ? ' hidden' : ''}`}>
+    <section class={`mt-8${!data ? ' hidden' : ''}`}>
       <div class="flex">
         <div>
           <CurrentTrack activeRepo={activeRepo} status={player.status} active={active} />

@@ -17,7 +17,7 @@ const CurrentTrack = ({ activeRepo = {}, status }) => {
   const messageFn = DISPLAY_MESSAGES[status];
 
   return (
-    <h2 class="text-2xl">
+    <h2 class="text-lg">
       {messageFn(activeRepo.owner, activeRepo.name)}
     </h2>
   );

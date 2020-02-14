@@ -12172,7 +12172,7 @@ var CurrentTrack = function CurrentTrack(_ref) {
       status = _ref.status;
   var messageFn = DISPLAY_MESSAGES[status];
   return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("h2", {
-    "class": "text-2xl"
+    "class": "text-lg"
   }, messageFn(activeRepo.owner, activeRepo.name));
 };
 
@@ -12208,7 +12208,7 @@ var ErrorMessage = function ErrorMessage(_ref) {
 
   var error = state[forState].error;
   return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("p", {
-    "class": "text-md italic mt-2 h-4",
+    "class": "text-md italic mt-1 h-4",
     style: {
       color: "#c14949"
     }
@@ -12280,7 +12280,7 @@ var PlayControls = function PlayControls() {
     width: 400
   };
   return Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("section", {
-    "class": "mt-4".concat(!data ? ' hidden' : '')
+    "class": "mt-8".concat(!data ? ' hidden' : '')
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
     "class": "flex"
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", null, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_current_track__WEBPACK_IMPORTED_MODULE_4__["default"], {
@@ -12449,7 +12449,7 @@ var RadioToggle = function RadioToggle(_ref) {
     "class": "radio-control"
   }), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("span", {
     "class": "label"
-  }, label, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("em", {
+  }, label, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("span", {
     "class": "help-text text-lg"
   }, helpText))));
 };
@@ -12461,7 +12461,7 @@ var RadioGroup = function RadioGroup(_ref2) {
       label = _ref2.label,
       helpText = _ref2.helpText;
   return Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
-    "class": "radio-group w-2/3 mb-10 mt-8",
+    "class": "radio-group w-2/3 mb-8 mt-8",
     role: "radiogroup"
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
     role: "label",
@@ -12749,7 +12749,6 @@ var App = function App() {
   }, []);
   return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", null, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_radio_group__WEBPACK_IMPORTED_MODULE_2__["default"], {
     label: "Choose one",
-    helpText: "You can always change your mind.",
     name: "toggle-repo-form-type"
   }), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_repo_form_dispatcher__WEBPACK_IMPORTED_MODULE_3__["default"], null), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_playback__WEBPACK_IMPORTED_MODULE_4__["default"], null));
 };
@@ -13154,7 +13153,6 @@ var BarViz = function BarViz(props) {
   var hide = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useCallback"])(function () {
     if (isActive && !playing) {
       setActive(false);
-      console.log(canvasRef);
     }
   }, [isActive, playing, setActive]); // By storing this as a ref, we can always ensure a
   // pointer to the freshest version of this function
@@ -13194,7 +13192,6 @@ var BarViz = function BarViz(props) {
 
     canvasRef.current.addEventListener('animationend', handler);
     return function () {
-      console.log('unhande', canvasRef);
       canvasRef.current && canvasRef.current.removeEventListener('animationend', handler);
     };
   }, [canvasRef.current]);
