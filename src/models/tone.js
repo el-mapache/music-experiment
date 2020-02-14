@@ -7,7 +7,7 @@ const types = ['sine', 'square', 'triangle', 'sawtooth'];
 const getRandomWaveType = () => types[Math.floor(Math.random() * 4)];
 
 class Tone {
-  constructor({ noteName, timing, peak,  noteType, envelope = envelopeFactory(), toneType = 'triangle' }) {
+  constructor({ noteName, timing, peak,  noteType, envelope = envelopeFactory(), toneType = 'sine' }) {
     this.noteType = noteType;
     this.noteName = noteName;
     this.frequency = frequency(noteName);
@@ -33,8 +33,11 @@ class Tone {
   }
 
   attenuateVolume() {
-    if (this.frequency > 800) {
+    if (this.frequency > 1000) {
       this.peak -= (this.peak / 10);
+    }
+    if (this.frequency < 100) {
+      this.peak += (this.peak / 2);
     }
   }
 

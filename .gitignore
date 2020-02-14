@@ -1,4 +1,2 @@
 node_modules
-build/**/*.js
-build/
 yarn-error.log

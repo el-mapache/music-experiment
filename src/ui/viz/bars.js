@@ -42,7 +42,7 @@ const render = (graph, {height, width}, context, ratio) => {
     let g = Math.max(226 - frequencyData, 81);
     let b = Math.max(9 - frequencyData, 191);
   
-    let finalHeight = barHeight ? barHeight * (i / 20) / ratio : 0; 
+    let finalHeight = barHeight ? barHeight * (i / 12) / ratio : 0; 
     context.fillStyle = `rgba(${r},${g},${b}, 1)`;
 
     // Since this is amplitude displayed linearly, the first elem is always the attack

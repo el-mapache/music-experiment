@@ -1,6 +1,6 @@
 import AudioContextProvider from 'services/audio-context-provider';
 
-const defaultChannelGain = .8;
+const defaultChannelGain = .65;
 
 /**
  * 

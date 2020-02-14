@@ -67,7 +67,7 @@ const buildNoteSequence = ({ commitStats, timeSignature, bpm }) => {
   const toneClusters = chords.reduce((clusters, cluster) => {
     const { volume, speed } = cluster;
     const clusterLen = cluster.notes.length;
-    const fractionalVolume = volume / (clusterLen * 2);
+    const fractionalVolume = volume / (clusterLen * 4);
     const noteType = getNoteValue(speed, meter.timeSignature);
     const noteTiming = meter.getTimeForNote(noteType);
     /**

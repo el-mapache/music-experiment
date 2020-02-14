@@ -1134,7 +1134,7 @@ function restRequest (endpointOptions) {
 
 module.exports = request
 
-const fetch = __webpack_require__(/*! node-fetch */ "./node_modules/node-fetch/browser.js").default
+const fetch = __webpack_require__(/*! node-fetch */ "./node_modules/@octokit/rest/node_modules/node-fetch/browser.js").default
 const debug = __webpack_require__(/*! debug */ "./node_modules/@octokit/rest/node_modules/debug/src/browser.js")('octokit:rest')
 const defaults = __webpack_require__(/*! lodash/defaults */ "./node_modules/lodash/defaults.js")
 const isPlainObject = __webpack_require__(/*! lodash/isPlainObject */ "./node_modules/lodash/isPlainObject.js")
@@ -1876,6 +1876,40 @@ function plural(ms, msAbs, n, name) {
   return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
 }
 
+
+/***/ }),
+
+/***/ "./node_modules/@octokit/rest/node_modules/node-fetch/browser.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/@octokit/rest/node_modules/node-fetch/browser.js ***!
+  \***********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// ref: https://github.com/tc39/proposal-global
+var getGlobal = function () {
+	// the only reliable means to get the global object is
+	// `Function('return this')()`
+	// However, this causes CSP violations in Chrome apps.
+	if (typeof self !== 'undefined') { return self; }
+	if (typeof window !== 'undefined') { return window; }
+	if (typeof global !== 'undefined') { return global; }
+	throw new Error('unable to locate global object');
+}
+
+var global = getGlobal();
+
+module.exports = exports = global.fetch;
+
+// Needed for TypeScript and Webpack.
+exports.default = global.fetch.bind(global);
+
+exports.Headers = global.Headers;
+exports.Request = global.Request;
+exports.Response = global.Response;
 
 /***/ }),
 
@@ -9780,40 +9814,6 @@ module.exports = uniq;
 
 /***/ }),
 
-/***/ "./node_modules/node-fetch/browser.js":
-/*!********************************************!*\
-  !*** ./node_modules/node-fetch/browser.js ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// ref: https://github.com/tc39/proposal-global
-var getGlobal = function () {
-	// the only reliable means to get the global object is
-	// `Function('return this')()`
-	// However, this causes CSP violations in Chrome apps.
-	if (typeof self !== 'undefined') { return self; }
-	if (typeof window !== 'undefined') { return window; }
-	if (typeof global !== 'undefined') { return global; }
-	throw new Error('unable to locate global object');
-}
-
-var global = getGlobal();
-
-module.exports = exports = global.fetch;
-
-// Needed for TypeScript and Webpack.
-exports.default = global.fetch.bind(global);
-
-exports.Headers = global.Headers;
-exports.Request = global.Request;
-exports.Response = global.Response;
-
-/***/ }),
-
 /***/ "./node_modules/preact/compat/dist/compat.module.js":
 /*!**********************************************************!*\
   !*** ./node_modules/preact/compat/dist/compat.module.js ***!
@@ -10517,7 +10517,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "audioChannel", function() { return audioChannel; });
 /* harmony import */ var services_audio_context_provider__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! services/audio-context-provider */ "./src/services/audio-context-provider.js");
 
-var defaultChannelGain = .8;
+var defaultChannelGain = .65;
 /**
  * 
  * Abstraction that groups audio nodes together. Nodes passed to the channel connect
@@ -10929,7 +10929,7 @@ function () {
         _ref$envelope = _ref.envelope,
         envelope = _ref$envelope === void 0 ? Object(factories_envelope_factory__WEBPACK_IMPORTED_MODULE_1__["default"])() : _ref$envelope,
         _ref$toneType = _ref.toneType,
-        toneType = _ref$toneType === void 0 ? 'triangle' : _ref$toneType;
+        toneType = _ref$toneType === void 0 ? 'sine' : _ref$toneType;
 
     _classCallCheck(this, Tone);
 
@@ -10959,8 +10959,12 @@ function () {
   }, {
     key: "attenuateVolume",
     value: function attenuateVolume() {
-      if (this.frequency > 800) {
+      if (this.frequency > 1000) {
         this.peak -= this.peak / 10;
+      }
+
+      if (this.frequency < 100) {
+        this.peak += this.peak / 2;
       }
     }
   }, {
@@ -11513,7 +11517,7 @@ var buildNoteSequence = function buildNoteSequence(_ref) {
     var volume = cluster.volume,
         speed = cluster.speed;
     var clusterLen = cluster.notes.length;
-    var fractionalVolume = volume / (clusterLen * 2);
+    var fractionalVolume = volume / (clusterLen * 4);
     var noteType = getNoteValue(speed, meter.timeSignature);
     var noteTiming = meter.getTimeForNote(noteType);
     /**
@@ -13450,7 +13454,7 @@ var render = function render(graph, _ref, context, ratio) {
     var r = Math.max(244 - frequencyData, 76);
     var g = Math.max(226 - frequencyData, 81);
     var b = Math.max(9 - frequencyData, 191);
-    var finalHeight = barHeight ? barHeight * (i / 20) / ratio : 0;
+    var finalHeight = barHeight ? barHeight * (i / 12) / ratio : 0;
     context.fillStyle = "rgba(".concat(r, ",").concat(g, ",").concat(b, ", 1)"); // Since this is amplitude displayed linearly, the first elem is always the attack
     // of the sound (I think), therefore the loudest, so clamp it manually
 
