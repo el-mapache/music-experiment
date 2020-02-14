@@ -1,6 +1,6 @@
 import { h, createRef } from 'preact';
 import { store } from 'ui/store';
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { useContext, useEffect, useState, useCallback, useRef } from 'preact/hooks';
 
 const getPixelRatio = context => {
   var backingStore =
@@ -19,18 +19,64 @@ const getPixelRatio = context => {
 
 const BarViz = (props) => {
   const { state: { player: { graph, status }} } = useContext(store);
-  const canvasRef = createRef();
+  const canvasRef = useRef();
   const playing = status === 'playing';
   const [isActive, setActive] = useState(false);
+
+  const hide = useCallback(() => {
+    if (isActive && !playing) {
+      setActive(false);
+      console.log(canvasRef)
+    }
+  }, [isActive, playing, setActive]);
+  
+  // By storing this as a ref, we can always ensure a
+  // pointer to the freshest version of this function
+  const safeHide = useRef();
+  // Every time the component re-renders,
+  // store a pointer to the current 'hide' function
+  // in our ref.
+  useEffect(() => {
+    safeHide.current = hide;
+  }, [hide])
+
 
   useEffect(() => {
     if (playing) {
       setActive(true);
     }
-  }, [playing]);
+  }, [playing, setActive]);
+
+  /**
+   * For this effect, we only have to pass in a reference to the canvas.
+   * Since we cached the hide function as safeHide, it doesn't need to be
+   * supplied as a dependency, as it is guaranteed to never be a stale
+   * reference.
+   * 
+   * We want to pass the `current` prop explicitly, as the canvasRef
+   * object will usually not be equal to itself
+   */
+  useEffect(() => {
+    if (!canvasRef.current) {
+      return;
+    }
+
+    // Wrap the event handler in a custom handler, to make
+    // sure we always call the freshest version.
+    const handler = (event) => safeHide.current(event);
+    canvasRef.current.addEventListener('animationend', handler);
+
+    return () => {
+      console.log('unhande', canvasRef)
+      canvasRef.current && canvasRef.current.removeEventListener('animationend', handler);
+    };
+  }, [canvasRef.current]);
 
   useEffect(() => {
-    if (!graph) return
+    if (!graph) {
+      return;
+    }
+
     let animationRequest;
     let canvas = canvasRef.current;
     let context = canvas.getContext('2d');
@@ -40,7 +86,6 @@ const BarViz = (props) => {
     // mounts we dont want to continually add the scaled values to it
     let width = canvas.width;
     let height = canvas.height;
-    canvas.addEventListener('onanimationend', hide);
 
     canvas.width = (canvas.width * ratio);
     canvas.height = (canvas.height * ratio);
@@ -98,12 +143,11 @@ const BarViz = (props) => {
       animationRequest = requestAnimationFrame(render);
     };
 
-    if (graph) {
-      bufferLength = graph.analyser.frequencyBinCount;
-      barWidth = ((canvas.width / ratio) / bufferLength) * 2.5;
-      dataArray = new Uint8Array(bufferLength);
-      render();
-    }
+    
+    bufferLength = graph.analyser.frequencyBinCount;
+    barWidth = ((canvas.width / ratio) / bufferLength) * 2.5;
+    dataArray = new Uint8Array(bufferLength);
+    render();
 
     return () => {
       // Restore the canvas to its defaults
@@ -111,23 +155,16 @@ const BarViz = (props) => {
       canvas.height = height;
       context.clearRect(0, 0, canvas.width, canvas.height);
       cancelAnimationFrame(animationRequest);
-      canvas.removeEventListener('onanimationend', hide);
     };
-  }, [graph]);
-
-  const hide = () => {
-    if (!isActive) {
-      setActive(false);
-    }
-  };
+  }, [ canvasRef.current]);
 
   return isActive && (
     <canvas
       class={`viz ${props.className} overflow-hidden`}
       style={{ animation: `${playing ? "fade-in" : "fade-out"} .75s` }}
       ref={canvasRef}
-      height="100"
-      width="400"
+      height={props.height}
+      width={props.width}
     >
     </canvas>
   );

@@ -29,6 +29,11 @@ const PlayControls = () => {
     }
   };
 
+  const vizSettings = {
+    height: 100,
+    width: 400,
+  };
+
   return (
     <section class={`mt-4${!data ? ' hidden' : ''}`}>
       <div class="flex">
@@ -38,13 +43,13 @@ const PlayControls = () => {
             trackTotalTime={data && data.totalTime}
             currentTime={player.currentTime}
           />
-          <div class="mt-2 flex items-center" onClick={handlePlayScore}>
+          <div class="mt-2 flex items-center" onClick={handlePlayScore} style={{minHeight: vizSettings.height}}>
             <button class={`fill-button h-16 w-16 ${unchecked} ${active}`}>
               <svg viewBox="0 0 26 26">
                 <polygon class="play-btn__svg" points="9.33 6.69 9.33 19.39 19.3 13.04 9.33 6.69"/>
               </svg>
             </button>
-            <BarViz className="ml-8" />
+            <BarViz className="ml-8" {...vizSettings} />
           </div>
         </div>
       </div>

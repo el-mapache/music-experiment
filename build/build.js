@@ -12236,6 +12236,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ui_components_timing_info__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ui/components/timing-info */ "./src/ui/components/timing-info.js");
 /* harmony import */ var ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ui/viz/bars */ "./src/ui/viz/bars.js");
 /* harmony import */ var ui_use_previous__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ui/use-previous */ "./src/ui/use-previous.js");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
 
 
 
@@ -12273,6 +12275,10 @@ var PlayControls = function PlayControls() {
     }
   };
 
+  var vizSettings = {
+    height: 100,
+    width: 400
+  };
   return Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("section", {
     "class": "mt-4".concat(!data ? ' hidden' : '')
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
@@ -12286,7 +12292,10 @@ var PlayControls = function PlayControls() {
     currentTime: player.currentTime
   }), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
     "class": "mt-2 flex items-center",
-    onClick: handlePlayScore
+    onClick: handlePlayScore,
+    style: {
+      minHeight: vizSettings.height
+    }
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("button", {
     "class": "fill-button h-16 w-16 ".concat(unchecked, " ").concat(active)
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("svg", {
@@ -12294,9 +12303,9 @@ var PlayControls = function PlayControls() {
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("polygon", {
     "class": "play-btn__svg",
     points: "9.33 6.69 9.33 19.39 19.3 13.04 9.33 6.69"
-  }))), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__["default"], {
+  }))), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__["default"], _extends({
     className: "ml-8"
-  })))));
+  }, vizSettings))))));
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (PlayControls);
@@ -13133,7 +13142,7 @@ var BarViz = function BarViz(props) {
       graph = _useContext$state$pla.graph,
       status = _useContext$state$pla.status;
 
-  var canvasRef = Object(preact__WEBPACK_IMPORTED_MODULE_0__["createRef"])();
+  var canvasRef = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useRef"])();
   var playing = status === 'playing';
 
   var _useState = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useState"])(false),
@@ -13141,13 +13150,58 @@ var BarViz = function BarViz(props) {
       isActive = _useState2[0],
       setActive = _useState2[1];
 
+  var hide = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useCallback"])(function () {
+    if (isActive && !playing) {
+      setActive(false);
+      console.log(canvasRef);
+    }
+  }, [isActive, playing, setActive]); // By storing this as a ref, we can always ensure a
+  // pointer to the freshest version of this function
+
+  var safeHide = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useRef"])(); // Every time the component re-renders,
+  // store a pointer to the current 'hide' function
+  // in our ref.
+
+  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
+    safeHide.current = hide;
+  }, [hide]);
   Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
     if (playing) {
       setActive(true);
     }
-  }, [playing]);
+  }, [playing, setActive]);
+  /**
+   * For this effect, we only have to pass in a reference to the canvas.
+   * Since we cached the hide function as safeHide, it doesn't need to be
+   * supplied as a dependency, as it is guaranteed to never be a stale
+   * reference.
+   * 
+   * We want to pass the `current` prop explicitly, as the canvasRef
+   * object will usually not be equal to itself
+   */
+
   Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
-    if (!graph) return;
+    if (!canvasRef.current) {
+      return;
+    } // Wrap the event handler in a custom handler, to make
+    // sure we always call the freshest version.
+
+
+    var handler = function handler(event) {
+      return safeHide.current(event);
+    };
+
+    canvasRef.current.addEventListener('animationend', handler);
+    return function () {
+      console.log('unhande', canvasRef);
+      canvasRef.current && canvasRef.current.removeEventListener('animationend', handler);
+    };
+  }, [canvasRef.current]);
+  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
+    if (!graph) {
+      return;
+    }
+
     var animationRequest;
     var canvas = canvasRef.current;
     var context = canvas.getContext('2d');
@@ -13157,7 +13211,6 @@ var BarViz = function BarViz(props) {
 
     var width = canvas.width;
     var height = canvas.height;
-    canvas.addEventListener('onanimationend', hide);
     canvas.width = canvas.width * ratio;
     canvas.height = canvas.height * ratio;
     context.scale(ratio, ratio);
@@ -13207,37 +13260,26 @@ var BarViz = function BarViz(props) {
       animationRequest = requestAnimationFrame(render);
     };
 
-    if (graph) {
-      bufferLength = graph.analyser.frequencyBinCount;
-      barWidth = canvas.width / ratio / bufferLength * 2.5;
-      dataArray = new Uint8Array(bufferLength);
-      render();
-    }
-
+    bufferLength = graph.analyser.frequencyBinCount;
+    barWidth = canvas.width / ratio / bufferLength * 2.5;
+    dataArray = new Uint8Array(bufferLength);
+    render();
     return function () {
       // Restore the canvas to its defaults
       canvas.width = width;
       canvas.height = height;
       context.clearRect(0, 0, canvas.width, canvas.height);
       cancelAnimationFrame(animationRequest);
-      canvas.removeEventListener('onanimationend', hide);
     };
-  }, [graph]);
-
-  var hide = function hide() {
-    if (!isActive) {
-      setActive(false);
-    }
-  };
-
+  }, [canvasRef.current]);
   return isActive && Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("canvas", {
     "class": "viz ".concat(props.className, " overflow-hidden"),
     style: {
       animation: "".concat(playing ? "fade-in" : "fade-out", " .75s")
     },
     ref: canvasRef,
-    height: "100",
-    width: "400"
+    height: props.height,
+    width: props.width
   });
 };
 
