@@ -1,25 +1,28 @@
-import sequencer from 'services/sequencer';
+import scheduler from 'services/scheduler';
 import recorder from 'services/recorder';
 import audioGraph from 'models/audio-graph';
 
 
-const commitSequencer = sequencer();
+const commitSequencer = scheduler();
 let lastData;
 let myRecorder = recorder();
 
-
-const playScore = (sequence) => {
-  //myRecorder.start();
-  const finalSequence = audioGraph(sequence);  
-  return commitSequencer.play([finalSequence.toneClusters])
-    .then(() => {
-      //myRecorder.stop();
-    });
-};
-
 const playback = {
-  play(data) {
-    return playScore(data);
+  buildAudioGraph(initialSequence) {
+    return new Promise((resolve) => {
+      const graph = audioGraph(initialSequence);
+
+      resolve(graph);
+    });
+  },
+  play(graph) {
+    //myRecorder.start();
+    const notesToSequence = graph.sequence.toneClusters.slice();
+    return commitSequencer.play(notesToSequence)
+      .then(() => {
+        return graph;
+        //myRecorder.stop();
+      });
   }
 };
 

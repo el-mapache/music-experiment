@@ -3,6 +3,7 @@ import { h } from 'preact';
 import { store  } from 'ui/store';
 import { useContext, useState } from 'preact/hooks';
 import COMMIT_DATA_STATUS from 'ui/types/commit-status';
+import PLAYER_STATUS from 'ui/types/player-status';
 import ErrorMessage from 'ui/components/error-message';
 
 
@@ -17,12 +18,14 @@ const hasError = (status) =>
   status === COMMIT_DATA_STATUS.ERROR;
 const isFetching = (status) =>
   status === COMMIT_DATA_STATUS.FETCHING;
+const isPlaying = (status) =>
+  status === PLAYER_STATUS.PLAYING;
 
 const SearchRepoForm = () => {
   const [ repoInfo, setRepoInfo ] = useState(initialState);
-  const { dispatch, state: { commitData } } = useContext(store);
+  const { dispatch, state: { commitData, player } } = useContext(store);
   const hasActiveRepo = repoInfo.name && repoInfo.owner;
-  const disabled = !hasActiveRepo || isFetching(commitData.status) ? 'disabled' : '';
+  const disabled = !hasActiveRepo || isFetching(commitData.status) || isPlaying(player.status) ? 'disabled' : '';
   const error = hasError(commitData.status) ? 'error' : '';
 
   const updateActiveRepoName = (event) =>
@@ -38,6 +41,7 @@ const SearchRepoForm = () => {
   }));
 
   const handleSubmit = () => {
+
     actions.COMMIT_DATA.fetch(dispatch)(repoInfo.owner, repoInfo.name);
   };
 
@@ -56,6 +60,7 @@ const SearchRepoForm = () => {
             class={`input ${error}`}
             value={repoInfo.name}
             onInput={updateActiveRepoName}
+            autofocus
           />
         </div>
         <div class={`m-2 my-0 input-group ${error}`}>

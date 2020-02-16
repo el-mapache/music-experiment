@@ -27,7 +27,8 @@ const audioChannel = context => ({ gain = defaultChannelGain } = {}) => {
       audioNodes.forEach((audioNode) => {
         audioNode.connectTo(channelGain);
       });
-    }
+    },
+    channel: channelGain
   };
 };
 

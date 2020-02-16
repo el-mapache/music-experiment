@@ -15,8 +15,10 @@ const preloadedRepoData = {
 const initialState = {
   player: {
     status: PLAYER_STATUS.IDLE,
-    totalTime: '',
-    timeRemaining: ''
+    totalTime: 0,
+    timeRemaining: '',
+    currentTime: 0,
+    graph: null
   },
   recorder: {
     isActive: false,
@@ -24,21 +26,6 @@ const initialState = {
   score: {
     tempo: 120,
     timeSignature: [3, 4],
-  },
-  formUI: {
-    activeFormName: '',
-    // so sloppy!!
-    cachedRepos: {
-      'tock': 0,
-      'bootstrap': 1
-    },
-    preloadedRepos: [{
-      name: 'tock',
-      owner: '18f',
-    }, {
-      name: 'bootstrap',
-      owner: 'twitter',
-    }],
   },
   activeRepo: {
     name: '',
@@ -117,26 +104,6 @@ function appReducer(state, action) {
         }
       };
     }
-    case ACTION_TYPES.FORM_UI.SET_FORM_NAME: {
-      // TODO: Another good selector candidate
-      const nextActiveRepo = state.player.status === PLAYER_STATUS.IDLE ? 
-        initialState.activeRepo : state.activeRepo;
-
-      return {
-        ...state,
-        formUI: {
-          ...state.formUI,
-          activeFormName: rest.formName
-        },
-        activeRepo: {
-          ...nextActiveRepo
-        },
-        commitData: {
-          ...initialState.commitData,
-          data: state.commitData.data,
-        }
-      };
-    }
     case ACTION_TYPES.COMMIT_DATA.FETCHING: {
       return {
         ...state,
@@ -175,7 +142,8 @@ function appReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          status: PLAYER_STATUS.PLAYING
+          status: PLAYER_STATUS.PLAYING,
+          currentTime: 0
         }
       }
     }
@@ -184,7 +152,27 @@ function appReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          status: PLAYER_STATUS.STOPPED
+          status: PLAYER_STATUS.STOPPED,
+          totalTime: rest.totalTime,
+          graph: null
+        }
+      };
+    }
+    case ACTION_TYPES.PLAYER.UPDATE_TIME: {
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          currentTime: rest.currentTime
+        }
+      };
+    }
+    case ACTION_TYPES.PLAYER.VIZ: {
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          graph: rest.graph
         }
       }
     }

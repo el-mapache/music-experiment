@@ -18,6 +18,8 @@ class Tone {
     this.timing = timing;
     this.startTime = null;
     this.endTime = null;
+
+    this.attenuateVolume();
   }
 
   resolveEnvelopeValues(envelope) {
@@ -30,15 +32,17 @@ class Tone {
     }
   }
 
+  attenuateVolume() {
+    if (this.frequency > 800) {
+      this.peak -= (this.peak / 10);
+    }
+  }
+
   addTimingInfo(offsetStartTime) {
     const noteEnd = offsetStartTime + this.duration + this.timing;
     this.startTime = offsetStartTime;
     this.endTime = noteEnd;
   }
-
-  humanize(time) {
-    return time - .01 / 2 + Math.random() * .01;
-  }
 }
 
-export { Tone };
+export default Tone;

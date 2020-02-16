@@ -8,12 +8,11 @@ const ACTION_TYPES = {
     SUCCESS: 'commitData.success',
     ERROR: 'commitData.error'
   },
-  FORM_UI: {
-    SET_FORM_NAME: 'formUI.setActiveName'
-  },
   PLAYER: {
     PLAY: 'player.play',
-    DONE: 'player.done'
+    DONE: 'player.done',
+    UPDATE_TIME: 'player.updateTime',
+    VIZ: 'player.viz',
   },
   SET_REPO: 'setRepo',
   SET_REPO_NAME: 'setRepoName',
@@ -21,14 +20,6 @@ const ACTION_TYPES = {
 };
 
 const actions = {
-  FORM_UI: {
-    setType(formName) {
-      return {
-        type: ACTION_TYPES.FORM_UI.SET_FORM_NAME,
-        formName
-      }
-    }
-  },
   COMMIT_DATA: {
     fetch: dispatch => (owner, name) => {
       dispatch({ type: ACTION_TYPES.COMMIT_DATA.FETCHING });
@@ -60,10 +51,30 @@ const actions = {
     play: dispatch => data => {
       dispatch({ type: ACTION_TYPES.PLAYER.PLAY });
 
-      playback.play(data)
-        .then(() => {
-          dispatch({ type: ACTION_TYPES.PLAYER.DONE });
+      playback.buildAudioGraph(data)
+        .then((graph) => {
+          dispatch({
+            type: ACTION_TYPES.PLAYER.VIZ,
+            graph
+          });
+
+          return graph;
         })
+        .then((graph) => {
+          return playback.play(graph);
+        })
+        .then((graph) => {
+          dispatch({
+            type: ACTION_TYPES.PLAYER.DONE,
+            totalTime: graph.context.currentTime
+          });
+        })
+    },
+    updateTime(time) {
+      return {
+        type: ACTION_TYPES.PLAYER.UPDATE_TIME,
+        currentTime: time.tick
+      };
     }
   },
   setRepo(name, owner) {

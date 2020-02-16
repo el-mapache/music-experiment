@@ -23,7 +23,7 @@ const buildSequence = (data) => {
 
   return buildNoteSequence({
     commitStats: normalized,
-    bpm: 180,
+    bpm: 168,
     timeSignature: [6, 8]
   });  
 }
