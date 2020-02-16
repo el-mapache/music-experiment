@@ -13,7 +13,7 @@ const getNoteAndOctave = (scale, octaveMin, octaveMax, notePosition) => {
   const octaveRange = Math.random() * (octaveMax - octaveMin) + octaveMin;
   const octave = Math.floor(octaveRange);
 
-  return `${scale[notePosition]}${''}${octave}`;
+  return `${scale[notePosition]}${octave}`;
 };
 
 /**

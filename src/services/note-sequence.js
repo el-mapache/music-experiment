@@ -1,9 +1,9 @@
-import { Tone } from 'factories/note-factory';
+import Tone from 'models/tone';
 import Meter from 'models/meter';
 import Chord from 'services/chord';
 import NOTE_VALUES from 'types/note-values';
 
-const MAX_VOLUME = 85;
+const MAX_VOLUME = 40;
 
 const defaultNoteDuration = (timeSignature) => {
   const baselineDuration = timeSignature[1];
@@ -69,7 +69,7 @@ const buildNoteSequence = ({ commitStats, timeSignature, bpm }) => {
     const clusterLen = cluster.notes.length;
     const fractionalVolume = volume / (clusterLen * 2);
     const noteType = getNoteValue(speed, meter.timeSignature);
-
+    const noteTiming = meter.getTimeForNote(noteType);
     /**
      * Reset chord time at each iteration so that the overall
      * length of the piece is not counted per tone, but per tone cluster
@@ -81,20 +81,22 @@ const buildNoteSequence = ({ commitStats, timeSignature, bpm }) => {
     cluster.notes = cluster.notes.map((note) => {
       const tone = new Tone({
         noteName: note,
-        timing: meter.getTimeForNote(noteType),
+        timing: noteTiming,
         peak: fractionalVolume,
         noteType: noteType,
       });
 
       // All tones in a chord occupy the same start point in time
       tone.addTimingInfo(clusterTime);
-      clusterTime = tone.endTime;
+      if (!clusterTime || tone.endTime < clusterTime) {
+        clusterTime = tone.endTime;
+      }
 
       return tone;
     });
 
-    startTime += (clusterTime / clusterLen);
-    finalTime += (startTime / chords.length);
+    startTime += clusterTime;
+    finalTime += startTime;
 
     cluster.totalTime = finalTime;
     clusters.push(cluster);
@@ -104,7 +106,7 @@ const buildNoteSequence = ({ commitStats, timeSignature, bpm }) => {
 
   return {
     toneClusters,
-    totalTime: finalTime
+    totalTime: finalTime / toneClusters.length
   };
 };
 

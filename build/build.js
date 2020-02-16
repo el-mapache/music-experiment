@@ -1134,7 +1134,7 @@ function restRequest (endpointOptions) {
 
 module.exports = request
 
-const fetch = __webpack_require__(/*! node-fetch */ "./node_modules/@octokit/rest/node_modules/node-fetch/browser.js").default
+const fetch = __webpack_require__(/*! node-fetch */ "./node_modules/node-fetch/browser.js").default
 const debug = __webpack_require__(/*! debug */ "./node_modules/@octokit/rest/node_modules/debug/src/browser.js")('octokit:rest')
 const defaults = __webpack_require__(/*! lodash/defaults */ "./node_modules/lodash/defaults.js")
 const isPlainObject = __webpack_require__(/*! lodash/isPlainObject */ "./node_modules/lodash/isPlainObject.js")
@@ -1876,40 +1876,6 @@ function plural(ms, msAbs, n, name) {
   return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
 }
 
-
-/***/ }),
-
-/***/ "./node_modules/@octokit/rest/node_modules/node-fetch/browser.js":
-/*!***********************************************************************!*\
-  !*** ./node_modules/@octokit/rest/node_modules/node-fetch/browser.js ***!
-  \***********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// ref: https://github.com/tc39/proposal-global
-var getGlobal = function () {
-	// the only reliable means to get the global object is
-	// `Function('return this')()`
-	// However, this causes CSP violations in Chrome apps.
-	if (typeof self !== 'undefined') { return self; }
-	if (typeof window !== 'undefined') { return window; }
-	if (typeof global !== 'undefined') { return global; }
-	throw new Error('unable to locate global object');
-}
-
-var global = getGlobal();
-
-module.exports = exports = global.fetch;
-
-// Needed for TypeScript and Webpack.
-exports.default = global.fetch.bind(global);
-
-exports.Headers = global.Headers;
-exports.Request = global.Request;
-exports.Response = global.Response;
 
 /***/ }),
 
@@ -9814,6 +9780,40 @@ module.exports = uniq;
 
 /***/ }),
 
+/***/ "./node_modules/node-fetch/browser.js":
+/*!********************************************!*\
+  !*** ./node_modules/node-fetch/browser.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// ref: https://github.com/tc39/proposal-global
+var getGlobal = function () {
+	// the only reliable means to get the global object is
+	// `Function('return this')()`
+	// However, this causes CSP violations in Chrome apps.
+	if (typeof self !== 'undefined') { return self; }
+	if (typeof window !== 'undefined') { return window; }
+	if (typeof global !== 'undefined') { return global; }
+	throw new Error('unable to locate global object');
+}
+
+var global = getGlobal();
+
+module.exports = exports = global.fetch;
+
+// Needed for TypeScript and Webpack.
+exports.default = global.fetch.bind(global);
+
+exports.Headers = global.Headers;
+exports.Request = global.Request;
+exports.Response = global.Response;
+
+/***/ }),
+
 /***/ "./node_modules/preact/compat/dist/compat.module.js":
 /*!**********************************************************!*\
   !*** ./node_modules/preact/compat/dist/compat.module.js ***!
@@ -10466,92 +10466,6 @@ var envelope = function envelope(type) {
 
 /***/ }),
 
-/***/ "./src/factories/note-factory.js":
-/*!***************************************!*\
-  !*** ./src/factories/note-factory.js ***!
-  \***************************************/
-/*! exports provided: Tone */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Tone", function() { return Tone; });
-/* harmony import */ var services_frequency__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! services/frequency */ "./src/services/frequency.js");
-/* harmony import */ var factories_envelope_factory__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! factories/envelope-factory */ "./src/factories/envelope-factory.js");
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-
-
-var WEB_AUDIO_ZERO = .0001;
-var msInSecond = 1000;
-var types = ['sine', 'square', 'triangle', 'sawtooth'];
-
-var getRandomWaveType = function getRandomWaveType() {
-  return types[Math.floor(Math.random() * 4)];
-};
-
-var Tone =
-/*#__PURE__*/
-function () {
-  function Tone(_ref) {
-    var noteName = _ref.noteName,
-        timing = _ref.timing,
-        peak = _ref.peak,
-        noteType = _ref.noteType,
-        _ref$envelope = _ref.envelope,
-        envelope = _ref$envelope === void 0 ? Object(factories_envelope_factory__WEBPACK_IMPORTED_MODULE_1__["default"])() : _ref$envelope,
-        _ref$toneType = _ref.toneType,
-        toneType = _ref$toneType === void 0 ? 'triangle' : _ref$toneType;
-
-    _classCallCheck(this, Tone);
-
-    this.noteType = noteType;
-    this.noteName = noteName;
-    this.frequency = Object(services_frequency__WEBPACK_IMPORTED_MODULE_0__["default"])(noteName);
-    this.envelope = this.resolveEnvelopeValues(envelope);
-    this.duration = this.envelope.decay + this.envelope.sustain;
-    this.peak = noteName ? peak : WEB_AUDIO_ZERO, this.toneType = toneType;
-    this.timing = timing;
-    this.startTime = null;
-    this.endTime = null;
-  }
-
-  _createClass(Tone, [{
-    key: "resolveEnvelopeValues",
-    value: function resolveEnvelopeValues(envelope) {
-      return {
-        attack: envelope.a / msInSecond,
-        decay: envelope.d / msInSecond,
-        sustain: envelope.s / msInSecond,
-        release: envelope.r / msInSecond,
-        hold: envelope.h / 100
-      };
-    }
-  }, {
-    key: "addTimingInfo",
-    value: function addTimingInfo(offsetStartTime) {
-      var noteEnd = offsetStartTime + this.duration + this.timing;
-      this.startTime = offsetStartTime;
-      this.endTime = noteEnd;
-    }
-  }, {
-    key: "humanize",
-    value: function humanize(time) {
-      return time - .01 / 2 + Math.random() * .01;
-    }
-  }]);
-
-  return Tone;
-}();
-
-
-
-/***/ }),
-
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -10824,6 +10738,94 @@ function () {
 
 /***/ }),
 
+/***/ "./src/models/tone.js":
+/*!****************************!*\
+  !*** ./src/models/tone.js ***!
+  \****************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var services_frequency__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! services/frequency */ "./src/services/frequency.js");
+/* harmony import */ var factories_envelope_factory__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! factories/envelope-factory */ "./src/factories/envelope-factory.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var WEB_AUDIO_ZERO = .0001;
+var msInSecond = 1000;
+var types = ['sine', 'square', 'triangle', 'sawtooth'];
+
+var getRandomWaveType = function getRandomWaveType() {
+  return types[Math.floor(Math.random() * 4)];
+};
+
+var Tone =
+/*#__PURE__*/
+function () {
+  function Tone(_ref) {
+    var noteName = _ref.noteName,
+        timing = _ref.timing,
+        peak = _ref.peak,
+        noteType = _ref.noteType,
+        _ref$envelope = _ref.envelope,
+        envelope = _ref$envelope === void 0 ? Object(factories_envelope_factory__WEBPACK_IMPORTED_MODULE_1__["default"])() : _ref$envelope,
+        _ref$toneType = _ref.toneType,
+        toneType = _ref$toneType === void 0 ? 'triangle' : _ref$toneType;
+
+    _classCallCheck(this, Tone);
+
+    this.noteType = noteType;
+    this.noteName = noteName;
+    this.frequency = Object(services_frequency__WEBPACK_IMPORTED_MODULE_0__["default"])(noteName);
+    this.envelope = this.resolveEnvelopeValues(envelope);
+    this.duration = this.envelope.decay + this.envelope.sustain;
+    this.peak = noteName ? peak : WEB_AUDIO_ZERO, this.toneType = toneType;
+    this.timing = timing;
+    this.startTime = null;
+    this.endTime = null;
+    this.attenuateVolume();
+  }
+
+  _createClass(Tone, [{
+    key: "resolveEnvelopeValues",
+    value: function resolveEnvelopeValues(envelope) {
+      return {
+        attack: envelope.a / msInSecond,
+        decay: envelope.d / msInSecond,
+        sustain: envelope.s / msInSecond,
+        release: envelope.r / msInSecond,
+        hold: envelope.h / 100
+      };
+    }
+  }, {
+    key: "attenuateVolume",
+    value: function attenuateVolume() {
+      if (this.frequency > 800) {
+        this.peak -= this.peak / 10;
+      }
+    }
+  }, {
+    key: "addTimingInfo",
+    value: function addTimingInfo(offsetStartTime) {
+      var noteEnd = offsetStartTime + this.duration + this.timing;
+      this.startTime = offsetStartTime;
+      this.endTime = noteEnd;
+    }
+  }]);
+
+  return Tone;
+}();
+
+/* harmony default export */ __webpack_exports__["default"] = (Tone);
+
+/***/ }),
+
 /***/ "./src/services/audio-channel.js":
 /*!***************************************!*\
   !*** ./src/services/audio-channel.js ***!
@@ -10933,7 +10935,7 @@ var buildSequence = function buildSequence(data) {
   var normalized = normalizeRepoStats(data);
   return Object(services_note_sequence__WEBPACK_IMPORTED_MODULE_0__["default"])({
     commitStats: normalized,
-    bpm: 180,
+    bpm: 168,
     timeSignature: [6, 8]
   });
 };
@@ -11331,7 +11333,7 @@ var getRepoCommitStats = function getRepoCommitStats(user, repo) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var factories_note_factory__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! factories/note-factory */ "./src/factories/note-factory.js");
+/* harmony import */ var models_tone__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! models/tone */ "./src/models/tone.js");
 /* harmony import */ var models_meter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! models/meter */ "./src/models/meter.js");
 /* harmony import */ var services_chord__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! services/chord */ "./src/services/chord.js");
 /* harmony import */ var types_note_values__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! types/note-values */ "./src/types/note-values.js");
@@ -11339,7 +11341,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var MAX_VOLUME = 85;
+var MAX_VOLUME = 40;
 
 var defaultNoteDuration = function defaultNoteDuration(timeSignature) {
   var baselineDuration = timeSignature[1];
@@ -11413,6 +11415,7 @@ var buildNoteSequence = function buildNoteSequence(_ref) {
     var clusterLen = cluster.notes.length;
     var fractionalVolume = volume / (clusterLen * 2);
     var noteType = getNoteValue(speed, meter.timeSignature);
+    var noteTiming = meter.getTimeForNote(noteType);
     /**
      * Reset chord time at each iteration so that the overall
      * length of the piece is not counted per tone, but per tone cluster
@@ -11423,26 +11426,30 @@ var buildNoteSequence = function buildNoteSequence(_ref) {
 
     var clusterTime = 0;
     cluster.notes = cluster.notes.map(function (note) {
-      var tone = new factories_note_factory__WEBPACK_IMPORTED_MODULE_0__["Tone"]({
+      var tone = new models_tone__WEBPACK_IMPORTED_MODULE_0__["default"]({
         noteName: note,
-        timing: meter.getTimeForNote(noteType),
+        timing: noteTiming,
         peak: fractionalVolume,
         noteType: noteType
       }); // All tones in a chord occupy the same start point in time
 
       tone.addTimingInfo(clusterTime);
-      clusterTime = tone.endTime;
+
+      if (!clusterTime || tone.endTime < clusterTime) {
+        clusterTime = tone.endTime;
+      }
+
       return tone;
     });
-    startTime += clusterTime / clusterLen;
-    finalTime += startTime / chords.length;
+    startTime += clusterTime;
+    finalTime += startTime;
     cluster.totalTime = finalTime;
     clusters.push(cluster);
     return clusters;
   }, []);
   return {
     toneClusters: toneClusters,
-    totalTime: finalTime
+    totalTime: finalTime / toneClusters.length
   };
 };
 
@@ -11673,6 +11680,14 @@ var recorder = function recorder(context) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "scheduler", function() { return scheduler; });
 /* harmony import */ var _audio_context_provider__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./audio-context-provider */ "./src/services/audio-context-provider.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 
 var msPerSecond = 1000;
 
@@ -11692,7 +11707,8 @@ var serial = function serial(data, handler, onDone) {
 };
 
 var humanize = function humanize(time) {
-  return time - .01 / 2 + Math.random() * .01;
+  var humanized = .01 / 2 + Math.random() * .01;
+  return [time - humanized, humanized];
 };
 
 var subscribers = {
@@ -11789,7 +11805,11 @@ var scheduler = function scheduler(context) {
           });
           var timing = tone.timing,
               duration = tone.duration;
-          var humanized = humanize(now + duration); // We want to figure out what the shortest note in this chord is,
+
+          var _humanize = humanize(now + duration),
+              _humanize2 = _slicedToArray(_humanize, 2),
+              humanized = _humanize2[0],
+              offset = _humanize2[1]; // We want to figure out what the shortest note in this chord is,
           // so we know when to schedule the next note.
           // Neccessary as a note can sustain for longer
           // than the duration of time till the next note.
@@ -11797,12 +11817,9 @@ var scheduler = function scheduler(context) {
           // bass with 3 16th notes in the treble are played as 4 16th notes,
           // but the A continues to sound as the next 3 notes are played.
 
-          if (!timeTilNextNote) {
-            timeTilNextNote = timing;
-          }
 
-          if (timing < timeTilNextNote) {
-            timeTilNextNote = timing;
+          if (!timeTilNextNote || timing < timeTilNextNote) {
+            timeTilNextNote = timing + offset;
           } // start should ramp gain up to current time, then play
 
 
@@ -12679,24 +12696,15 @@ var formatTime = function formatTime(time) {
 };
 
 var TimingInfo = function TimingInfo(_ref) {
-  var _ref$trackTotalTime = _ref.trackTotalTime,
-      trackTotalTime = _ref$trackTotalTime === void 0 ? 0 : _ref$trackTotalTime,
-      currentTime = _ref.currentTime;
-  var minutes = getMinutes(trackTotalTime);
-  var seconds = getSeconds(trackTotalTime);
+  var currentTime = _ref.currentTime;
+  ;
   var currentMinutes = getMinutes(currentTime);
   var currentSeconds = getSeconds(currentTime);
-  var formatMinutes = formatTime(minutes);
-  var formatSeconds = formatTime(seconds);
   var formatCurrentMinutes = formatTime(currentMinutes);
   var formatCurrentSeconds = formatTime(currentSeconds);
   return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("p", null, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("span", {
     "class": "px-1 w-12 text-left inline-block"
-  }, formatCurrentMinutes, ":", formatCurrentSeconds), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("span", {
-    "class": "px-1"
-  }, "/"), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("span", {
-    "class": "px-1"
-  }, formatMinutes, ":", formatSeconds));
+  }, formatCurrentMinutes, ":", formatCurrentSeconds));
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (TimingInfo);
@@ -12795,7 +12803,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
 /* harmony import */ var services_playback__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! services/playback */ "./src/services/playback.js");
 /* harmony import */ var ui_actions__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ui/actions */ "./src/ui/actions.js");
-/* harmony import */ var ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ui/contexts/form-ui */ "./src/ui/contexts/form-ui/index.js");
+/* harmony import */ var ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ui/contexts/form-ui */ "./src/ui/contexts/form-ui/index.js");
 
 
 
@@ -12818,7 +12826,7 @@ var App = function App() {
   }, []);
   return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", {
     "class": "w-3/4"
-  }, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_9__["default"], null, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_radio_group__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  }, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_8__["default"], null, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_radio_group__WEBPACK_IMPORTED_MODULE_2__["default"], {
     label: "Choose one",
     name: "toggle-repo-form-type"
   }), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_repo_form_switcher__WEBPACK_IMPORTED_MODULE_3__["default"], null)), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_playback__WEBPACK_IMPORTED_MODULE_4__["default"], null));

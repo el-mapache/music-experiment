@@ -18,6 +18,8 @@ class Tone {
     this.timing = timing;
     this.startTime = null;
     this.endTime = null;
+
+    this.attenuateVolume();
   }
 
   resolveEnvelopeValues(envelope) {
@@ -27,6 +29,12 @@ class Tone {
       sustain: envelope.s / msInSecond,
       release: envelope.r / msInSecond,
       hold: envelope.h / 100,
+    }
+  }
+
+  attenuateVolume() {
+    if (this.frequency > 800) {
+      this.peak -= (this.peak / 10);
     }
   }
 

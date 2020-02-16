@@ -17,7 +17,8 @@ const serial = (data, handler, onDone) => {
 };
 
 const humanize = (time) => {
-  return time - .01 / 2 + Math.random() * .01;
+  const humanized = .01 / 2 + Math.random() * .01;
+  return [time - humanized, humanized];
 };
 
 const subscribers = {
@@ -101,7 +102,7 @@ const scheduler = context => () => {
       tonesToPlay.forEach((tone) => {
         toNotify.forEach((s) => s({ chord: tone }));
         const { timing, duration } = tone;
-        const humanized = humanize(now + duration); 
+        const [humanized, offset] = humanize(now + duration); 
 
         // We want to figure out what the shortest note in this chord is,
         // so we know when to schedule the next note.
@@ -111,12 +112,8 @@ const scheduler = context => () => {
         // For example: In notated sheet music, a half-note `A` in the
         // bass with 3 16th notes in the treble are played as 4 16th notes,
         // but the A continues to sound as the next 3 notes are played.
-        if (!timeTilNextNote) {
-          timeTilNextNote = timing;
-        }
-
-        if (timing < timeTilNextNote) {
-          timeTilNextNote = timing
+        if (!timeTilNextNote || timing < timeTilNextNote) {
+          timeTilNextNote = timing + offset;
         }
 
         // start should ramp gain up to current time, then play
