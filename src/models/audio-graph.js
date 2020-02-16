@@ -1,6 +1,6 @@
-import audioChannel from 'services/audio-channel';
+import audioChannel from 'models/audio-channel';
 import analyser from 'models/analyser';
-import oscillator from 'services/oscillator';
+import oscillator from 'models/oscillator';
 
 const AudioGraph = (sequence) => {
   const channel = audioChannel();

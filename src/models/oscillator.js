@@ -1,4 +1,4 @@
-import AudioContextProvider from './audio-context-provider';
+import AudioContextProvider from 'services/audio-context-provider';
 
 // 15ms ramp down time to provide smooth fade out
 const rampDownDelayTime = 0.0015;
