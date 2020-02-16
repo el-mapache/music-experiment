@@ -27,21 +27,6 @@ const initialState = {
     tempo: 120,
     timeSignature: [3, 4],
   },
-  formUI: {
-    activeFormName: '',
-    // so sloppy!!
-    cachedRepos: {
-      'tock': 0,
-      'bootstrap': 1
-    },
-    preloadedRepos: [{
-      name: 'tock',
-      owner: '18f',
-    }, {
-      name: 'bootstrap',
-      owner: 'twitter',
-    }],
-  },
   activeRepo: {
     name: '',
     owner: ''
@@ -116,26 +101,6 @@ function appReducer(state, action) {
           ...state.commitData,
           status: COMMIT_DATA_STATUS.IDLE,
           error: ''
-        }
-      };
-    }
-    case ACTION_TYPES.FORM_UI.SET_FORM_NAME: {
-      // TODO: Another good selector candidate
-      const nextActiveRepo = state.player.status === PLAYER_STATUS.IDLE ? 
-        initialState.activeRepo : state.activeRepo;
-
-      return {
-        ...state,
-        formUI: {
-          ...state.formUI,
-          activeFormName: rest.formName
-        },
-        activeRepo: {
-          ...nextActiveRepo
-        },
-        commitData: {
-          ...initialState.commitData,
-          data: state.commitData.data,
         }
       };
     }

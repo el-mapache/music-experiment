@@ -1,8 +1,8 @@
-import { createContext } from 'preact';
+import { h, createContext } from 'preact';
 import { useContext, useState } from 'preact/hooks';
 
 const initialState = {
-  activeForm = ''
+  name: ''
 };
 
 const FormUIContext = createContext();
@@ -27,7 +27,8 @@ const useFormUIUpdate = () => {
 };
 
 const FormUIProvider = ({ children }) => {
-  const [ state, update ] = useState(initialState);
+  const [ state, setState ] = useState(initialState);
+  const update = name => setState({ name });
 
   return (
     <FormUIContext.Provider value={{ state, update }}>

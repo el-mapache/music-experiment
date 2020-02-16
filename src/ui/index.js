@@ -1,12 +1,13 @@
 import {h, render } from 'preact';
 import StateProvider from 'ui/store';
 import RadioGroup from 'ui/components/radio-group';
-import RepoFormDispatcher from 'ui/components/repo-form-dispatcher';
+import RepoFormSwitcher from 'ui/components/repo-form-switcher';
 import Playback from 'ui/components/playback';
 import { useEffect, useState, useContext } from 'preact/hooks';
 import { store } from 'ui/store';
 import { commitSequencerSubscriber } from 'services/playback';
 import { actions } from 'ui/actions';
+import FormUIProvider from 'ui/contexts/form-ui';
 
 const App = () => {
   const { dispatch } = useContext(store);
@@ -18,12 +19,14 @@ const App = () => {
   },[])
 
   return (
-    <div>
-      <RadioGroup
-        label="Choose one"
-        name="toggle-repo-form-type"
-      />
-      <RepoFormDispatcher />
+    <div class="w-3/4">
+      <FormUIProvider>
+        <RadioGroup
+          label="Choose one"
+          name="toggle-repo-form-type"
+        />
+        <RepoFormSwitcher />
+      </FormUIProvider>
       <Playback />
     </div>
   );

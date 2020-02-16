@@ -1,19 +1,20 @@
-import { actions } from 'ui/actions';
 import { h } from 'preact';
-import { useContext } from 'preact/hooks';
-import { store } from 'ui/store.js';
 import withCheckable from 'ui/with-checkable';
+import { useFormUIUpdate, useFormUIState } from 'ui/contexts/form-ui';
 
 const RadioToggle = ({ label, helpText, className, setChecked, ...rest }) => {
-  const { state, dispatch } = useContext(store);
-  const { formUI } = state;
+  const activeFormUpdate = useFormUIUpdate();
+  const activeFormState = useFormUIState();
   const { name, id } = rest;
-  const checked = setChecked(formUI.activeFormName, id);
+  const checked = setChecked(activeFormState.name, id);
+  const updateHandler = () => {
+    activeFormUpdate(id);
+  };
 
   return (
     <div
       class={`radio-group-input mr-4 border-indigo-400 w-1/2 ${className}${checked}`}
-      onClick={() => dispatch(actions.FORM_UI.setType(id))}
+      onClick={updateHandler}
     >
       <input id={id} type="radio" name={name} class="hidden radio" />
       <label for={id} class="flex items-top cursor-pointer text-lg">

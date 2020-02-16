@@ -1,8 +1,7 @@
 import { h } from 'preact';
-import { useContext } from 'preact/hooks';
-import { store } from 'ui/store';
 import PreloadedRepoForm from 'ui/components/preloaded-repo-form';
 import SearchRepoForm from 'ui/components/search-repo-form';
+import { useFormUIState } from 'ui/contexts/form-ui';
 
 
 const FORM_TYPES = {
@@ -12,13 +11,8 @@ const FORM_TYPES = {
 };
 
 const RepoFormSwitcher = () => {
-  const { state } = useContext(store);
-  const { formUI } = state;
-  const {
-    activeFormName,
-  } = formUI;
-
-  const FormComponent = FORM_TYPES[activeFormName] || FORM_TYPES.default;
+  const { name } = useFormUIState();
+  const FormComponent = FORM_TYPES[name] || FORM_TYPES.default;
 
   return <FormComponent />;
 };

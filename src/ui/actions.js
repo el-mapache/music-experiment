@@ -8,9 +8,6 @@ const ACTION_TYPES = {
     SUCCESS: 'commitData.success',
     ERROR: 'commitData.error'
   },
-  FORM_UI: {
-    SET_FORM_NAME: 'formUI.setActiveName'
-  },
   PLAYER: {
     PLAY: 'player.play',
     DONE: 'player.done',
@@ -23,14 +20,6 @@ const ACTION_TYPES = {
 };
 
 const actions = {
-  FORM_UI: {
-    setType(formName) {
-      return {
-        type: ACTION_TYPES.FORM_UI.SET_FORM_NAME,
-        formName
-      }
-    }
-  },
   COMMIT_DATA: {
     fetch: dispatch => (owner, name) => {
       dispatch({ type: ACTION_TYPES.COMMIT_DATA.FETCHING });

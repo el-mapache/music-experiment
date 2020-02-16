@@ -12024,9 +12024,6 @@ var ACTION_TYPES = {
     SUCCESS: 'commitData.success',
     ERROR: 'commitData.error'
   },
-  FORM_UI: {
-    SET_FORM_NAME: 'formUI.setActiveName'
-  },
   PLAYER: {
     PLAY: 'player.play',
     DONE: 'player.done',
@@ -12038,14 +12035,6 @@ var ACTION_TYPES = {
   SET_REPO_OWNER: 'setRepoOwner'
 };
 var actions = {
-  FORM_UI: {
-    setType: function setType(formName) {
-      return {
-        type: ACTION_TYPES.FORM_UI.SET_FORM_NAME,
-        formName: formName
-      };
-    }
-  },
   COMMIT_DATA: {
     fetch: function fetch(dispatch) {
       return function (owner, name) {
@@ -12236,7 +12225,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ui_components_timing_info__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ui/components/timing-info */ "./src/ui/components/timing-info.js");
 /* harmony import */ var ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ui/viz/bars */ "./src/ui/viz/bars.js");
 /* harmony import */ var ui_use_previous__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ui/use-previous */ "./src/ui/use-previous.js");
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 
 
@@ -12245,7 +12233,11 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 
 
-
+var vizSettings = {
+  height: 100,
+  width: 400
+};
+var data = '';
 
 var PlayControls = function PlayControls() {
   var _useContext = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useContext"])(ui_store__WEBPACK_IMPORTED_MODULE_3__["store"]),
@@ -12267,22 +12259,14 @@ var PlayControls = function PlayControls() {
         tick: 0
       }));
     }
-  }, [lastPlayerStatus, activeRepo]);
-
-  var handlePlayScore = function handlePlayScore() {
+  }, [lastPlayerStatus]);
+  var handlePlayScore = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useCallback"])(function () {
     if (data && !active) {
       ui_actions__WEBPACK_IMPORTED_MODULE_0__["actions"].PLAYER.play(dispatch)(data);
     }
-  };
-
-  var vizSettings = {
-    height: 100,
-    width: 400
-  };
+  }, [data, active]);
   return Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("section", {
     "class": "mt-8".concat(!data ? ' hidden' : '')
-  }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
-    "class": "flex"
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", null, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_current_track__WEBPACK_IMPORTED_MODULE_4__["default"], {
     activeRepo: activeRepo,
     status: player.status,
@@ -12303,9 +12287,11 @@ var PlayControls = function PlayControls() {
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("polygon", {
     "class": "play-btn__svg",
     points: "9.33 6.69 9.33 19.39 19.3 13.04 9.33 6.69"
-  }))), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__["default"], _extends({
-    className: "ml-8"
-  }, vizSettings))))));
+  }))), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__["default"], {
+    className: "ml-8",
+    width: vizSettings.width,
+    height: vizSettings.height
+  }))));
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (PlayControls);
@@ -12332,6 +12318,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var preloadedRepos = [{
+  name: 'tock',
+  owner: '18f'
+}, {
+  name: 'bootstrap',
+  owner: 'twitter'
+}];
 
 var RadioButton = function RadioButton(_ref) {
   var id = _ref.id,
@@ -12368,8 +12361,7 @@ var PreloadedRepoForm = function PreloadedRepoForm(_ref2) {
       dispatch = _useContext.dispatch,
       state = _useContext.state;
 
-  var preloadedRepos = state.formUI.preloadedRepos,
-      activeRepo = state.activeRepo;
+  var activeRepo = state.activeRepo;
   return Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", null, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("p", {
     "class": "block font-bold text-lg text-black mb-1",
     role: "label"
@@ -12402,16 +12394,12 @@ var PreloadedRepoForm = function PreloadedRepoForm(_ref2) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var ui_actions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ui/actions */ "./src/ui/actions.js");
-/* harmony import */ var preact__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! preact */ "./node_modules/preact/dist/preact.module.js");
-/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
-/* harmony import */ var ui_store_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ui/store.js */ "./src/ui/store.js");
-/* harmony import */ var ui_with_checkable__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ui/with-checkable */ "./src/ui/with-checkable.js");
+/* harmony import */ var preact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact */ "./node_modules/preact/dist/preact.module.js");
+/* harmony import */ var ui_with_checkable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ui/with-checkable */ "./src/ui/with-checkable.js");
+/* harmony import */ var ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ui/contexts/form-ui */ "./src/ui/contexts/form-ui/index.js");
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-
 
 
 
@@ -12424,58 +12412,58 @@ var RadioToggle = function RadioToggle(_ref) {
       setChecked = _ref.setChecked,
       rest = _objectWithoutProperties(_ref, ["label", "helpText", "className", "setChecked"]);
 
-  var _useContext = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useContext"])(ui_store_js__WEBPACK_IMPORTED_MODULE_3__["store"]),
-      state = _useContext.state,
-      dispatch = _useContext.dispatch;
-
-  var formUI = state.formUI;
+  var activeFormUpdate = Object(ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_2__["useFormUIUpdate"])();
+  var activeFormState = Object(ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_2__["useFormUIState"])();
   var name = rest.name,
       id = rest.id;
-  var checked = setChecked(formUI.activeFormName, id);
-  return Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
+  var checked = setChecked(activeFormState.name, id);
+
+  var updateHandler = function updateHandler() {
+    activeFormUpdate(id);
+  };
+
+  return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", {
     "class": "radio-group-input mr-4 border-indigo-400 w-1/2 ".concat(className).concat(checked),
-    onClick: function onClick() {
-      return dispatch(ui_actions__WEBPACK_IMPORTED_MODULE_0__["actions"].FORM_UI.setType(id));
-    }
-  }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("input", {
+    onClick: updateHandler
+  }, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("input", {
     id: id,
     type: "radio",
     name: name,
     "class": "hidden radio"
-  }), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("label", {
+  }), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("label", {
     "for": id,
     "class": "flex items-top cursor-pointer text-lg"
-  }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("span", {
+  }, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("span", {
     "class": "radio-control"
-  }), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("span", {
+  }), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("span", {
     "class": "label"
-  }, label, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("span", {
+  }, label, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("span", {
     "class": "help-text text-lg"
   }, helpText))));
 };
 
-var RadioButton = Object(ui_with_checkable__WEBPACK_IMPORTED_MODULE_4__["default"])(RadioToggle);
+var RadioButton = Object(ui_with_checkable__WEBPACK_IMPORTED_MODULE_1__["default"])(RadioToggle);
 
 var RadioGroup = function RadioGroup(_ref2) {
   var name = _ref2.name,
       label = _ref2.label,
       helpText = _ref2.helpText;
-  return Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
+  return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", {
     "class": "radio-group w-2/3 mb-8 mt-8",
     role: "radiogroup"
-  }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
+  }, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", {
     role: "label",
     "class": "w-full block mb-1"
-  }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("h2", {
+  }, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("h2", {
     "class": "block font-bold text-lg text-black"
-  }, label), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("em", {
+  }, label), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("em", {
     "class": "font-medium font-serif text-gray-700"
-  }, helpText)), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(RadioButton, {
+  }, helpText)), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(RadioButton, {
     label: "Listen to a preloaded repo",
     helpText: "Select a repo",
     name: name,
     id: "preloaded-repo"
-  }), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(RadioButton, {
+  }), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(RadioButton, {
     label: "Let me enter a repo",
     helpText: "Search GitHub",
     className: "flex-1",
@@ -12488,44 +12476,40 @@ var RadioGroup = function RadioGroup(_ref2) {
 
 /***/ }),
 
-/***/ "./src/ui/components/repo-form-dispatcher.js":
-/*!***************************************************!*\
-  !*** ./src/ui/components/repo-form-dispatcher.js ***!
-  \***************************************************/
+/***/ "./src/ui/components/repo-form-switcher.js":
+/*!*************************************************!*\
+  !*** ./src/ui/components/repo-form-switcher.js ***!
+  \*************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var preact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact */ "./node_modules/preact/dist/preact.module.js");
-/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
-/* harmony import */ var ui_store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ui/store */ "./src/ui/store.js");
-/* harmony import */ var ui_components_preloaded_repo_form__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ui/components/preloaded-repo-form */ "./src/ui/components/preloaded-repo-form.js");
-/* harmony import */ var ui_components_search_repo_form__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ui/components/search-repo-form */ "./src/ui/components/search-repo-form.js");
-
+/* harmony import */ var ui_components_preloaded_repo_form__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ui/components/preloaded-repo-form */ "./src/ui/components/preloaded-repo-form.js");
+/* harmony import */ var ui_components_search_repo_form__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ui/components/search-repo-form */ "./src/ui/components/search-repo-form.js");
+/* harmony import */ var ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ui/contexts/form-ui */ "./src/ui/contexts/form-ui/index.js");
 
 
 
 
 var FORM_TYPES = {
-  'preloaded-repo': ui_components_preloaded_repo_form__WEBPACK_IMPORTED_MODULE_3__["default"],
-  'search-repo': ui_components_search_repo_form__WEBPACK_IMPORTED_MODULE_4__["default"],
+  'preloaded-repo': ui_components_preloaded_repo_form__WEBPACK_IMPORTED_MODULE_1__["default"],
+  'search-repo': ui_components_search_repo_form__WEBPACK_IMPORTED_MODULE_2__["default"],
   "default": function _default() {
     return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", null);
   }
 };
 
-var RepoFormDispatcher = function RepoFormDispatcher() {
-  var _useContext = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useContext"])(ui_store__WEBPACK_IMPORTED_MODULE_2__["store"]),
-      state = _useContext.state;
+var RepoFormSwitcher = function RepoFormSwitcher() {
+  var _useFormUIState = Object(ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_3__["useFormUIState"])(),
+      name = _useFormUIState.name;
 
-  var formUI = state.formUI;
-  var activeFormName = formUI.activeFormName;
-  var FormComponent = FORM_TYPES[activeFormName] || FORM_TYPES["default"];
+  var FormComponent = FORM_TYPES[name] || FORM_TYPES["default"];
   return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(FormComponent, null);
 };
 
-/* harmony default export */ __webpack_exports__["default"] = (RepoFormDispatcher);
+/* harmony default export */ __webpack_exports__["default"] = (RepoFormSwitcher);
 
 /***/ }),
 
@@ -12543,7 +12527,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ui_store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ui/store */ "./src/ui/store.js");
 /* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
 /* harmony import */ var ui_types_commit_status__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ui/types/commit-status */ "./src/ui/types/commit-status.js");
-/* harmony import */ var ui_components_error_message__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ui/components/error-message */ "./src/ui/components/error-message.js");
+/* harmony import */ var ui_types_player_status__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ui/types/player-status */ "./src/ui/types/player-status.js");
+/* harmony import */ var ui_components_error_message__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ui/components/error-message */ "./src/ui/components/error-message.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -12557,6 +12542,7 @@ function _nonIterableRest() { throw new TypeError("Invalid attempt to destructur
 function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 
 
 
@@ -12581,6 +12567,10 @@ var isFetching = function isFetching(status) {
   return status === ui_types_commit_status__WEBPACK_IMPORTED_MODULE_4__["default"].FETCHING;
 };
 
+var isPlaying = function isPlaying(status) {
+  return status === ui_types_player_status__WEBPACK_IMPORTED_MODULE_5__["default"].PLAYING;
+};
+
 var SearchRepoForm = function SearchRepoForm() {
   var _useState = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_3__["useState"])(initialState),
       _useState2 = _slicedToArray(_useState, 2),
@@ -12589,10 +12579,12 @@ var SearchRepoForm = function SearchRepoForm() {
 
   var _useContext = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_3__["useContext"])(ui_store__WEBPACK_IMPORTED_MODULE_2__["store"]),
       dispatch = _useContext.dispatch,
-      commitData = _useContext.state.commitData;
+      _useContext$state = _useContext.state,
+      commitData = _useContext$state.commitData,
+      player = _useContext$state.player;
 
   var hasActiveRepo = repoInfo.name && repoInfo.owner;
-  var disabled = !hasActiveRepo || isFetching(commitData.status) ? 'disabled' : '';
+  var disabled = !hasActiveRepo || isFetching(commitData.status) || isPlaying(player.status) ? 'disabled' : '';
   var error = hasError(commitData.status) ? 'error' : '';
 
   var updateActiveRepoName = function updateActiveRepoName(event) {
@@ -12653,7 +12645,7 @@ var SearchRepoForm = function SearchRepoForm() {
     "class": "btn-primary ".concat(disabled, " self-end -my-1"),
     disabled: disabled,
     onClick: handleSubmit
-  }, "Get commit data")), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_error_message__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  }, "Get commit data")), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_error_message__WEBPACK_IMPORTED_MODULE_6__["default"], {
     forState: "commitData"
   }));
 };
@@ -12711,6 +12703,81 @@ var TimingInfo = function TimingInfo(_ref) {
 
 /***/ }),
 
+/***/ "./src/ui/contexts/form-ui/index.js":
+/*!******************************************!*\
+  !*** ./src/ui/contexts/form-ui/index.js ***!
+  \******************************************/
+/*! exports provided: useFormUIState, useFormUIUpdate, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useFormUIState", function() { return useFormUIState; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useFormUIUpdate", function() { return useFormUIUpdate; });
+/* harmony import */ var preact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact */ "./node_modules/preact/dist/preact.module.js");
+/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+
+var initialState = {
+  name: ''
+};
+var FormUIContext = Object(preact__WEBPACK_IMPORTED_MODULE_0__["createContext"])();
+
+var useFormUIState = function useFormUIState() {
+  var context = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useContext"])(FormUIContext);
+
+  if (typeof context === 'undefined') {
+    throw new Error('Must be called from within a FormUIContext');
+  }
+
+  return context.state;
+};
+
+var useFormUIUpdate = function useFormUIUpdate() {
+  var context = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useContext"])(FormUIContext);
+
+  if (typeof context === 'undefined') {
+    throw new Error('Must be called from within a FormUIContext');
+  }
+
+  return context.update;
+};
+
+var FormUIProvider = function FormUIProvider(_ref) {
+  var children = _ref.children;
+
+  var _useState = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useState"])(initialState),
+      _useState2 = _slicedToArray(_useState, 2),
+      state = _useState2[0],
+      setState = _useState2[1];
+
+  var update = function update(name) {
+    return setState({
+      name: name
+    });
+  };
+
+  return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(FormUIContext.Provider, {
+    value: {
+      state: state,
+      update: update
+    }
+  }, children);
+};
+
+
+/* harmony default export */ __webpack_exports__["default"] = (FormUIProvider);
+
+/***/ }),
+
 /***/ "./src/ui/index.js":
 /*!*************************!*\
   !*** ./src/ui/index.js ***!
@@ -12723,11 +12790,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var preact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact */ "./node_modules/preact/dist/preact.module.js");
 /* harmony import */ var ui_store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ui/store */ "./src/ui/store.js");
 /* harmony import */ var ui_components_radio_group__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ui/components/radio-group */ "./src/ui/components/radio-group.js");
-/* harmony import */ var ui_components_repo_form_dispatcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ui/components/repo-form-dispatcher */ "./src/ui/components/repo-form-dispatcher.js");
+/* harmony import */ var ui_components_repo_form_switcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ui/components/repo-form-switcher */ "./src/ui/components/repo-form-switcher.js");
 /* harmony import */ var ui_components_playback__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ui/components/playback */ "./src/ui/components/playback.js");
 /* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
 /* harmony import */ var services_playback__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! services/playback */ "./src/services/playback.js");
 /* harmony import */ var ui_actions__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ui/actions */ "./src/ui/actions.js");
+/* harmony import */ var ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ui/contexts/form-ui */ "./src/ui/contexts/form-ui/index.js");
+
 
 
 
@@ -12747,10 +12816,12 @@ var App = function App() {
       dispatch(ui_actions__WEBPACK_IMPORTED_MODULE_7__["actions"].PLAYER.updateTime(nextState));
     });
   }, []);
-  return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", null, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_radio_group__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", {
+    "class": "w-3/4"
+  }, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_contexts_form_ui__WEBPACK_IMPORTED_MODULE_9__["default"], null, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_radio_group__WEBPACK_IMPORTED_MODULE_2__["default"], {
     label: "Choose one",
     name: "toggle-repo-form-type"
-  }), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_repo_form_dispatcher__WEBPACK_IMPORTED_MODULE_3__["default"], null), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_playback__WEBPACK_IMPORTED_MODULE_4__["default"], null));
+  }), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_repo_form_switcher__WEBPACK_IMPORTED_MODULE_3__["default"], null)), Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_components_playback__WEBPACK_IMPORTED_MODULE_4__["default"], null));
 };
 
 Object(preact__WEBPACK_IMPORTED_MODULE_0__["render"])(Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(ui_store__WEBPACK_IMPORTED_MODULE_1__["default"], null, Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(App, null)), document.getElementById('app'));
@@ -12821,21 +12892,6 @@ var initialState = {
     tempo: 120,
     timeSignature: [3, 4]
   },
-  formUI: {
-    activeFormName: '',
-    // so sloppy!!
-    cachedRepos: {
-      'tock': 0,
-      'bootstrap': 1
-    },
-    preloadedRepos: [{
-      name: 'tock',
-      owner: '18f'
-    }, {
-      name: 'bootstrap',
-      owner: 'twitter'
-    }]
-  },
   activeRepo: {
     name: '',
     owner: ''
@@ -12903,21 +12959,6 @@ function appReducer(state, action) {
           commitData: _objectSpread({}, state.commitData, {
             status: ui_types_commit_status__WEBPACK_IMPORTED_MODULE_5__["default"].IDLE,
             error: ''
-          })
-        });
-      }
-
-    case ui_actions__WEBPACK_IMPORTED_MODULE_3__["ACTION_TYPES"].FORM_UI.SET_FORM_NAME:
-      {
-        // TODO: Another good selector candidate
-        var nextActiveRepo = state.player.status === ui_types_player_status__WEBPACK_IMPORTED_MODULE_4__["default"].IDLE ? initialState.activeRepo : state.activeRepo;
-        return _objectSpread({}, state, {
-          formUI: _objectSpread({}, state.formUI, {
-            activeFormName: rest.formName
-          }),
-          activeRepo: _objectSpread({}, nextActiveRepo),
-          commitData: _objectSpread({}, initialState.commitData, {
-            data: state.commitData.data
           })
         });
       }
@@ -13157,9 +13198,9 @@ var BarViz = function BarViz(props) {
   }, [isActive, playing, setActive]); // By storing this as a ref, we can always ensure a
   // pointer to the freshest version of this function
 
-  var safeHide = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useRef"])(); // Every time the component re-renders,
-  // store a pointer to the current 'hide' function
-  // in our ref.
+  var safeHide = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useRef"])(); // // Every time the component re-renders,
+  // // store a pointer to the current 'hide' function
+  // // in our ref.
 
   Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
     safeHide.current = hide;

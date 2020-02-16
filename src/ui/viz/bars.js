@@ -1,6 +1,6 @@
 import { h, createRef } from 'preact';
 import { store } from 'ui/store';
-import { useContext, useEffect, useState, useCallback, useRef } from 'preact/hooks';
+import { useContext, useEffect, useState, useCallback, useRef, useMemo } from 'preact/hooks';
 
 const getPixelRatio = context => {
   var backingStore =
@@ -32,9 +32,9 @@ const BarViz = (props) => {
   // By storing this as a ref, we can always ensure a
   // pointer to the freshest version of this function
   const safeHide = useRef();
-  // Every time the component re-renders,
-  // store a pointer to the current 'hide' function
-  // in our ref.
+  // // Every time the component re-renders,
+  // // store a pointer to the current 'hide' function
+  // // in our ref.
   useEffect(() => {
     safeHide.current = hide;
   }, [hide])
