@@ -10505,6 +10505,59 @@ var analyser = function analyser(context) {
 
 /***/ }),
 
+/***/ "./src/models/audio-channel.js":
+/*!*************************************!*\
+  !*** ./src/models/audio-channel.js ***!
+  \*************************************/
+/*! exports provided: audioChannel, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "audioChannel", function() { return audioChannel; });
+/* harmony import */ var services_audio_context_provider__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! services/audio-context-provider */ "./src/services/audio-context-provider.js");
+
+var defaultChannelGain = .8;
+/**
+ * 
+ * Abstraction that groups audio nodes together. Nodes passed to the channel connect
+ * to the channel's internal gain node, which then connects to the audio context's
+ * destination
+ * 
+ * TODO: this shows need for abstraction of audio node, since both oscillator
+ * and this channel node need gain functionality. or at least a gain decorator.
+ * think like a linked list, where any given node is also a list?
+ * 
+ */
+
+var audioChannel = function audioChannel(context) {
+  return function () {
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref$gain = _ref.gain,
+        gain = _ref$gain === void 0 ? defaultChannelGain : _ref$gain;
+
+    var channelGain = context.createGain();
+    channelGain.gain.value = gain;
+    channelGain.connect(context.destination);
+    return {
+      addNode: function addNode(audioNode) {
+        audioNode.connectTo(channelGain);
+      },
+      addNodes: function addNodes(audioNodes) {
+        audioNodes.forEach(function (audioNode) {
+          audioNode.connectTo(channelGain);
+        });
+      },
+      channel: channelGain
+    };
+  };
+};
+
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(services_audio_context_provider__WEBPACK_IMPORTED_MODULE_0__["default"])(audioChannel));
+
+/***/ }),
+
 /***/ "./src/models/audio-graph.js":
 /*!***********************************!*\
   !*** ./src/models/audio-graph.js ***!
@@ -10514,21 +10567,21 @@ var analyser = function analyser(context) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var services_audio_channel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! services/audio-channel */ "./src/services/audio-channel.js");
+/* harmony import */ var models_audio_channel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! models/audio-channel */ "./src/models/audio-channel.js");
 /* harmony import */ var models_analyser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! models/analyser */ "./src/models/analyser.js");
-/* harmony import */ var services_oscillator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! services/oscillator */ "./src/services/oscillator.js");
+/* harmony import */ var models_oscillator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! models/oscillator */ "./src/models/oscillator.js");
 
 
 
 
 var AudioGraph = function AudioGraph(sequence) {
-  var channel = Object(services_audio_channel__WEBPACK_IMPORTED_MODULE_0__["default"])();
+  var channel = Object(models_audio_channel__WEBPACK_IMPORTED_MODULE_0__["default"])();
   var analyserNode = Object(models_analyser__WEBPACK_IMPORTED_MODULE_1__["default"])({
     fftSize: 128
   });
   sequence.toneClusters.forEach(function (toneCluster) {
     toneCluster.oscillators = toneCluster.notes.map(function (note) {
-      var osc = Object(services_oscillator__WEBPACK_IMPORTED_MODULE_2__["default"])(note);
+      var osc = Object(models_oscillator__WEBPACK_IMPORTED_MODULE_2__["default"])(note);
       osc.connectTo(osc.context.destinationStream);
       channel.addNode(osc);
       return {
@@ -10738,6 +10791,106 @@ function () {
 
 /***/ }),
 
+/***/ "./src/models/oscillator.js":
+/*!**********************************!*\
+  !*** ./src/models/oscillator.js ***!
+  \**********************************/
+/*! exports provided: oscillator, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "oscillator", function() { return oscillator; });
+/* harmony import */ var services_audio_context_provider__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! services/audio-context-provider */ "./src/services/audio-context-provider.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+ // 15ms ramp down time to provide smooth fade out
+
+var rampDownDelayTime = 0.0015; // zero is generally recognized as a non-finite value so we provide
+// a tiny value instead
+
+var webAudioZero = .0001;
+/**
+ * Handles building an oscillator for a single sound event. Once a context is injected,
+ * the oscillator acts as a factory function, constructing a new oscillator and
+ * returning an object with methods used to control it.
+ * Each oscillator has an accompanying gain node to control loudness.
+ * 
+ * Oscillators are connected to their gain nodes when constructed,
+ * and any effects added to it will be added AFTER the gain stage!
+ * 
+ * @param {WebAudioContext} context inject context into oscillator, exposing it to
+ * web audio functionality
+ * @returns Oscillator factory function
+ *    @param {Object} oscState describe the oscillator { frequency: number, type: string, peak: float }
+ *    @param {Envelope} adsr values for the oscillator
+ */
+
+var oscillator = function oscillator(context) {
+  return function (oscSettings) {
+    var osc = context.createOscillator();
+    var gain = context.createGain();
+    osc.type = oscSettings.toneType;
+    osc.frequency.value = oscSettings.frequency;
+    osc.connect(gain);
+    return {
+      get duration() {
+        return oscSettings.duration;
+      },
+
+      get envelope() {
+        return oscSettings.envelope;
+      },
+
+      get context() {
+        return context;
+      },
+
+      connectTo: function connectTo(node) {
+        gain.connect(node);
+      },
+      disconnectFrom: function disconnectFrom(node) {
+        gain.disconnect(node);
+      },
+
+      /**
+       * Returns a new object representing metadata
+       * about this oscillator object
+       */
+      toJSON: function toJSON() {
+        return _objectSpread({}, oscSettings);
+      },
+      start: function start(time) {
+        var peak = oscSettings.peak;
+        var envelope = this.envelope; // schedule a move to zero out the oscillator's gain
+
+        gain.gain.setValueAtTime(webAudioZero, time); // schedule the node's time to max volume
+
+        gain.gain.linearRampToValueAtTime(peak, time + envelope.attack); // schedule time node should play at volume
+
+        gain.gain.linearRampToValueAtTime(envelope.hold * peak, envelope.attack + envelope.sustain + envelope.decay + time);
+        osc.start(time);
+      },
+      stop: function stop(time) {
+        var envelope = this.envelope;
+        var stopTime = envelope.attack + envelope.sustain + envelope.decay + envelope.release + time; // Schedule a fade-out
+
+        gain.gain.exponentialRampToValueAtTime(webAudioZero, time, rampDownDelayTime);
+        osc.stop(stopTime);
+      }
+    };
+  };
+};
+
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(services_audio_context_provider__WEBPACK_IMPORTED_MODULE_0__["default"])(oscillator));
+
+/***/ }),
+
 /***/ "./src/models/tone.js":
 /*!****************************!*\
   !*** ./src/models/tone.js ***!
@@ -10823,59 +10976,6 @@ function () {
 }();
 
 /* harmony default export */ __webpack_exports__["default"] = (Tone);
-
-/***/ }),
-
-/***/ "./src/services/audio-channel.js":
-/*!***************************************!*\
-  !*** ./src/services/audio-channel.js ***!
-  \***************************************/
-/*! exports provided: audioChannel, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "audioChannel", function() { return audioChannel; });
-/* harmony import */ var services_audio_context_provider__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! services/audio-context-provider */ "./src/services/audio-context-provider.js");
-
-var defaultChannelGain = .8;
-/**
- * 
- * Abstraction that groups audio nodes together. Nodes passed to the channel connect
- * to the channel's internal gain node, which then connects to the audio context's
- * destination
- * 
- * TODO: this shows need for abstraction of audio node, since both oscillator
- * and this channel node need gain functionality. or at least a gain decorator.
- * think like a linked list, where any given node is also a list?
- * 
- */
-
-var audioChannel = function audioChannel(context) {
-  return function () {
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$gain = _ref.gain,
-        gain = _ref$gain === void 0 ? defaultChannelGain : _ref$gain;
-
-    var channelGain = context.createGain();
-    channelGain.gain.value = gain;
-    channelGain.connect(context.destination);
-    return {
-      addNode: function addNode(audioNode) {
-        audioNode.connectTo(channelGain);
-      },
-      addNodes: function addNodes(audioNodes) {
-        audioNodes.forEach(function (audioNode) {
-          audioNode.connectTo(channelGain);
-        });
-      },
-      channel: channelGain
-    };
-  };
-};
-
-
-/* harmony default export */ __webpack_exports__["default"] = (Object(services_audio_context_provider__WEBPACK_IMPORTED_MODULE_0__["default"])(audioChannel));
 
 /***/ }),
 
@@ -11454,106 +11554,6 @@ var buildNoteSequence = function buildNoteSequence(_ref) {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (buildNoteSequence);
-
-/***/ }),
-
-/***/ "./src/services/oscillator.js":
-/*!************************************!*\
-  !*** ./src/services/oscillator.js ***!
-  \************************************/
-/*! exports provided: oscillator, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "oscillator", function() { return oscillator; });
-/* harmony import */ var _audio_context_provider__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./audio-context-provider */ "./src/services/audio-context-provider.js");
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
- // 15ms ramp down time to provide smooth fade out
-
-var rampDownDelayTime = 0.0015; // zero is generally recognized as a non-finite value so we provide
-// a tiny value instead
-
-var webAudioZero = .0001;
-/**
- * Handles building an oscillator for a single sound event. Once a context is injected,
- * the oscillator acts as a factory function, constructing a new oscillator and
- * returning an object with methods used to control it.
- * Each oscillator has an accompanying gain node to control loudness.
- * 
- * Oscillators are connected to their gain nodes when constructed,
- * and any effects added to it will be added AFTER the gain stage!
- * 
- * @param {WebAudioContext} context inject context into oscillator, exposing it to
- * web audio functionality
- * @returns Oscillator factory function
- *    @param {Object} oscState describe the oscillator { frequency: number, type: string, peak: float }
- *    @param {Envelope} adsr values for the oscillator
- */
-
-var oscillator = function oscillator(context) {
-  return function (oscSettings) {
-    var osc = context.createOscillator();
-    var gain = context.createGain();
-    osc.type = oscSettings.toneType;
-    osc.frequency.value = oscSettings.frequency;
-    osc.connect(gain);
-    return {
-      get duration() {
-        return oscSettings.duration;
-      },
-
-      get envelope() {
-        return oscSettings.envelope;
-      },
-
-      get context() {
-        return context;
-      },
-
-      connectTo: function connectTo(node) {
-        gain.connect(node);
-      },
-      disconnectFrom: function disconnectFrom(node) {
-        gain.disconnect(node);
-      },
-
-      /**
-       * Returns a new object representing metadata
-       * about this oscillator object
-       */
-      toJSON: function toJSON() {
-        return _objectSpread({}, oscSettings);
-      },
-      start: function start(time) {
-        var peak = oscSettings.peak;
-        var envelope = this.envelope; // schedule a move to zero out the oscillator's gain
-
-        gain.gain.setValueAtTime(webAudioZero, time); // schedule the node's time to max volume
-
-        gain.gain.linearRampToValueAtTime(peak, time + envelope.attack); // schedule time node should play at volume
-
-        gain.gain.linearRampToValueAtTime(envelope.hold * peak, envelope.attack + envelope.sustain + envelope.decay + time);
-        osc.start(time);
-      },
-      stop: function stop(time) {
-        var envelope = this.envelope;
-        var stopTime = envelope.attack + envelope.sustain + envelope.decay + envelope.release + time; // Schedule a fade-out
-
-        gain.gain.exponentialRampToValueAtTime(webAudioZero, time, rampDownDelayTime);
-        osc.stop(stopTime);
-      }
-    };
-  };
-};
-
-
-/* harmony default export */ __webpack_exports__["default"] = (Object(_audio_context_provider__WEBPACK_IMPORTED_MODULE_0__["default"])(oscillator));
 
 /***/ }),
 
@@ -12141,6 +12141,109 @@ var actions = {
 
 /***/ }),
 
+/***/ "./src/ui/components/canvas.js":
+/*!*************************************!*\
+  !*** ./src/ui/components/canvas.js ***!
+  \*************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var preact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact */ "./node_modules/preact/dist/preact.module.js");
+/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
+/* harmony import */ var _hooks_use_animation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../hooks/use-animation */ "./src/ui/hooks/use-animation.js");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+
+
+
+
+var Canvas = function Canvas(_ref) {
+  var width = _ref.width,
+      height = _ref.height,
+      Viz = _ref.viz,
+      rest = _objectWithoutProperties(_ref, ["width", "height", "viz"]);
+
+  var canvasRef = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useRef"])();
+
+  var _useState = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useState"])({
+    height: null,
+    width: null
+  }),
+      _useState2 = _slicedToArray(_useState, 2),
+      originalSize = _useState2[0],
+      setOriginalSize = _useState2[1];
+
+  var _useState3 = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useState"])(null),
+      _useState4 = _slicedToArray(_useState3, 2),
+      context = _useState4[0],
+      setContext = _useState4[1];
+
+  var _useState5 = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useState"])(null),
+      _useState6 = _slicedToArray(_useState5, 2),
+      pixelRatio = _useState6[0],
+      setPixelRatio = _useState6[1];
+
+  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+    var getPixelRatio = function getPixelRatio(context) {
+      var backingStore = context.backingStorePixelRatio || context.webkitBackingStorePixelRatio || context.mozBackingStorePixelRatio || 1;
+      return (window.devicePixelRatio || 1) / backingStore;
+    };
+
+    var canvas = canvasRef.current;
+    var context = canvas.getContext('2d');
+    var ratio = getPixelRatio(context);
+    setPixelRatio(ratio); // We need to store values to the original unscaled size of the 
+    // canvas. Since this function runs again every time the component
+    // mounts we dont want to continually add the scaled values to it
+
+    var width = canvas.width;
+    var height = canvas.height;
+    setContext(context);
+    setOriginalSize({
+      height: height,
+      width: width
+    });
+    canvas.width = canvas.width * ratio;
+    canvas.height = canvas.height * ratio;
+    context.scale(ratio, ratio);
+    canvas.style.width = "".concat(width, "px");
+    canvas.style.height = "".concat(height, "px");
+  }, []);
+  var showViz;
+
+  if (context) {
+    showViz = Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])(Viz, {
+      context: context,
+      dimensions: originalSize,
+      ratio: pixelRatio
+    });
+  }
+
+  return Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("canvas", _extends({
+    ref: canvasRef,
+    height: height,
+    width: width
+  }, rest), showViz);
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Canvas);
+
+/***/ }),
+
 /***/ "./src/ui/components/current-track.js":
 /*!********************************************!*\
   !*** ./src/ui/components/current-track.js ***!
@@ -12225,6 +12328,63 @@ var ErrorMessage = function ErrorMessage(_ref) {
 
 /***/ }),
 
+/***/ "./src/ui/components/fade.js":
+/*!***********************************!*\
+  !*** ./src/ui/components/fade.js ***!
+  \***********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var preact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact */ "./node_modules/preact/dist/preact.module.js");
+/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
+/* harmony import */ var ui_hooks_use_event_listener__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ui/hooks/use-event-listener */ "./src/ui/hooks/use-event-listener.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+
+
+
+var Fade = function Fade(_ref) {
+  var show = _ref.show,
+      children = _ref.children;
+  var elRef = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useRef"])();
+
+  var _useState = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useState"])(false),
+      _useState2 = _slicedToArray(_useState, 2),
+      isActive = _useState2[0],
+      setActive = _useState2[1];
+
+  var hide = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useCallback"])(function () {
+    if (isActive && !show) {
+      setActive(false);
+    }
+  }, [isActive, show, setActive]);
+  Object(ui_hooks_use_event_listener__WEBPACK_IMPORTED_MODULE_2__["default"])(elRef.current, 'animationend', hide);
+  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+    if (show) {
+      setActive(true);
+    }
+  }, [show, setActive]);
+  return isActive && Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("div", {
+    ref: elRef,
+    style: {
+      animation: "".concat(show ? "fade-in" : "fade-out", " .75s")
+    }
+  }, children);
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Fade);
+
+/***/ }),
+
 /***/ "./src/ui/components/playback.js":
 /*!***************************************!*\
   !*** ./src/ui/components/playback.js ***!
@@ -12241,7 +12401,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ui_components_current_track__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ui/components/current-track */ "./src/ui/components/current-track.js");
 /* harmony import */ var ui_components_timing_info__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ui/components/timing-info */ "./src/ui/components/timing-info.js");
 /* harmony import */ var ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ui/viz/bars */ "./src/ui/viz/bars.js");
-/* harmony import */ var ui_use_previous__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ui/use-previous */ "./src/ui/use-previous.js");
+/* harmony import */ var ui_components_canvas__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ui/components/canvas */ "./src/ui/components/canvas.js");
+/* harmony import */ var ui_hooks_use_previous__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ui/hooks/use-previous */ "./src/ui/hooks/use-previous.js");
+/* harmony import */ var ui_components_fade__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ui/components/fade */ "./src/ui/components/fade.js");
+
+
 
 
 
@@ -12254,7 +12418,6 @@ var vizSettings = {
   height: 100,
   width: 400
 };
-var data = '';
 
 var PlayControls = function PlayControls() {
   var _useContext = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useContext"])(ui_store__WEBPACK_IMPORTED_MODULE_3__["store"]),
@@ -12266,7 +12429,7 @@ var PlayControls = function PlayControls() {
       activeRepo = state.activeRepo;
   var unchecked = !data ? 'unchecked' : '';
   var active = player.status === 'playing' ? 'active' : '';
-  var lastPlayerStatus = Object(ui_use_previous__WEBPACK_IMPORTED_MODULE_7__["default"])({
+  var lastPlayerStatus = Object(ui_hooks_use_previous__WEBPACK_IMPORTED_MODULE_8__["default"])({
     status: player.status,
     activeRepo: activeRepo
   });
@@ -12284,12 +12447,11 @@ var PlayControls = function PlayControls() {
   }, [data, active]);
   return Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("section", {
     "class": "mt-8".concat(!data ? ' hidden' : '')
-  }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", null, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_current_track__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_current_track__WEBPACK_IMPORTED_MODULE_4__["default"], {
     activeRepo: activeRepo,
     status: player.status,
     active: active
   }), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_timing_info__WEBPACK_IMPORTED_MODULE_5__["default"], {
-    trackTotalTime: data && data.totalTime,
     currentTime: player.currentTime
   }), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("div", {
     "class": "mt-2 flex items-center",
@@ -12304,10 +12466,13 @@ var PlayControls = function PlayControls() {
   }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])("polygon", {
     "class": "play-btn__svg",
     points: "9.33 6.69 9.33 19.39 19.3 13.04 9.33 6.69"
-  }))), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__["default"], {
+  }))), Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_fade__WEBPACK_IMPORTED_MODULE_9__["default"], {
+    show: active
+  }, Object(preact__WEBPACK_IMPORTED_MODULE_1__["h"])(ui_components_canvas__WEBPACK_IMPORTED_MODULE_7__["default"], {
     className: "ml-8",
     width: vizSettings.width,
-    height: vizSettings.height
+    height: vizSettings.height,
+    viz: ui_viz_bars__WEBPACK_IMPORTED_MODULE_6__["default"]
   }))));
 };
 
@@ -12786,6 +12951,109 @@ var FormUIProvider = function FormUIProvider(_ref) {
 
 /***/ }),
 
+/***/ "./src/ui/hooks/use-animation.js":
+/*!***************************************!*\
+  !*** ./src/ui/hooks/use-animation.js ***!
+  \***************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
+
+
+var useAnimation = function useAnimation(callback, cleanup) {
+  var requestRef = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+  var previousTimeRef = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+
+  var animate = function animate(time) {
+    if (typeof previousTimeRef.current !== 'undefined') {
+      callback(time);
+    }
+
+    previousTimeRef.current = time;
+    requestRef.current = window.requestAnimationFrame(animate);
+  };
+
+  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    requestRef.current = window.requestAnimationFrame(animate);
+    return function () {
+      cleanup();
+      cancelAnimationFrame(requestRef.current);
+    };
+  }, []);
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (useAnimation);
+
+/***/ }),
+
+/***/ "./src/ui/hooks/use-event-listener.js":
+/*!********************************************!*\
+  !*** ./src/ui/hooks/use-event-listener.js ***!
+  \********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
+
+
+var useEventListener = function useEventListener(element, event, handler) {
+  var cachedHandler = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    cachedHandler.current = handler;
+  }, [handler]);
+  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    if (!element) {
+      return;
+    } // Wrap the event handler in a custom handler, to make
+    // sure we always call the freshest version.
+
+
+    var wrappedHandler = function wrappedHandler(event) {
+      return cachedHandler.current(event);
+    };
+
+    element.addEventListener(event, wrappedHandler);
+    return function () {
+      element && element.removeEventListener(event, wrappedHandler);
+    };
+  }, [event, element]);
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (useEventListener);
+
+/***/ }),
+
+/***/ "./src/ui/hooks/use-previous.js":
+/*!**************************************!*\
+  !*** ./src/ui/hooks/use-previous.js ***!
+  \**************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
+ // Allows for a componentDid/Should update type hook
+// in which we compute somoe side effect based on
+// changes in previous and current props
+
+var usePrevious = function usePrevious(value) {
+  var ref = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useRef"])(value);
+  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    ref.current = value;
+  });
+  return ref.current;
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (usePrevious);
+
+/***/ }),
+
 /***/ "./src/ui/index.js":
 /*!*************************!*\
   !*** ./src/ui/index.js ***!
@@ -13129,32 +13397,6 @@ var PLAYER_STATUS = {
 
 /***/ }),
 
-/***/ "./src/ui/use-previous.js":
-/*!********************************!*\
-  !*** ./src/ui/use-previous.js ***!
-  \********************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
- // Allows for a componentDid/Should update type hook
-// in which we compute somoe side effect based on
-// changes in previous and current props
-
-var usePrevious = function usePrevious(value) {
-  var ref = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useRef"])(value);
-  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
-    ref.current = value;
-  });
-  return ref.current;
-};
-
-/* harmony default export */ __webpack_exports__["default"] = (usePrevious);
-
-/***/ }),
-
 /***/ "./src/ui/viz/bars.js":
 /*!****************************!*\
   !*** ./src/ui/viz/bars.js ***!
@@ -13167,167 +13409,78 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var preact__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! preact */ "./node_modules/preact/dist/preact.module.js");
 /* harmony import */ var ui_store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ui/store */ "./src/ui/store.js");
 /* harmony import */ var preact_hooks__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! preact/hooks */ "./node_modules/preact/hooks/dist/hooks.module.js");
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+/* harmony import */ var ui_hooks_use_animation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ui/hooks/use-animation */ "./src/ui/hooks/use-animation.js");
 
 
 
 
+var FILL = '#CBD5E0';
 
-var getPixelRatio = function getPixelRatio(context) {
-  var backingStore = context.backingStorePixelRatio || context.webkitBackingStorePixelRatio || context.mozBackingStorePixelRatio || context.msBackingStorePixelRatio || context.oBackingStorePixelRatio || context.backingStorePixelRatio || 1;
-  return (window.devicePixelRatio || 1) / backingStore;
-}; // not optimal but it works!
+var render = function render(graph, _ref, context, ratio) {
+  var height = _ref.height,
+      width = _ref.width;
 
+  if (!graph) {
+    return;
+  }
 
-var BarViz = function BarViz(props) {
-  var _useContext = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useContext"])(ui_store__WEBPACK_IMPORTED_MODULE_1__["store"]),
-      _useContext$state$pla = _useContext.state.player,
-      graph = _useContext$state$pla.graph,
-      status = _useContext$state$pla.status;
-
-  var canvasRef = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useRef"])();
-  var playing = status === 'playing';
-
-  var _useState = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useState"])(false),
-      _useState2 = _slicedToArray(_useState, 2),
-      isActive = _useState2[0],
-      setActive = _useState2[1];
-
-  var hide = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useCallback"])(function () {
-    if (isActive && !playing) {
-      setActive(false);
-    }
-  }, [isActive, playing, setActive]); // By storing this as a ref, we can always ensure a
-  // pointer to the freshest version of this function
-
-  var safeHide = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useRef"])(); // // Every time the component re-renders,
-  // // store a pointer to the current 'hide' function
-  // // in our ref.
-
-  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
-    safeHide.current = hide;
-  }, [hide]);
-  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
-    if (playing) {
-      setActive(true);
-    }
-  }, [playing, setActive]);
+  var h = height;
+  var w = width;
+  var x = 0;
+  var bufferLength = graph.analyser.frequencyBinCount;
+  var dataArray = new Uint8Array(bufferLength);
+  var barWidth = w / bufferLength * 2.5;
+  var barHeight;
+  graph.analyser.getByteFrequencyData(dataArray);
+  context.clearRect(0, 0, w, h);
+  context.fillStyle = FILL;
+  context.fillRect(0, 0, w, h);
   /**
-   * For this effect, we only have to pass in a reference to the canvas.
-   * Since we cached the hide function as safeHide, it doesn't need to be
-   * supplied as a dependency, as it is guaranteed to never be a stale
-   * reference.
-   * 
-   * We want to pass the `current` prop explicitly, as the canvasRef
-   * object will usually not be equal to itself
+   * Start at 1 because according to the nyquist theorum, N * samplerate/frequency,
+   * where N is 0, the frequency here will also be zero. This means that the
+   * bar will always be at max height due to the calculations below used
+   * to draw. Also, nobody will miss 1 frequency : D
    */
 
-  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
-    if (!canvasRef.current) {
-      return;
-    } // Wrap the event handler in a custom handler, to make
-    // sure we always call the freshest version.
+  for (var i = 1; i < bufferLength; i++) {
+    var frequencyData = dataArray[i];
+    barHeight = frequencyData; // The louder the sound, the more indigo it turns, the quieter,
+    // the yellower
 
+    var r = Math.max(244 - frequencyData, 76);
+    var g = Math.max(226 - frequencyData, 81);
+    var b = Math.max(9 - frequencyData, 191);
+    var finalHeight = barHeight ? barHeight * (i / 20) / ratio : 0;
+    context.fillStyle = "rgba(".concat(r, ",").concat(g, ",").concat(b, ", 1)"); // Since this is amplitude displayed linearly, the first elem is always the attack
+    // of the sound (I think), therefore the loudest, so clamp it manually
 
-    var handler = function handler(event) {
-      return safeHide.current(event);
-    };
-
-    canvasRef.current.addEventListener('animationend', handler);
-    return function () {
-      canvasRef.current && canvasRef.current.removeEventListener('animationend', handler);
-    };
-  }, [canvasRef.current]);
-  Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useEffect"])(function () {
-    if (!graph) {
-      return;
+    if (!i) {
+      finalHeight = barHeight - 150;
     }
 
-    var animationRequest;
-    var canvas = canvasRef.current;
-    var context = canvas.getContext('2d');
-    var ratio = getPixelRatio(context); // We need to store values to the original unscaled size of the 
-    // canvas. Since this function runs again every time the component
-    // mounts we dont want to continually add the scaled values to it
+    context.fillRect(x, h - finalHeight, barWidth, finalHeight);
+    x += barWidth + 1;
+  }
+};
 
-    var width = canvas.width;
-    var height = canvas.height;
-    canvas.width = canvas.width * ratio;
-    canvas.height = canvas.height * ratio;
-    context.scale(ratio, ratio);
-    canvas.style.width = "".concat(width, "px");
-    canvas.style.height = "".concat(height, "px");
-    var x = 0;
-    var dataArray;
-    var barWidth;
-    var barHeight;
-    var bufferLength;
+var BarViz = function BarViz(_ref2) {
+  var dimensions = _ref2.dimensions,
+      context = _ref2.context,
+      ratio = _ref2.ratio;
 
-    var render = function render() {
-      var h = canvas.height / ratio;
-      var w = canvas.width / ratio;
-      context.clearRect(0, 0, w, h);
-      x = 0;
-      graph.analyser.getByteFrequencyData(dataArray);
-      context.fillStyle = "#CBD5E0";
-      context.fillRect(0, 0, w, h);
-      /**
-       * Start at 1 because according to the nyquist theorum, N * samplerate/frequency,
-       * where N is 0, the frequency here will also be zero. This means that the
-       * bar will always be at max height due to the calculations below used
-       * to draw. Also, nobody will miss 1 frequency : D
-       */
+  var _useContext = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useContext"])(ui_store__WEBPACK_IMPORTED_MODULE_1__["store"]),
+      graph = _useContext.state.player.graph;
 
-      for (var i = 1; i < bufferLength; i++) {
-        var frequencyData = dataArray[i];
-        barHeight = frequencyData; // The louder the sound, the more indigo it turns, the quieter,
-        // the yellower
-
-        var r = Math.max(244 - frequencyData, 76);
-        var g = Math.max(226 - frequencyData, 81);
-        var b = Math.max(9 - frequencyData, 191);
-        var finalHeight = barHeight ? barHeight * (i / 20) / ratio : 0;
-        context.fillStyle = "rgba(".concat(r, ",").concat(g, ",").concat(b, ", .8)"); // Since this is amplitude displayed linearly, the first elem is always the attack
-        // of the sound (I think), therefore the loudest, so clamp it manually
-
-        if (!i) {
-          finalHeight = barHeight - 150;
-        }
-
-        context.fillRect(x, h - finalHeight, barWidth, finalHeight);
-        x += barWidth + 1;
-      }
-
-      animationRequest = requestAnimationFrame(render);
-    };
-
-    bufferLength = graph.analyser.frequencyBinCount;
-    barWidth = canvas.width / ratio / bufferLength * 2.5;
-    dataArray = new Uint8Array(bufferLength);
-    render();
-    return function () {
-      // Restore the canvas to its defaults
-      canvas.width = width;
-      canvas.height = height;
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      cancelAnimationFrame(animationRequest);
-    };
-  }, [canvasRef.current]);
-  return isActive && Object(preact__WEBPACK_IMPORTED_MODULE_0__["h"])("canvas", {
-    "class": "viz ".concat(props.className, " overflow-hidden"),
-    style: {
-      animation: "".concat(playing ? "fade-in" : "fade-out", " .75s")
-    },
-    ref: canvasRef,
-    height: props.height,
-    width: props.width
+  var draw = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_2__["useCallback"])(function () {
+    return render(graph, {
+      height: dimensions.height,
+      width: dimensions.width
+    }, context, ratio);
+  }, [graph, dimensions.height, dimensions.width, context, ratio]);
+  Object(ui_hooks_use_animation__WEBPACK_IMPORTED_MODULE_3__["default"])(draw, function () {
+    context.clearRect(0, 0, dimensions.width, dimensions.height);
   });
+  return null;
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (BarViz);
